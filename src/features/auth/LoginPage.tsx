@@ -106,7 +106,7 @@ export function LoginPage() {
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-600/30">
             <GraduationCap className="h-7 w-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Acompanha Escola</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Acompanha+</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Acompanhamento escolar para famílias e educadores</p>
         </div>
 

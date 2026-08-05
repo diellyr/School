@@ -81,7 +81,7 @@ function SidebarHeader() {
         <GraduationCap className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">Acompanha Escola</p>
+        <p className="text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">Acompanha+</p>
         <p className="text-[11px] leading-tight text-slate-400">Educação Infantil &amp; Fundamental</p>
       </div>
     </div>

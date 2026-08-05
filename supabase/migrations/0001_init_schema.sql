@@ -1,4 +1,4 @@
--- Acompanha Escola — schema inicial para Supabase/Postgres (Fase 6)
+-- Acompanha+ — schema inicial para Supabase/Postgres (Fase 6)
 -- Espelha 1:1 as entidades de src/domain/*.ts e docs/data-model.md.
 -- Aplique com `supabase db push` (Supabase CLI) ou via mcp__Supabase__apply_migration.
 

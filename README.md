@@ -1,4 +1,4 @@
-# Acompanha Escola
+# Acompanha+
 
 Aplicativo web responsivo para acompanhamento escolar de crianças na Educação Infantil e no Ensino
 Fundamental, com foco em pais, professores, alunos, administradores e Owner (dono da plataforma).

@@ -1,4 +1,4 @@
--- Acompanha Escola — funções privilegiadas (security definer) para operações que
+-- Acompanha+ — funções privilegiadas (security definer) para operações que
 -- nunca devem ser feitas por um DELETE/INSERT direto do cliente (Fase 6).
 -- Chamadas pelo frontend via `supabase.rpc(...)`, nunca com a service role key
 -- (que fica restrita a Edge Functions/servidor, se algum dia for necessária).

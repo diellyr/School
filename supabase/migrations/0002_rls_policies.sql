@@ -1,4 +1,4 @@
--- Acompanha Escola — Row Level Security (Fase 6)
+-- Acompanha+ — Row Level Security (Fase 6)
 -- Padrão: nada é visível por padrão; cada policy soma uma condição de acesso.
 -- Aplique depois de 0001_init_schema.sql.
 

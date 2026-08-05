@@ -1,6 +1,6 @@
 # Migrações Supabase (Fase 6)
 
-Este diretório contém o schema Postgres completo do Acompanha Escola, pronto para ser
+Este diretório contém o schema Postgres completo do Acompanha+, pronto para ser
 aplicado a um projeto Supabase real. **Nenhuma destas migrações foi executada** —
 o app roda 100% em IndexedDB local até que você decida ativar a nuvem.
 
