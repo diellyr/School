@@ -36,6 +36,7 @@ import {
 } from './local/eventRepository';
 import { LocalDocumentRepository, LocalPortfolioRepository } from './local/portfolioRepository';
 import { LocalImportBatchRepository, LocalImportRowRepository } from './local/importRepository';
+import { LocalRecommendationRepository } from './local/recommendationRepository';
 
 /**
  * Ponto único de acesso aos repositórios. Hoje instancia as implementações Local*
@@ -83,6 +84,8 @@ export interface Repositories {
 
   imports: LocalImportBatchRepository;
   importRows: LocalImportRowRepository;
+
+  recommendations: LocalRecommendationRepository;
 }
 
 function createLocalRepositories(): Repositories {
@@ -125,6 +128,8 @@ function createLocalRepositories(): Repositories {
 
     imports: new LocalImportBatchRepository(),
     importRows: new LocalImportRowRepository(),
+
+    recommendations: new LocalRecommendationRepository(),
   };
 }
 

@@ -28,6 +28,9 @@ import { EventsPage } from '../features/events/EventsPage';
 import { AlertsPage } from '../features/alerts/AlertsPage';
 import { PortfolioPage } from '../features/portfolio/PortfolioPage';
 import { DocumentsPage } from '../features/documents/DocumentsPage';
+import { ImportsPage } from '../features/imports/ImportsPage';
+import { ManualEntryHubPage } from '../features/manual-entry/ManualEntryHubPage';
+import { RecommendationsPage } from '../features/recommendations/RecommendationsPage';
 
 const comingSoon = (title: string, phase: string) => <ComingSoon title={title} phase={phase} />;
 
@@ -52,8 +55,8 @@ export const router = createHashRouter([
       { path: 'escolas', element: <SchoolsPage /> },
       { path: 'turmas', element: <ClassesPage /> },
 
-      { path: 'importacao', element: comingSoon('Importação', 'Fase 3') },
-      { path: 'lancamento-manual', element: comingSoon('Lançamento manual', 'Fase 2') },
+      { path: 'importacao', element: <ImportsPage /> },
+      { path: 'lancamento-manual', element: <ManualEntryHubPage /> },
       { path: 'atividades', element: <ActivitiesPage /> },
       { path: 'avaliacoes', element: <AssessmentsPage /> },
       { path: 'notas', element: <GradesPage /> },
@@ -65,7 +68,7 @@ export const router = createHashRouter([
       { path: 'portfolio', element: <PortfolioPage /> },
       { path: 'documentos', element: <DocumentsPage /> },
       { path: 'relatorios', element: comingSoon('Relatórios', 'Fase 5/6') },
-      { path: 'recomendacoes', element: comingSoon('Recomendações', 'Fase 4') },
+      { path: 'recomendacoes', element: <RecommendationsPage /> },
 
       { path: 'usuarios', element: <UsersPage /> },
       { path: 'permissoes', element: <PermissionsAdminPage /> },

@@ -39,14 +39,46 @@ Educação Infantil e Ensino Fundamental, importação de arquivos, lançamento 
 alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem. Ver
 `docs/status.md` para o detalhamento completo.
 
+## v0.2.0 — Fase 2: Educação Infantil
+
+- Atividades: cadastro por turma e categoria/campo de experiência BNCC.
+- Avaliações: lançamento em lote da escala R/B/O por atividade, rascunho/publicação.
+- Observações: professor (com controle de visibilidade) e responsável.
+- Dashboard individual: cards, evolução por período, distribuição por categoria, radar
+  por campo de experiência (com amostra mínima configurável), linha do tempo — a escala
+  R/B/O nunca é exibida como nota numérica às famílias.
+
+## v0.3.0 — Fase 3: Importação
+
+- Assistente completo em etapas: tipo de documento, escopo/período/periodicidade (nunca
+  deduzida da data do arquivo), armazenamento (aviso em destaque), upload, mapeamento de
+  colunas (com sugestão automática por sinônimos), validação, duplicidades,
+  pré-visualização com correção manual, confirmação e log.
+- Parsing real de CSV (Papa Parse) e XLSX (SheetJS).
+- Criação automática de registros para **Cadastro de aluno** e **Frequência**, com
+  detecção de duplicidade; demais tipos ficam registrados no log para revisão manual.
+
+## v0.4.0 — Fase 4: Comunicação e rotina
+
+- Frequência: lançamento em lote por turma e data.
+- Eventos: cadastro completo e confirmação de presença pelos responsáveis.
+- Alertas: motor de regras simplificado e testado (nunca conclui a partir de um único
+  registro), central com contestação/contexto.
+- Portfólio: upload de arquivo vinculado ao aluno.
+- Documentos: central com busca, filtro por categoria e download.
+- Recomendações: cadastro com faixa etária, fonte e fluxo de aprovação.
+
+## v0.5.0 — Fase 5: Ensino Fundamental
+
+- Notas: lançamento por turma/disciplina/período respeitando a escala configurada pela
+  escola (conceitos ou numérica) — a ordem de "melhor nota" nunca é assumida pelo código.
+- Dashboard: notas normalizadas por escala apenas para gráficos de tendência (nunca
+  misturando escalas diferentes), tabela de notas real, recuperações, frequência.
+
 ## Próximas versões previstas
 
 | Versão | Fase | Escopo |
 |---|---|---|
-| v0.2.0 | Fase 2 — Educação Infantil | Atividades, escala R/B/O, lançamento manual, dashboard, gráficos, observações |
-| v0.3.0 | Fase 3 — Importação | CSV/XLSX, pré-visualização, mapeamento, validação, duplicidades, log |
-| v0.4.0 | Fase 4 — Comunicação e rotina | Alertas, eventos, frequência, portfólio, documentos |
-| v0.5.0 | Fase 5 — Ensino Fundamental | Escalas configuráveis, disciplinas, notas, dashboard próprio, relatórios |
 | v0.6.0 | Fase 6 — Segurança e continuidade | Auditoria avançada, sincronização, políticas, migração Supabase |
 | v0.7.0 | Fase 7 — Importação avançada | PDF, OCR (JPEG/PNG), indicador de confiança, revisão humana |
 | v1.0.0 | — | Sistema completo conforme escopo do briefing original |

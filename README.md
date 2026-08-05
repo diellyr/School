@@ -14,8 +14,8 @@ seja plugada depois **sem reescrever as telas** — veja [`docs/supabase-migrati
 React 19 · TypeScript · Vite · Tailwind CSS v4 · React Router · Dexie.js (IndexedDB) · Zustand ·
 React Hook Form + Zod · Recharts · dexie-react-hooks · Vitest
 
-As dependências de importação de arquivos (SheetJS, Papa Parse, PDF.js, Tesseract.js/OCR) já estão
-instaladas e prontas para as Fases 3 e 7.
+A importação de CSV (Papa Parse) e XLSX (SheetJS) já está funcionando no assistente de importação
+(Fase 3). PDF.js e Tesseract.js (OCR) já estão instalados e prontos para a Fase 7.
 
 ## Como executar
 
@@ -70,7 +70,10 @@ src/
   auth/           autenticação demo, RBAC (matriz de permissões) e hooks de autorização
   layout/         casca do app: sidebar, header, breadcrumbs, busca global, menu do usuário
   components/     componentes de UI reutilizáveis (Button, Card, Dialog, formulários, estados vazios…)
-  features/       telas por módulo (alunos, responsáveis, escolas, turmas, auditoria, backup…)
+  features/       telas por módulo: alunos, responsáveis, escolas, turmas, auditoria, backup,
+                  early-childhood (atividades/dashboard EI), elementary (notas/dashboard EF),
+                  assessments, attendance, alerts (+ motor de regras), events, observations,
+                  portfolio, documents, imports (assistente CSV/XLSX), recommendations…
   test/           setup do Vitest (fake-indexeddb, jest-dom)
 docs/
   data-model.md            entidades, campos e relacionamentos
@@ -101,22 +104,31 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
 - **Real e funcional:** estrutura do projeto, login demo com hashing de senha e bloqueio por
   tentativas inválidas, RBAC, IndexedDB via Dexie, CRUD completo de escolas/turmas/alunos/
   responsáveis/professores/usuários com exclusão lógica, auditoria, backup/restauração local (JSON),
-  dados de demonstração, testes automatizados das regras críticas.
-- **Simulado nesta fase:** dashboards de Educação Infantil e Ensino Fundamental, importação de
-  arquivos, lançamento manual de atividades/notas/frequência, alertas automáticos, eventos,
-  portfólio, documentos, relatórios/exportações, sincronização com nuvem — todos navegáveis pelo
-  menu com indicação clara da fase em que serão entregues.
+  dados de demonstração, testes automatizados das regras críticas — **e também** os dashboards de
+  Educação Infantil e Ensino Fundamental (com gráficos reais), lançamento manual de
+  atividades/avaliações/notas/frequência/observações, motor de alertas educacionais (testado),
+  eventos com confirmação de presença, portfólio com upload de arquivo, central de documentos,
+  recomendações, e o assistente completo de importação de CSV/XLSX (com criação real de alunos e
+  frequência a partir do arquivo).
+- **Simulado nesta fase:** relatórios/exportações em PDF/XLSX, importação de PDF e imagens com OCR,
+  sincronização com nuvem, e a criação automática de registros para os demais tipos de importação
+  (relatórios, eventos, observações, alertas, portfólio importados) — navegáveis pelo menu com
+  indicação clara da fase em que serão entregues.
 
 ## Plano de fases
 
-1. **Fundação** *(esta entrega)* — estrutura, login, layout, perfis, permissões, IndexedDB, escolas,
-   turmas, alunos, responsáveis.
-2. **Educação Infantil** — atividades, escala R/B/O, lançamento manual, dashboard, gráficos, observações.
-3. **Importação** — CSV/XLSX, pré-visualização, mapeamento, validação, duplicidades, log.
-4. **Comunicação e rotina** — alertas, eventos, frequência, portfólio, documentos.
-5. **Ensino Fundamental** — escalas configuráveis, disciplinas, notas, dashboard próprio, relatórios.
+1. **Fundação** ✅ — estrutura, login, layout, perfis, permissões, IndexedDB, escolas, turmas, alunos,
+   responsáveis.
+2. **Educação Infantil** ✅ — atividades, escala R/B/O, lançamento manual, dashboard, gráficos, observações.
+3. **Importação** ✅ — CSV/XLSX, pré-visualização, mapeamento, validação, duplicidades, log. *(criação
+   automática de registros cobre cadastro de aluno e frequência; demais tipos ficam no log para
+   revisão manual)*
+4. **Comunicação e rotina** ✅ — alertas, eventos, frequência, portfólio, documentos, recomendações.
+5. **Ensino Fundamental** ✅ — escalas configuráveis, disciplinas, notas, dashboard próprio.
 6. **Segurança e continuidade** — auditoria avançada, sincronização, políticas, migração Supabase.
 7. **Importação avançada** — PDF, OCR (JPEG/PNG), indicador de confiança, revisão humana.
+
+Relatórios/exportações formais (PDF/XLSX, boletim) ainda são simulados — chegam junto das Fases 5–6.
 
 ## Diretrizes éticas e educacionais
 
