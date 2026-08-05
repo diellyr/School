@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, Upload } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, ScanEye, Upload } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
 import { Card, CardContent } from '../../components/Card';
@@ -9,7 +9,7 @@ import { FormField, Input, Select } from '../../components/form/Field';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
 import { DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, TARGET_FIELDS } from './importTypes';
-import { parseTabularFile, type ParsedTable } from './parseFile';
+import { parseTabularFile, type ImportSource, type ParsedTable } from './parseFile';
 import { buildPreview, type PreviewRow } from './validateRows';
 import { sha256OfFile } from '../../lib/files';
 import { newId } from '../../domain/common';
@@ -47,6 +47,9 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [resolutions, setResolutions] = useState<Record<number, PreviewRow['resolution']>>({});
   const [result, setResult] = useState<{ imported: number; rejected: number; duplicates: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [ocrProgress, setOcrProgress] = useState<number | null>(null);
+  const [reviewedManually, setReviewedManually] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const repositories = useRepositories();
@@ -62,20 +65,31 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
   async function handleFileSelected(f: File) {
     setFile(f);
+    setTable(null);
+    setParseError(null);
+    setReviewedManually(false);
     const format = FILE_FORMAT_FROM_NAME(f.name);
-    if (format !== 'csv' && format !== 'xlsx' && format !== 'xls') {
-      alert('Nesta fase, apenas CSV e XLSX geram pré-visualização automática. PDF/imagens (OCR) chegam na Fase 7.');
+    if (!format) {
+      setParseError('Formato de arquivo não suportado. Use CSV, XLSX, PDF, JPEG ou PNG.');
       return;
     }
-    const parsed = await parseTabularFile(f);
-    setTable(parsed);
-    const autoMapping: Record<string, string> = {};
-    for (const field of targetFields) {
-      const candidates = [field.key, field.label, ...field.synonyms].map(normalizeHeader);
-      const match = parsed.headers.find((h) => candidates.includes(normalizeHeader(h)));
-      if (match) autoMapping[field.key] = match;
+    const isImage = format === 'jpeg' || format === 'jpg' || format === 'png';
+    if (isImage) setOcrProgress(0);
+    try {
+      const parsed = await parseTabularFile(f, isImage ? (p) => setOcrProgress(p) : undefined);
+      setTable(parsed);
+      const autoMapping: Record<string, string> = {};
+      for (const field of targetFields) {
+        const candidates = [field.key, field.label, ...field.synonyms].map(normalizeHeader);
+        const match = parsed.headers.find((h) => candidates.includes(normalizeHeader(h)));
+        if (match) autoMapping[field.key] = match;
+      }
+      setColumnMapping(autoMapping);
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : 'Não foi possível ler este arquivo.');
+    } finally {
+      setOcrProgress(null);
     }
-    setColumnMapping(autoMapping);
   }
 
   async function runPreview() {
@@ -297,14 +311,40 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-10 text-center hover:border-sky-400 dark:border-slate-700"
+            disabled={ocrProgress !== null}
+            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-10 text-center hover:border-sky-400 disabled:opacity-60 dark:border-slate-700"
           >
             <Upload className="h-8 w-8 text-slate-400" />
-            <span className="text-sm text-slate-600 dark:text-slate-300">{file ? file.name : 'Clique para selecionar um arquivo CSV ou XLSX'}</span>
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              {file ? file.name : 'Clique para selecionar um arquivo CSV, XLSX, PDF, JPEG ou PNG'}
+            </span>
           </button>
+          <p className="text-xs text-slate-500">
+            CSV e XLSX são lidos como tabela estruturada. PDF tem o texto extraído diretamente (não funciona para PDFs
+            escaneados). JPEG/PNG passam por reconhecimento óptico de caracteres (OCR) — nesses dois casos, a revisão
+            humana da pré-visualização é obrigatória antes de confirmar a importação.
+          </p>
+          {ocrProgress !== null && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-sky-700 dark:text-sky-400">
+                <ScanEye className="h-4 w-4 animate-pulse" />
+                Reconhecendo texto na imagem… {Math.round(ocrProgress * 100)}%
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${Math.round(ocrProgress * 100)}%` }} />
+              </div>
+            </div>
+          )}
+          {parseError && (
+            <p className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              {parseError}
+            </p>
+          )}
           {table && (
             <p className="text-sm text-emerald-700 dark:text-emerald-400">
               {table.rows.length} linha(s) e {table.headers.length} coluna(s) identificadas: {table.headers.join(', ')}
+              {table.source !== 'structured' && ' — confira cada linha com atenção na pré-visualização antes de confirmar.'}
             </p>
           )}
         </CardContent></Card>
@@ -337,9 +377,12 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       {step === 5 && (
         <PreviewStep
           preview={preview}
+          source={table?.source ?? 'structured'}
           loading={loading}
           resolutions={resolutions}
           setResolutions={setResolutions}
+          reviewedManually={reviewedManually}
+          setReviewedManually={setReviewedManually}
           onRunPreview={runPreview}
           onConfirm={confirmImport}
         />
@@ -399,19 +442,26 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function PreviewStep({
   preview,
+  source,
   loading,
   resolutions,
   setResolutions,
+  reviewedManually,
+  setReviewedManually,
   onRunPreview,
   onConfirm,
 }: {
   preview: PreviewRow[] | null;
+  source: ImportSource;
   loading: boolean;
   resolutions: Record<number, PreviewRow['resolution']>;
   setResolutions: (updater: (r: Record<number, PreviewRow['resolution']>) => Record<number, PreviewRow['resolution']>) => void;
+  reviewedManually: boolean;
+  setReviewedManually: (v: boolean) => void;
   onRunPreview: () => void;
   onConfirm: () => void;
 }) {
+  const requiresManualReview = source !== 'structured';
   const counts = useMemo(() => {
     if (!preview) return { valid: 0, warning: 0, error: 0, duplicate: 0 };
     return {
@@ -435,11 +485,24 @@ function PreviewStep({
     <Card>
       <CardContent>
         <div className="mb-4 flex flex-wrap gap-2">
+          <Badge tone={source === 'structured' ? 'info' : source === 'pdf' ? 'warning' : 'danger'}>
+            Origem: {source === 'structured' ? 'arquivo estruturado (CSV/XLSX)' : source === 'pdf' ? 'texto extraído de PDF' : 'OCR de imagem'}
+          </Badge>
           <Badge tone="success">{counts.valid} válidas</Badge>
           <Badge tone="warning">{counts.warning} avisos</Badge>
           <Badge tone="danger">{counts.error} erros</Badge>
           <Badge tone="info">{counts.duplicate} duplicidades</Badge>
         </div>
+
+        {requiresManualReview && (
+          <p className="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            {source === 'pdf'
+              ? 'O texto foi extraído automaticamente do PDF e as colunas foram reconstruídas por heurística — confira cada linha.'
+              : 'Estes dados vieram de reconhecimento óptico de caracteres (OCR) e podem conter erros de leitura, mesmo com confiança alta.'}
+            {' '}Linhas com confiança abaixo de 70% estão destacadas abaixo.
+          </p>
+        )}
 
         <div className="max-h-96 overflow-auto rounded-lg border border-slate-200 dark:border-slate-800">
           <table className="w-full text-xs">
@@ -453,14 +516,23 @@ function PreviewStep({
               </tr>
             </thead>
             <tbody>
-              {preview.map((row) => (
-                <tr key={row.index} className={`border-b border-slate-50 last:border-0 dark:border-slate-800/60 ${row.validation === 'error' ? 'bg-rose-50/60 dark:bg-rose-950/20' : ''}`}>
+              {preview.map((row) => {
+                const lowConfidence = requiresManualReview && row.confidence < 0.7;
+                return (
+                <tr
+                  key={row.index}
+                  className={`border-b border-slate-50 last:border-0 dark:border-slate-800/60 ${
+                    row.validation === 'error' ? 'bg-rose-50/60 dark:bg-rose-950/20' : lowConfidence ? 'bg-amber-50/60 dark:bg-amber-950/20' : ''
+                  }`}
+                >
                   <td className="px-3 py-2 text-slate-400">{row.index + 1}</td>
                   <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
                     {Object.entries(row.interpreted).map(([k, v]) => `${k}: ${v}`).join(' · ') || '—'}
                     {row.validationNotes && <p className="mt-0.5 text-[11px] text-slate-400">{row.validationNotes}</p>}
                   </td>
-                  <td className="px-3 py-2">{Math.round(row.confidence * 100)}%</td>
+                  <td className={`px-3 py-2 ${lowConfidence ? 'font-medium text-amber-700 dark:text-amber-400' : ''}`}>
+                    {Math.round(row.confidence * 100)}%
+                  </td>
                   <td className="px-3 py-2">
                     <Badge tone={row.validation === 'valid' ? 'success' : row.validation === 'warning' ? 'warning' : row.validation === 'error' ? 'danger' : 'info'}>
                       {row.validation}
@@ -479,13 +551,31 @@ function PreviewStep({
                     </select>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
 
+        {requiresManualReview && (
+          <label className="mt-4 flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <input
+              type="checkbox"
+              checked={reviewedManually}
+              onChange={(e) => setReviewedManually(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+            />
+            Revisei manualmente todas as linhas acima, inclusive as destacadas com confiança baixa, e confirmo que os
+            valores interpretados estão corretos.
+          </label>
+        )}
+
         <div className="mt-4 flex justify-end">
-          <Button onClick={onConfirm} loading={loading} disabled={counts.error === preview.length}>
+          <Button
+            onClick={onConfirm}
+            loading={loading}
+            disabled={counts.error === preview.length || (requiresManualReview && !reviewedManually)}
+          >
             Confirmar importação
           </Button>
         </div>

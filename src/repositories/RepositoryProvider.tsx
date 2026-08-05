@@ -37,6 +37,15 @@ import {
 import { LocalDocumentRepository, LocalPortfolioRepository } from './local/portfolioRepository';
 import { LocalImportBatchRepository, LocalImportRowRepository } from './local/importRepository';
 import { LocalRecommendationRepository } from './local/recommendationRepository';
+import { LocalSyncQueueRepository } from './local/syncQueueRepository';
+import { LocalDataRetentionRuleRepository } from './local/retentionRepository';
+import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import { SupabaseClassRepository, SupabaseOrganizationRepository, SupabaseSchoolRepository } from './supabase/schoolRepository';
+import {
+  SupabaseGuardianRepository,
+  SupabaseStudentGuardianRepository,
+  SupabaseStudentRepository,
+} from './supabase/studentRepository';
 
 /**
  * Ponto único de acesso aos repositórios. Hoje instancia as implementações Local*
@@ -86,6 +95,8 @@ export interface Repositories {
   importRows: LocalImportRowRepository;
 
   recommendations: LocalRecommendationRepository;
+  syncQueue: LocalSyncQueueRepository;
+  dataRetentionRules: LocalDataRetentionRuleRepository;
 }
 
 function createLocalRepositories(): Repositories {
@@ -130,13 +141,44 @@ function createLocalRepositories(): Repositories {
     importRows: new LocalImportRowRepository(),
 
     recommendations: new LocalRecommendationRepository(),
+    syncQueue: new LocalSyncQueueRepository(),
+    dataRetentionRules: new LocalDataRetentionRuleRepository(),
+  };
+}
+
+/**
+ * Decide entre Local* e Supabase* por entidade. Enquanto `VITE_SUPABASE_URL` e
+ * `VITE_SUPABASE_ANON_KEY` não estiverem definidas (o padrão nesta versão), este
+ * bloco nem executa — tudo continua no IndexedDB, exatamente como antes. Quando a
+ * organização ativar a nuvem (Fase 6), as entidades que já têm implementação
+ * Supabase* (organizations, schools, classes, students, guardians, studentGuardians)
+ * passam a gravar direto no Postgres; as demais permanecem locais até ganharem sua
+ * própria Supabase*Repository — nenhuma tela precisa saber disso.
+ *
+ * Os casts abaixo existem porque `Local*Repository` e `Supabase*Repository` derivam
+ * de bases distintas (Dexie vs. Supabase-js) e por isso o TypeScript não os considera
+ * estruturalmente intercambiáveis mesmo implementando os mesmos métodos públicos —
+ * em tempo de execução só os métodos públicos são chamados, então é seguro.
+ */
+function createRepositories(): Repositories {
+  const local = createLocalRepositories();
+  if (!isSupabaseConfigured || !supabase) return local;
+
+  return {
+    ...local,
+    organizations: new SupabaseOrganizationRepository(supabase) as unknown as Repositories['organizations'],
+    schools: new SupabaseSchoolRepository(supabase) as unknown as Repositories['schools'],
+    classes: new SupabaseClassRepository(supabase) as unknown as Repositories['classes'],
+    students: new SupabaseStudentRepository(supabase) as unknown as Repositories['students'],
+    guardians: new SupabaseGuardianRepository(supabase) as unknown as Repositories['guardians'],
+    studentGuardians: new SupabaseStudentGuardianRepository(supabase) as unknown as Repositories['studentGuardians'],
   };
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
 
 export function RepositoryProvider({ children }: { children: ReactNode }) {
-  const repositories = useMemo(() => createLocalRepositories(), []);
+  const repositories = useMemo(() => createRepositories(), []);
   return <RepositoryContext.Provider value={repositories}>{children}</RepositoryContext.Provider>;
 }
 

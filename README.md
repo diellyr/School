@@ -3,9 +3,11 @@
 Aplicativo web responsivo para acompanhamento escolar de crianças na Educação Infantil e no Ensino
 Fundamental, com foco em pais, professores, alunos, administradores e Owner (dono da plataforma).
 
-Esta versão é o **MVP local, Fase 1 (Fundação)**: roda inteiramente no navegador, persistindo dados em
-**IndexedDB (Dexie.js)**. A arquitetura foi construída para que uma versão em nuvem (Supabase/Postgres)
-seja plugada depois **sem reescrever as telas** — veja [`docs/supabase-migration.md`](docs/supabase-migration.md).
+Esta versão entrega as **Fases 1 a 7** do plano abaixo: roda inteiramente no navegador, persistindo
+dados em **IndexedDB (Dexie.js)**. A arquitetura foi construída para que uma versão em nuvem
+(Supabase/Postgres) seja plugada depois **sem reescrever as telas** — o código dessa camada já existe
+e compila, mas nenhum projeto Supabase real foi provisionado (ver
+[`docs/supabase-migration.md`](docs/supabase-migration.md) e [`supabase/README.md`](supabase/README.md)).
 
 > Este é um ambiente de demonstração/desenvolvimento. Não insira dados reais de crianças.
 
@@ -14,8 +16,9 @@ seja plugada depois **sem reescrever as telas** — veja [`docs/supabase-migrati
 React 19 · TypeScript · Vite · Tailwind CSS v4 · React Router · Dexie.js (IndexedDB) · Zustand ·
 React Hook Form + Zod · Recharts · dexie-react-hooks · Vitest
 
-A importação de CSV (Papa Parse) e XLSX (SheetJS) já está funcionando no assistente de importação
-(Fase 3). PDF.js e Tesseract.js (OCR) já estão instalados e prontos para a Fase 7.
+A importação de CSV (Papa Parse), XLSX (SheetJS), PDF (PDF.js) e imagens com OCR (Tesseract.js) está
+funcionando no assistente de importação (Fases 3 e 7) — importações vindas de PDF ou OCR exigem revisão
+humana explícita antes de confirmar.
 
 ## Como executar
 
@@ -73,22 +76,26 @@ src/
   features/       telas por módulo: alunos, responsáveis, escolas, turmas, auditoria, backup,
                   early-childhood (atividades/dashboard EI), elementary (notas/dashboard EF),
                   assessments, attendance, alerts (+ motor de regras), events, observations,
-                  portfolio, documents, imports (assistente CSV/XLSX), recommendations…
+                  portfolio, documents, imports (assistente CSV/XLSX/PDF/OCR), sync (fila de
+                  sincronização), recommendations…
   test/           setup do Vitest (fake-indexeddb, jest-dom)
 docs/
   data-model.md            entidades, campos e relacionamentos
-  supabase-migration.md    plano de migração, schema SQL e políticas RLS sugeridas
+  supabase-migration.md    plano de migração, schema SQL e políticas RLS
   status.md                o que é real e o que está simulado, por módulo
+supabase/
+  migrations/*.sql         schema completo, políticas RLS e funções privilegiadas (não aplicadas)
+  README.md                passo a passo para ativar a nuvem quando/se decidido
 ```
 
 ### Camada de repositório
 
 Nenhuma tela acessa o Dexie/IndexedDB diretamente. Toda leitura/escrita passa por uma interface de
-repositório (`src/repositories/interfaces/Repository.ts`) implementada hoje por `Local*Repository`
-(Dexie). O `RepositoryProvider` (`src/repositories/RepositoryProvider.tsx`) é o único lugar que decide
-qual implementação instanciar — quando o Supabase entrar (Fase 6), basta trocar essa fábrica por
-`Supabase*Repository` (mesma interface, ver `src/repositories/supabase/*.example.ts`) sem tocar nas
-páginas.
+repositório (`src/repositories/interfaces/Repository.ts`) implementada por `Local*Repository` (Dexie) e,
+para as entidades mais usadas, também por `Supabase*Repository` real (`src/repositories/supabase/*.ts`).
+O `RepositoryProvider` (`src/repositories/RepositoryProvider.tsx`) é o único lugar que decide qual
+implementação instanciar, condicionado a `isSupabaseConfigured` — hoje sempre local, pois nenhuma
+variável `VITE_SUPABASE_*` está definida.
 
 ## Perfis e permissões
 
@@ -103,17 +110,20 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
 
 - **Real e funcional:** estrutura do projeto, login demo com hashing de senha e bloqueio por
   tentativas inválidas, RBAC, IndexedDB via Dexie, CRUD completo de escolas/turmas/alunos/
-  responsáveis/professores/usuários com exclusão lógica, auditoria, backup/restauração local (JSON),
-  dados de demonstração, testes automatizados das regras críticas — **e também** os dashboards de
-  Educação Infantil e Ensino Fundamental (com gráficos reais), lançamento manual de
-  atividades/avaliações/notas/frequência/observações, motor de alertas educacionais (testado),
-  eventos com confirmação de presença, portfólio com upload de arquivo, central de documentos,
-  recomendações, e o assistente completo de importação de CSV/XLSX (com criação real de alunos e
-  frequência a partir do arquivo).
-- **Simulado nesta fase:** relatórios/exportações em PDF/XLSX, importação de PDF e imagens com OCR,
-  sincronização com nuvem, e a criação automática de registros para os demais tipos de importação
-  (relatórios, eventos, observações, alertas, portfólio importados) — navegáveis pelo menu com
-  indicação clara da fase em que serão entregues.
+  responsáveis/professores/usuários com exclusão lógica, auditoria (incluindo filtros, exportação CSV
+  e registro de acesso a dados sensíveis), backup/restauração local (JSON), dados de demonstração,
+  testes automatizados das regras críticas — **e também** os dashboards de Educação Infantil e Ensino
+  Fundamental (com gráficos reais), lançamento manual de atividades/avaliações/notas/frequência/
+  observações, motor de alertas educacionais (testado), eventos com confirmação de presença, portfólio
+  com upload de arquivo, central de documentos, recomendações, o assistente completo de importação de
+  CSV/XLSX/PDF/OCR (com criação real de alunos e frequência a partir do arquivo, confiança por linha e
+  revisão humana obrigatória para PDF/OCR), a fila de sincronização simulada com resolução de
+  conflitos, as políticas de retenção de dados, e a prontidão de código para Supabase (repositórios,
+  schema SQL, RLS, funções privilegiadas — nunca aplicados a um projeto real sem decisão explícita).
+- **Simulado nesta fase:** relatórios/exportações formais em PDF/XLSX, banco de dados em nuvem
+  (Supabase — código pronto, mas nenhum projeto real provisionado) e a criação automática de registros
+  para os demais tipos de importação (relatórios, eventos, observações, alertas, portfólio importados)
+  — navegáveis pelo menu com indicação clara do que é simulado.
 
 ## Plano de fases
 
@@ -125,10 +135,12 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
    revisão manual)*
 4. **Comunicação e rotina** ✅ — alertas, eventos, frequência, portfólio, documentos, recomendações.
 5. **Ensino Fundamental** ✅ — escalas configuráveis, disciplinas, notas, dashboard próprio.
-6. **Segurança e continuidade** — auditoria avançada, sincronização, políticas, migração Supabase.
-7. **Importação avançada** — PDF, OCR (JPEG/PNG), indicador de confiança, revisão humana.
+6. **Segurança e continuidade** ✅ — auditoria avançada, sincronização simulada, políticas de retenção,
+   código de migração Supabase (schema, RLS, repositórios) pronto e dormente.
+7. **Importação avançada** ✅ — PDF (extração real de texto), OCR de imagens (JPEG/PNG) com Tesseract.js,
+   indicador de confiança por linha, revisão humana obrigatória antes de confirmar.
 
-Relatórios/exportações formais (PDF/XLSX, boletim) ainda são simulados — chegam junto das Fases 5–6.
+Relatórios/exportações formais (PDF/XLSX, boletim) ainda são simulados.
 
 ## Diretrizes éticas e educacionais
 

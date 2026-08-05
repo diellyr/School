@@ -15,6 +15,8 @@ export interface PreviewRow {
 
 const ATTENDANCE_STATUSES = ['present', 'absent', 'justified_absence', 'late', 'early_departure', 'class_cancelled', 'remote_activity'];
 
+export const LOW_CONFIDENCE_THRESHOLD = 0.7;
+
 function mapRow(row: Record<string, string>, columnMapping: Record<string, string>): Record<string, string> {
   const interpreted: Record<string, string> = {};
   for (const [targetKey, sourceColumn] of Object.entries(columnMapping)) {
@@ -37,10 +39,16 @@ export async function buildPreview(
 
   return table.rows.map((row, index) => {
     const interpreted = mapRow(row, columnMapping);
+    const confidence = table.rowConfidences?.[index] ?? 1;
     let validation: PreviewRow['validation'] = 'valid';
     let notes: string | undefined;
     let resolution: PreviewRow['resolution'] = 'import';
     let matchedExistingId: string | undefined;
+
+    if (table.source !== 'structured' && confidence < LOW_CONFIDENCE_THRESHOLD) {
+      validation = 'warning';
+      notes = `Confiança baixa na leitura desta linha (${Math.round(confidence * 100)}%) — revise os valores com atenção antes de confirmar.`;
+    }
 
     if (documentType === 'student_registration') {
       if (!interpreted.fullName) {
@@ -100,6 +108,6 @@ export async function buildPreview(
       resolution = 'ignore';
     }
 
-    return { index, original: row, interpreted, confidence: 1, validation, validationNotes: notes, resolution, matchedExistingId };
+    return { index, original: row, interpreted, confidence, validation, validationNotes: notes, resolution, matchedExistingId };
   });
 }

@@ -75,10 +75,36 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
 - Dashboard: notas normalizadas por escala apenas para gráficos de tendência (nunca
   misturando escalas diferentes), tabela de notas real, recuperações, frequência.
 
+## v0.6.0 — Fase 6: Segurança e continuidade
+
+- Sincronização: fila local (`sync_queue`), tela dedicada para simular pendências,
+  sincronizar e resolver conflitos (manter local/remoto) — sempre rotulado como
+  simulação em modo local, nunca finge estar conectada a um servidor real.
+- Políticas de retenção de dados: CRUD de regras por tipo de entidade/prazo/ação.
+- Auditoria avançada: filtros por usuário/módulo/ação/período, exportação CSV, motivo
+  da ação, e registro automático de `view_sensitive` ao abrir a ficha de um aluno.
+- Prontidão Supabase: `SupabaseBaseRepository` genérica e `Supabase*Repository` reais
+  para organizations/schools/classes/students/guardians/student_guardians; schema SQL
+  completo (~38 tabelas) e políticas RLS por organização → escola → turma → aluno →
+  responsável; funções `security definer` para exclusão definitiva, gravação de
+  auditoria e aplicação de políticas de retenção. `RepositoryProvider` já alterna
+  Local*/Supabase* por `isSupabaseConfigured` — **nenhum projeto Supabase real foi
+  provisionado nesta versão**, nenhuma variável de ambiente configurada, nenhuma
+  migração executada; o app continua 100% em IndexedDB local.
+
+## v0.7.0 — Fase 7: Importação avançada
+
+- PDF: extração real de texto via PDF.js, com reconstrução heurística de colunas por
+  posição — funciona bem para PDFs gerados de planilhas, não para PDFs escaneados.
+- Imagem (OCR): reconhecimento real de texto via Tesseract.js, com indicador de
+  progresso durante o reconhecimento e confiança por linha vinda diretamente do motor
+  (nunca inventada).
+- Pré-visualização: linhas com confiança abaixo de 70% destacadas; para qualquer
+  importação vinda de PDF ou OCR, a confirmação fica bloqueada até o usuário marcar
+  explicitamente que revisou manualmente todas as linhas.
+
 ## Próximas versões previstas
 
-| Versão | Fase | Escopo |
-|---|---|---|
-| v0.6.0 | Fase 6 — Segurança e continuidade | Auditoria avançada, sincronização, políticas, migração Supabase |
-| v0.7.0 | Fase 7 — Importação avançada | PDF, OCR (JPEG/PNG), indicador de confiança, revisão humana |
-| v1.0.0 | — | Sistema completo conforme escopo do briefing original |
+| Versão | Escopo |
+|---|---|
+| v1.0.0 | Sistema completo conforme escopo do briefing original (relatórios/exportações formais em PDF/XLSX, ativação real do Supabase quando decidido) |

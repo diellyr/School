@@ -31,6 +31,7 @@ import { DocumentsPage } from '../features/documents/DocumentsPage';
 import { ImportsPage } from '../features/imports/ImportsPage';
 import { ManualEntryHubPage } from '../features/manual-entry/ManualEntryHubPage';
 import { RecommendationsPage } from '../features/recommendations/RecommendationsPage';
+import { SyncPage } from '../features/sync/SyncPage';
 
 const comingSoon = (title: string, phase: string) => <ComingSoon title={title} phase={phase} />;
 
@@ -73,7 +74,7 @@ export const router = createHashRouter([
       { path: 'usuarios', element: <UsersPage /> },
       { path: 'permissoes', element: <PermissionsAdminPage /> },
       { path: 'auditoria', element: <AuditPage /> },
-      { path: 'sincronizacao', element: comingSoon('Sincronização', 'Fase 6') },
+      { path: 'sincronizacao', element: <SyncPage /> },
       { path: 'backup', element: <BackupPage /> },
       { path: 'configuracoes', element: <SettingsPage /> },
       { path: 'perfil', element: <ProfilePage /> },

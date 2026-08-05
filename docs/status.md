@@ -1,6 +1,6 @@
 # O que é real e o que está simulado
 
-Esta versão entrega as **Fases 1 a 5** do plano por fases descrito no README. Esta página lista, sem
+Esta versão entrega as **Fases 1 a 7** do plano por fases descrito no README. Esta página lista, sem
 ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder navegável.
 
 ## ✅ Real e funcional
@@ -60,6 +60,23 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Demais tipos | Relatórios EI/EF, eventos, observações, alertas e portfólio passam pelo pipeline completo (upload, mapeamento, log), mas ainda não criam os registros automaticamente — ficam no log de importação para revisão manual |
 | Log de importação | Tela própria com histórico, contagens de encontrados/importados/rejeitados/duplicados e local de armazenamento |
 
+### Segurança e continuidade (Fase 6)
+
+| Área | Detalhe |
+|---|---|
+| Fila de sincronização | `sync_queue` local (`src/features/sync/SyncPage.tsx`): simula pendências, sincroniza (com falhas ocasionais realistas) e resolve conflitos (manter local/remoto) — sempre rotulado como "modo local (IndexedDB)"/"simulado", nunca finge estar conectado a um servidor real |
+| Políticas de retenção | CRUD de regras por tipo de entidade/prazo/ação (`src/features/settings/RetentionPoliciesCard.tsx`), persistidas em `data_retention_rules` |
+| Auditoria avançada | Filtros por usuário/módulo/ação/período, exportação CSV, motivo da ação, e registro de `view_sensitive` ao abrir a ficha de um aluno (`src/features/audit/AuditPage.tsx`, `StudentDetailPage.tsx`) |
+| Prontidão Supabase | `SupabaseBaseRepository` + `Supabase*Repository` reais para organizations/schools/classes/students/guardians/student_guardians (`src/repositories/supabase/*.ts`), schema SQL completo e políticas RLS por organização → escola → turma → aluno → responsável (`supabase/migrations/*.sql`), funções `security definer` para exclusão definitiva/auditoria/retenção. `RepositoryProvider` já alterna Local*/Supabase* por `isSupabaseConfigured` — **hoje sempre local**, pois nenhum projeto Supabase foi provisionado nem variável de ambiente configurada. Ver `supabase/README.md`. |
+
+### Importação avançada (Fase 7)
+
+| Área | Detalhe |
+|---|---|
+| PDF | Extração real de texto via PDF.js (`parsePdfFile` em `src/features/imports/parseFile.ts`); reconstrução de colunas por heurística de posição — funciona bem para PDFs gerados de planilhas, não para PDFs escaneados (aí é preciso usar a importação por imagem) |
+| Imagem (OCR) | Reconhecimento de texto real via Tesseract.js (`parseImageFile`), com indicador de progresso durante o reconhecimento e confiança por linha vinda diretamente do motor (nunca inventada) |
+| Confiança e revisão humana | Linhas com confiança abaixo de 70% são destacadas na pré-visualização; para qualquer importação vinda de PDF ou OCR, o botão "Confirmar importação" fica bloqueado até o usuário marcar explicitamente que revisou manualmente todas as linhas |
+
 ### Testes automatizados
 
 RBAC (perfis e precedência de sobreposições), CRUD + exclusão lógica/restauração do repositório base,
@@ -70,19 +87,17 @@ partir de um único registro).
 
 | Módulo | Fase prevista |
 |---|---|
-| Relatórios e exportações (PDF/XLSX/CSV, boletim) | Fases 5–6 |
-| Sincronização com nuvem | Fase 6 |
-| Importação de PDF e imagens com OCR | Fase 7 |
+| Relatórios e exportações (PDF/XLSX/CSV, boletim) | Fase futura |
 | Criação automática de registros para relatórios EI/EF, eventos, observações, alertas e portfólio importados | Próxima iteração da Fase 3 |
 
 ## 🔒 Simulado por natureza do MVP local (fica pronto, mas "desligado")
 
 | Item | Situação |
 |---|---|
-| Banco de dados em nuvem (Supabase) | Arquitetura pronta (`Repository<T>`, `RepositoryProvider`, stub `Supabase*Repository`), toggle mostrado como indisponível nesta versão — inclusive no assistente de importação |
+| Banco de dados em nuvem (Supabase) | Código completo e compilando (repositórios, schema SQL, RLS, funções privilegiadas — ver Fase 6 acima), mas **nenhuma migração foi executada contra um projeto real** e nenhuma variável `VITE_SUPABASE_*` está configurada — decisão explícita de ativar fica para quando houver um projeto Supabase real autorizado |
 | Autenticação real (Supabase Auth) | `authStore.loginWithPassword()` isola o ponto de troca; hoje compara hash local |
-| Row Level Security | Só existe como SQL sugerido em `docs/supabase-migration.md`; localmente a restrição de escopo é feita na camada de aplicação (hooks de permissão) |
-| OCR / leitura de PDF | Bibliotecas (`pdfjs-dist`, `tesseract.js`) já instaladas, sem tela de importação ainda |
+| Row Level Security | Políticas SQL reais em `supabase/migrations/0002_rls_policies.sql`, nunca aplicadas contra um banco real; localmente a restrição de escopo é feita na camada de aplicação (hooks de permissão) |
+| OCR em ambiente com rede restrita | O reconhecimento em si depende de um download de dados de idioma (Tesseract.js); em ambientes com bloqueio de saída para CDNs esse download falha — a extração de PDF e todo o resto do fluxo (progresso, confiança, revisão obrigatória) funcionam normalmente |
 
 ## Como verificar
 
@@ -94,5 +109,7 @@ npm run dev     # app completo, use "Carregar dados de demonstração" na tela d
 
 Testado manualmente (Playwright) o fluxo completo de cada módulo com dados de demonstração: login por
 perfil, dashboards, lançamento de atividades/avaliações/notas/frequência, alertas, eventos, portfólio,
-documentos e importação de CSV — incluindo a criação real de um aluno via importação e a detecção de
-duplicidade.
+documentos e importação de CSV e PDF — incluindo a criação real de um aluno via importação, a detecção
+de duplicidade, o bloqueio de confirmação sem revisão manual em importações de PDF/OCR, e o tratamento
+de erro (sem crash) quando o download dos dados de idioma do OCR falha por restrição de rede do
+ambiente de teste.

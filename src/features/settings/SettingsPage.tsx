@@ -10,6 +10,7 @@ import { DEMO_ORG_ID } from '../../db/demoIds';
 import { useDemoDataActions, useDemoDataStatus } from './useDemoData';
 import { applyThemeClass, useThemeStore } from '../../app/themeStore';
 import { formatDateTime } from '../../lib/utils';
+import { RetentionPoliciesCard } from './RetentionPoliciesCard';
 
 export function SettingsPage() {
   const theme = useThemeStore((s) => s.theme);
@@ -86,6 +87,8 @@ export function SettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      <RetentionPoliciesCard />
 
       <Card>
         <CardHeader>

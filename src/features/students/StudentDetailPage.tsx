@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { ArrowLeft, Baby, Cake, GraduationCap, School as SchoolIcon, Users2 } from 'lucide-react';
@@ -6,11 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card'
 import { Badge } from '../../components/Badge';
 import { EmptyState } from '../../components/EmptyState';
 import { calculateAge, formatDate, initials } from '../../lib/utils';
+import { useRepositories } from '../../repositories/RepositoryProvider';
+import { useAuthStore } from '../../auth/authStore';
 
 export function StudentDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const repositories = useRepositories();
+  const session = useAuthStore((s) => s.session);
+  const loggedForId = useRef<string | null>(null);
 
   const student = useLiveQuery(() => (id ? db.students.get(id) : undefined), [id]);
+
+  useEffect(() => {
+    if (!id || !student || !session || loggedForId.current === id) return;
+    loggedForId.current = id;
+    repositories.audit.record(
+      { userId: session.user.id, role: session.role, organizationId: session.user.organizationId },
+      { action: 'view_sensitive', module: 'students', entityId: id },
+    );
+  }, [id, student, session, repositories]);
   const school = useLiveQuery(() => (student ? db.schools.get(student.schoolId) : undefined), [student?.schoolId]);
   const klass = useLiveQuery(() => (student?.classId ? db.classes.get(student.classId) : undefined), [student?.classId]);
   const links = useLiveQuery(() => (id ? db.studentGuardians.filter((l) => l.studentId === id && l.status === 'active').toArray() : []), [id]);
