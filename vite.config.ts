@@ -4,7 +4,11 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
 
-export default defineConfig({
+// Em produção o app é publicado no GitHub Pages como "project page"
+// (https://<usuario>.github.io/School/), então os assets precisam do prefixo
+// "/School/". Em desenvolvimento mantemos a raiz "/" para não atrapalhar o dev server.
+export default defineConfig(({ command, isPreview }) => ({
+  base: command === 'build' || isPreview ? '/School/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -16,5 +20,4 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
   },
-})
-
+}))

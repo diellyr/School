@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createHashRouter, Navigate } from 'react-router-dom';
 import { AppShell } from '../layout/AppShell';
 import { ProtectedRoute } from './ProtectedRoute';
 import { LoginPage } from '../features/auth/LoginPage';
@@ -20,7 +20,7 @@ import { ComingSoon } from '../components/ComingSoon';
 
 const comingSoon = (title: string, phase: string) => <ComingSoon title={title} phase={phase} />;
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   { path: '/login', element: <LoginPage /> },
   {
     path: '/',
