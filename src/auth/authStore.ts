@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AppUser, SystemRole } from '../domain';
+import type { AppUser, Organization, SystemRole } from '../domain';
 import { DEMO_CREDENTIALS } from './demoUsers';
 import { db } from '../db/schema';
 import { sha256Hex } from '../lib/hash';
+import { newId, nowIso } from '../domain/common';
 
 export const MAX_LOGIN_ATTEMPTS = 5;
 export const SESSION_TTL_MINUTES = 60;
@@ -49,6 +50,70 @@ export const useAuthStore = create<AuthState>()(
 
 export class InvalidCredentialsError extends Error {}
 export class AccountBlockedError extends Error {}
+export class EmailAlreadyExistsError extends Error {}
+
+/**
+ * Cria uma conta real (não-demo) com sua própria organização e já retorna a sessão
+ * autenticada — permite começar a usar o sistema (e importar dados reais) sem depender
+ * dos dados de demonstração, que continuam disponíveis como opção separada em
+ * Configurações depois do login. O primeiro usuário de uma organização nova é sempre
+ * Owner, dono da própria conta que acabou de criar.
+ */
+export async function createAccountAndLogin(input: {
+  fullName: string;
+  organizationName: string;
+  email: string;
+  password: string;
+}): Promise<Session> {
+  const normalized = input.email.trim().toLowerCase();
+  const existing = await db.users.where('email').equals(normalized).first();
+  if (existing) throw new EmailAlreadyExistsError('Já existe uma conta com este e-mail.');
+
+  const now = nowIso();
+  const userId = newId();
+  const organizationId = newId();
+  const passwordHash = await sha256Hex(input.password);
+
+  const organization: Organization = {
+    id: organizationId,
+    organizationId,
+    name: input.organizationName.trim(),
+    cloudStorageEnabled: false,
+    retentionPolicyDays: 1825,
+    createdAt: now,
+    updatedAt: now,
+    createdBy: userId,
+    updatedBy: userId,
+    version: 1,
+    status: 'active',
+    isDemo: false,
+  };
+
+  const user: AppUser = {
+    id: userId,
+    organizationId,
+    fullName: input.fullName.trim(),
+    email: normalized,
+    role: 'owner',
+    passwordHash,
+    isDemo: false,
+    isBlocked: false,
+    failedLoginAttempts: 0,
+    createdAt: now,
+    updatedAt: now,
+    createdBy: userId,
+    updatedBy: userId,
+    version: 1,
+    status: 'active',
+  };
+
+  await db.transaction('rw', db.organizations, db.users, async () => {
+    await db.organizations.add(organization);
+    await db.users.add(user);
+  });
+
+  return loginWithPassword(input.email, input.password);
+}
 
 /**
  * Autenticação simulada do modo demo local (Dexie). A mesma assinatura de resultado

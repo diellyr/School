@@ -6,11 +6,11 @@ import { Button } from '../../components/Button';
 import { Dialog } from '../../components/Dialog';
 import { Badge } from '../../components/Badge';
 import { db } from '../../db/schema';
-import { DEMO_ORG_ID } from '../../db/demoIds';
 import { useDemoDataActions, useDemoDataStatus } from './useDemoData';
 import { applyThemeClass, useThemeStore } from '../../app/themeStore';
 import { formatDateTime } from '../../lib/utils';
 import { RetentionPoliciesCard } from './RetentionPoliciesCard';
+import { useAuthStore } from '../../auth/authStore';
 
 export function SettingsPage() {
   const theme = useThemeStore((s) => s.theme);
@@ -19,8 +19,12 @@ export function SettingsPage() {
   const { loading, handleLoad, handleRemove } = useDemoDataActions();
   const [confirmLoadOpen, setConfirmLoadOpen] = useState(false);
   const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+  const session = useAuthStore((s) => s.session);
 
-  const organization = useLiveQuery(() => db.organizations.get(DEMO_ORG_ID), []);
+  const organization = useLiveQuery(
+    () => (session ? db.organizations.get(session.user.organizationId) : undefined),
+    [session?.user.organizationId],
+  );
 
   return (
     <div className="max-w-3xl space-y-6">

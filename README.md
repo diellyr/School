@@ -41,10 +41,18 @@ tudo funciona localmente no navegador via IndexedDB.
 
 ## Primeiro acesso
 
-Na tela de login, clique em **"Carregar dados de demonstração"** (pede confirmação antes de criar
-os registros). Isso cria duas escolas, quatro turmas, alunos de Educação Infantil e Ensino
-Fundamental, responsáveis, professores, um administrador e um Owner, além de atividades, notas,
-frequência, um alerta, um evento e uma recomendação de exemplo.
+Há duas formas de começar, e elas não se excluem:
+
+- **Criar uma conta real:** na tela de login, aba **"Criar conta"**, informe nome, o nome da sua
+  escola/rede, e-mail e senha. Isso cria uma organização própria e uma conta Owner, sem nenhum dado
+  de demonstração — ideal para já começar a importar seus próprios dados (assistente de
+  Importação). Nenhum dado de exemplo é necessário para isso.
+- **Carregar dados de demonstração:** na tela de login ou em **Configurações** (depois de já estar
+  logado, inclusive com uma conta real), clique em **"Carregar dados de demonstração"** (pede
+  confirmação antes de criar os registros). Isso cria duas escolas, quatro turmas, alunos de
+  Educação Infantil e Ensino Fundamental, responsáveis, professores, um administrador e um Owner de
+  demonstração, além de atividades, notas, frequência, um alerta, um evento e uma recomendação de
+  exemplo — todos claramente marcados e removíveis a qualquer momento sem afetar dados reais.
 
 ### Acessos de demonstração
 
