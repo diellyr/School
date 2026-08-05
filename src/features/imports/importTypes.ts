@@ -12,8 +12,21 @@ export const DOCUMENT_TYPE_LABELS: Record<ImportDocumentType, string> = {
   generic: 'Importação genérica (mapeamento manual)',
 };
 
-/** Tipos com criação automática de registros (Fase 3). Os demais ficam registrados no log para revisão manual. */
-export const AUTOMATED_TYPES: ImportDocumentType[] = ['student_registration', 'attendance'];
+/** Tipos com criação automática de registros. Os demais ficam registrados no log para revisão manual. */
+export const AUTOMATED_TYPES: ImportDocumentType[] = [
+  'student_registration',
+  'attendance',
+  'early_childhood_report',
+  'elementary_report',
+];
+
+/**
+ * Tipos cujo cadastro completo (escola, turma, aluno, professor) é lido diretamente do arquivo
+ * e criado automaticamente quando ainda não existe — em vez de depender só da escola/turma
+ * escolhidas no passo "Escopo". Ver `ImportWizard.tsx` (etapa 1: escola deixa de ser obrigatória)
+ * e `confirmImport` (funções `ensureSchool`/`ensureClass`/`ensureStudent`/`ensureTeacher`).
+ */
+export const SELF_CONTAINED_TYPES: ImportDocumentType[] = ['early_childhood_report', 'elementary_report'];
 
 export const PERIODICITY_LABELS: Record<ImportPeriodicity, string> = {
   monthly: 'Mensal',
@@ -56,8 +69,24 @@ export const TARGET_FIELDS: Record<ImportDocumentType, TargetField[]> = {
     { key: 'date', label: 'Data (AAAA-MM-DD)', required: true, synonyms: ['data', 'dia'] },
     { key: 'status', label: 'Situação (present/absent/justified_absence/late)', required: true, synonyms: ['situacao', 'situação', 'status', 'presenca', 'presença', 'frequencia', 'frequência'] },
   ],
-  early_childhood_report: [],
-  elementary_report: [],
+  early_childhood_report: [
+    { key: 'schoolName', label: 'Escola', required: true, synonyms: ['escola', 'nome da escola'] },
+    { key: 'className', label: 'Turma', required: true, synonyms: ['turma', 'sala', 'classe'] },
+    { key: 'studentName', label: 'Nome do aluno', required: true, synonyms: ['aluno', 'nome do aluno', 'nome completo', 'nome'] },
+    { key: 'teacherName', label: 'Professor(a)', required: false, synonyms: ['professor', 'professora', 'educador', 'docente'] },
+    { key: 'activityTitle', label: 'Atividade', required: true, synonyms: ['atividade', 'titulo da atividade', 'título da atividade'] },
+    { key: 'categoryName', label: 'Categoria / campo de experiência', required: false, synonyms: ['categoria', 'campo de experiencia', 'campo de experiência'] },
+    { key: 'activityDate', label: 'Data da atividade (AAAA-MM-DD)', required: false, synonyms: ['data', 'data da atividade'] },
+    { key: 'rboLevel', label: 'Nível (R/B/O)', required: true, synonyms: ['nivel', 'nível', 'avaliacao', 'avaliação', 'r/b/o', 'rbo'] },
+  ],
+  elementary_report: [
+    { key: 'schoolName', label: 'Escola', required: true, synonyms: ['escola', 'nome da escola'] },
+    { key: 'className', label: 'Turma', required: true, synonyms: ['turma', 'sala', 'classe'] },
+    { key: 'studentName', label: 'Nome do aluno', required: true, synonyms: ['aluno', 'nome do aluno', 'nome completo', 'nome'] },
+    { key: 'teacherName', label: 'Professor(a)', required: false, synonyms: ['professor', 'professora', 'educador', 'docente'] },
+    { key: 'subject', label: 'Disciplina', required: true, synonyms: ['disciplina', 'materia', 'matéria', 'componente curricular'] },
+    { key: 'numericScore', label: 'Nota (0 a 10)', required: true, synonyms: ['nota', 'pontuacao', 'pontuação', 'nota numerica', 'nota numérica'] },
+  ],
   events: [],
   observations: [],
   alerts: [],

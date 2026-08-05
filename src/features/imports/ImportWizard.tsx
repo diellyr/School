@@ -8,12 +8,27 @@ import { Badge } from '../../components/Badge';
 import { FormField, Input, Select } from '../../components/form/Field';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
-import { DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, TARGET_FIELDS } from './importTypes';
+import { DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, SELF_CONTAINED_TYPES, TARGET_FIELDS } from './importTypes';
 import { parseTabularFile, type ImportSource, type ParsedTable } from './parseFile';
 import { buildPreview, type PreviewRow } from './validateRows';
 import { sha256OfFile } from '../../lib/files';
+import { sha256Hex } from '../../lib/hash';
 import { newId } from '../../domain/common';
-import type { Class, ImportDocumentType, ImportPeriodicity, School, StorageDestination } from '../../domain';
+import type {
+  Activity,
+  AppUser,
+  AssessmentCategory,
+  AssessmentScale,
+  Class,
+  EducationStage,
+  ImportDocumentType,
+  ImportPeriodicity,
+  RboLevel,
+  School,
+  Student,
+  StorageDestination,
+  TeacherAssignment,
+} from '../../domain';
 
 const STEPS = ['Tipo de documento', 'Escopo e período', 'Armazenamento', 'Arquivo', 'Mapeamento', 'Pré-visualização', 'Resultado'];
 
@@ -32,6 +47,18 @@ function toDomainResolution(resolution: PreviewRow['resolution'] | undefined): '
   return undefined;
 }
 
+/** Vira um prefixo de e-mail plausível a partir do nome, só para a conta-placeholder do professor. */
+function slugifyName(text: string): string {
+  return (
+    text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '.')
+      .replace(/^\.+|\.+$/g, '') || 'professor'
+  );
+}
+
 export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [step, setStep] = useState(0);
   const [documentType, setDocumentType] = useState<ImportDocumentType>('student_registration');
@@ -45,7 +72,15 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<PreviewRow[] | null>(null);
   const [resolutions, setResolutions] = useState<Record<number, PreviewRow['resolution']>>({});
-  const [result, setResult] = useState<{ imported: number; rejected: number; duplicates: number } | null>(null);
+  const [result, setResult] = useState<{
+    imported: number;
+    rejected: number;
+    duplicates: number;
+    createdSchools: number;
+    createdClasses: number;
+    createdStudents: number;
+    createdTeachers: number;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
   const [ocrProgress, setOcrProgress] = useState<number | null>(null);
@@ -62,6 +97,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
   const targetFields = TARGET_FIELDS[documentType];
   const isAutomated = targetFields.length > 0;
+  const isSelfContained = SELF_CONTAINED_TYPES.includes(documentType);
 
   async function handleFileSelected(f: File) {
     setFile(f);
@@ -96,7 +132,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     if (!table) return;
     setLoading(true);
     try {
-      const rows = await buildPreview(documentType, table, columnMapping, { schoolId, classId });
+      const rows = await buildPreview(documentType, table, columnMapping, { schoolId, classId, period });
       setPreview(rows);
       const initialResolutions: Record<number, PreviewRow['resolution']> = {};
       for (const r of rows) initialResolutions[r.index] = r.resolution;
@@ -113,6 +149,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     let imported = 0;
     let rejected = 0;
     let duplicates = 0;
+    let createdSchools = 0;
+    let createdClasses = 0;
+    let createdStudentsCount = 0;
+    let createdTeachers = 0;
 
     try {
       const fileHash = await sha256OfFile(file);
@@ -120,6 +160,209 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
       const students = schoolId ? await db.students.filter((s) => s.schoolId === schoolId && s.status === 'active').toArray() : [];
       const classesForSchool = schoolId ? await db.classes.filter((c) => c.schoolId === schoolId && c.status === 'active').toArray() : [];
+
+      // --- Cadastro automático (só usado por early_childhood_report / elementary_report) ---
+      // Lê escola/turma/aluno/professor/atividade direto da planilha e cadastra o que ainda não
+      // existir, em vez de exigir que tudo já esteja pré-cadastrado antes da importação.
+      const allSchools = isSelfContained ? await db.schools.filter((s) => s.status === 'active').toArray() : [];
+      const allClasses = isSelfContained ? await db.classes.filter((c) => c.status === 'active').toArray() : [];
+      const allStudents = isSelfContained ? await db.students.filter((s) => s.status === 'active').toArray() : [];
+      const allTeachers = isSelfContained ? await db.users.filter((u) => u.role === 'teacher' && u.status === 'active').toArray() : [];
+      const allAcademicYears = isSelfContained ? await db.academicYears.filter((y) => y.status === 'active').toArray() : [];
+      const allAssignments = isSelfContained ? await db.teacherAssignments.filter((a) => a.status === 'active').toArray() : [];
+      const allCategories = documentType === 'early_childhood_report' ? await db.assessmentCategories.filter((c) => c.status === 'active').toArray() : [];
+      const allActivities = documentType === 'early_childhood_report' ? await db.activities.filter((a) => a.status === 'active').toArray() : [];
+      const allScales = documentType === 'elementary_report' ? await db.assessmentScales.filter((s) => s.status === 'active').toArray() : [];
+
+      const schoolCache = new Map<string, School>();
+      const classCache = new Map<string, Class>();
+      const studentCache = new Map<string, Student>();
+      const teacherCache = new Map<string, AppUser>();
+      const academicYearCache = new Map<string, string>();
+      const assignmentCache = new Set<string>();
+      const categoryCache = new Map<string, AssessmentCategory>();
+      const activityCache = new Map<string, Activity>();
+      const scaleCache = new Map<string, string>();
+
+      async function ensureSchool(name: string): Promise<School> {
+        const key = name.trim().toLowerCase();
+        const cached = schoolCache.get(key);
+        if (cached) return cached;
+        const existing = allSchools.find((s) => s.name.toLowerCase() === key);
+        if (existing) { schoolCache.set(key, existing); return existing; }
+        const created = await repositories.schools.create({ name: name.trim() }, actor);
+        allSchools.push(created);
+        schoolCache.set(key, created);
+        createdSchools++;
+        return created;
+      }
+
+      async function ensureAcademicYear(schoolIdArg: string): Promise<string> {
+        const cached = academicYearCache.get(schoolIdArg);
+        if (cached) return cached;
+        const existing = allAcademicYears.find((y) => y.schoolId === schoolIdArg && y.isCurrent);
+        if (existing) { academicYearCache.set(schoolIdArg, existing.id); return existing.id; }
+        const year = new Date().getFullYear();
+        const created = await repositories.academicYears.create(
+          { schoolId: schoolIdArg, year, startDate: `${year}-02-01`, endDate: `${year}-12-15`, isCurrent: true },
+          actor,
+        );
+        allAcademicYears.push(created);
+        academicYearCache.set(schoolIdArg, created.id);
+        return created.id;
+      }
+
+      async function ensureClass(schoolIdArg: string, name: string, stage: EducationStage): Promise<Class> {
+        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const cached = classCache.get(key);
+        if (cached) return cached;
+        const existing = allClasses.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        if (existing) { classCache.set(key, existing); return existing; }
+        const academicYearId = await ensureAcademicYear(schoolIdArg);
+        const created = await repositories.classes.create(
+          { schoolId: schoolIdArg, academicYearId, name: name.trim(), stage, grade: name.trim(), shift: 'morning' },
+          actor,
+        );
+        allClasses.push(created);
+        classCache.set(key, created);
+        createdClasses++;
+        return created;
+      }
+
+      async function ensureStudent(schoolIdArg: string, classIdArg: string, name: string): Promise<Student> {
+        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const cached = studentCache.get(key);
+        if (cached) return cached;
+        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && s.fullName.toLowerCase() === name.trim().toLowerCase());
+        if (existing) { studentCache.set(key, existing); return existing; }
+        const created = await repositories.students.create(
+          {
+            fullName: name.trim(),
+            birthDate: '2020-01-01',
+            schoolId: schoolIdArg,
+            classId: classIdArg,
+            matriculationStatus: 'active',
+            enrollmentDate: new Date().toISOString().slice(0, 10),
+          },
+          actor,
+        );
+        allStudents.push(created);
+        studentCache.set(key, created);
+        createdStudentsCount++;
+        return created;
+      }
+
+      /** Professor citado na planilha, mas ainda sem cadastro: criado com login bloqueado — um
+       *  Owner/Admin precisa liberar o acesso e definir uma senha real depois, na tela Professores. */
+      async function ensureTeacher(name: string): Promise<AppUser> {
+        const key = name.trim().toLowerCase();
+        const cached = teacherCache.get(key);
+        if (cached) return cached;
+        const existing = allTeachers.find((t) => t.fullName.toLowerCase() === key);
+        if (existing) { teacherCache.set(key, existing); return existing; }
+        const placeholderEmail = `${slugifyName(name)}.${newId().slice(0, 6)}@pendente.importacao`;
+        const created = await repositories.users.create(
+          {
+            fullName: name.trim(),
+            email: placeholderEmail,
+            role: 'teacher',
+            passwordHash: await sha256Hex(newId()),
+            isDemo: false,
+            isBlocked: true,
+            failedLoginAttempts: 0,
+          },
+          actor,
+        );
+        allTeachers.push(created);
+        teacherCache.set(key, created);
+        createdTeachers++;
+        return created;
+      }
+
+      async function ensureTeacherAssignment(teacherUserId: string, classIdArg: string, schoolIdArg: string, academicYearId: string): Promise<void> {
+        const key = `${teacherUserId}::${classIdArg}`;
+        if (assignmentCache.has(key)) return;
+        const existing = allAssignments.find((a) => a.teacherUserId === teacherUserId && a.classId === classIdArg);
+        if (existing) { assignmentCache.add(key); return; }
+        const created: TeacherAssignment = await repositories.teacherAssignments.create(
+          { teacherUserId, classId: classIdArg, schoolId: schoolIdArg, isHomeroom: false, academicYearId },
+          actor,
+        );
+        allAssignments.push(created);
+        assignmentCache.add(key);
+      }
+
+      async function ensureCategory(schoolIdArg: string, stage: EducationStage, name: string | undefined): Promise<string | undefined> {
+        if (!name?.trim()) return undefined;
+        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const cached = categoryCache.get(key);
+        if (cached) return cached.id;
+        const existing = allCategories.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        if (existing) { categoryCache.set(key, existing); return existing.id; }
+        const created = await repositories.assessmentCategories.create({ schoolId: schoolIdArg, stage, kind: 'custom', name: name.trim() }, actor);
+        allCategories.push(created);
+        categoryCache.set(key, created);
+        return created.id;
+      }
+
+      async function ensureActivity(
+        schoolIdArg: string,
+        classIdArg: string,
+        academicYearId: string,
+        title: string,
+        date: string,
+        categoryId: string | undefined,
+        teacherId: string,
+      ): Promise<Activity> {
+        const key = `${classIdArg}::${title.trim().toLowerCase()}::${date}`;
+        const cached = activityCache.get(key);
+        if (cached) return cached;
+        const existing = allActivities.find((a) => a.classId === classIdArg && a.title.toLowerCase() === title.trim().toLowerCase() && a.date === date);
+        if (existing) { activityCache.set(key, existing); return existing; }
+        const created = await repositories.activities.create(
+          {
+            schoolId: schoolIdArg,
+            classId: classIdArg,
+            academicYearId,
+            stage: 'early_childhood',
+            title: title.trim(),
+            categoryId,
+            type: 'atividade',
+            date,
+            period,
+            createdByTeacherId: teacherId,
+          },
+          actor,
+        );
+        allActivities.push(created);
+        activityCache.set(key, created);
+        return created;
+      }
+
+      /** Nenhuma escala configurada para a escola? Cria uma numérica 0–10 (a mais neutra) só para
+       *  destravar o lançamento — o administrador pode trocar por conceitos depois em Configurações. */
+      async function ensureDefaultScale(schoolIdArg: string): Promise<string> {
+        const cached = scaleCache.get(schoolIdArg);
+        if (cached) return cached;
+        const existing = allScales.find((s) => s.schoolId === schoolIdArg && s.stage === 'elementary');
+        if (existing) { scaleCache.set(schoolIdArg, existing.id); return existing.id; }
+        const created: AssessmentScale = await repositories.assessmentScales.create(
+          {
+            schoolId: schoolIdArg,
+            stage: 'elementary',
+            name: 'Notas de 0 a 10 (criada automaticamente na importação)',
+            type: 'numeric',
+            minValue: 0,
+            maxValue: 10,
+            levels: [],
+            isDefault: allScales.length === 0,
+          },
+          actor,
+        );
+        allScales.push(created);
+        scaleCache.set(schoolIdArg, created.id);
+        return created.id;
+      }
 
       for (const row of preview) {
         const resolution = resolutions[row.index];
@@ -159,6 +402,53 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
           } else {
             await repositories.attendance.create(
               { studentId: student.id, classId: student.classId ?? classId, date: row.interpreted.date, attendanceStatus: row.interpreted.status as never, registeredBy: session.user.id },
+              actor,
+            );
+          }
+          imported++;
+        } else if (documentType === 'early_childhood_report') {
+          const school = await ensureSchool(row.interpreted.schoolName);
+          const klass = await ensureClass(school.id, row.interpreted.className, 'early_childhood');
+          const student = await ensureStudent(school.id, klass.id, row.interpreted.studentName);
+          const academicYearId = await ensureAcademicYear(school.id);
+          let teacherId = session.user.id;
+          if (row.interpreted.teacherName) {
+            const teacher = await ensureTeacher(row.interpreted.teacherName);
+            teacherId = teacher.id;
+            await ensureTeacherAssignment(teacher.id, klass.id, school.id, academicYearId);
+          }
+          const categoryId = await ensureCategory(school.id, 'early_childhood', row.interpreted.categoryName);
+          const activityDate =
+            row.interpreted.activityDate && !Number.isNaN(Date.parse(row.interpreted.activityDate))
+              ? row.interpreted.activityDate
+              : new Date().toISOString().slice(0, 10);
+          const activity = await ensureActivity(school.id, klass.id, academicYearId, row.interpreted.activityTitle, activityDate, categoryId, teacherId);
+          const level = row.interpreted.rboLevel.trim().toUpperCase() as RboLevel;
+          if (resolution === 'update_existing' && row.matchedExistingId) {
+            await repositories.assessments.update(row.matchedExistingId, { rboLevel: level }, actor);
+          } else {
+            await repositories.assessments.create(
+              { activityId: activity.id, studentId: student.id, stage: 'early_childhood', rboLevel: level, publicationStatus: 'draft' },
+              actor,
+            );
+          }
+          imported++;
+        } else if (documentType === 'elementary_report') {
+          const school = await ensureSchool(row.interpreted.schoolName);
+          const klass = await ensureClass(school.id, row.interpreted.className, 'elementary');
+          const student = await ensureStudent(school.id, klass.id, row.interpreted.studentName);
+          if (row.interpreted.teacherName) {
+            const academicYearId = await ensureAcademicYear(school.id);
+            const teacher = await ensureTeacher(row.interpreted.teacherName);
+            await ensureTeacherAssignment(teacher.id, klass.id, school.id, academicYearId);
+          }
+          const scaleId = await ensureDefaultScale(school.id);
+          const numericScore = Number(row.interpreted.numericScore.replace(',', '.'));
+          if (resolution === 'update_existing' && row.matchedExistingId) {
+            await repositories.grades.update(row.matchedExistingId, { numericScore }, actor);
+          } else {
+            await repositories.grades.create(
+              { studentId: student.id, classId: klass.id, subject: row.interpreted.subject, period, scaleId, numericScore, isRecovery: false, publicationStatus: 'draft' },
               actor,
             );
           }
@@ -209,7 +499,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
-      setResult({ imported, rejected, duplicates });
+      setResult({ imported, rejected, duplicates, createdSchools, createdClasses, createdStudents: createdStudentsCount, createdTeachers });
       setStep(6);
     } finally {
       setLoading(false);
@@ -245,9 +535,16 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
       {step === 1 && (
         <Card><CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Escola" htmlFor="schoolId" required>
+          {isSelfContained && (
+            <p className="col-span-full flex items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300 sm:col-span-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              Este relatório lê escola, turma, aluno e professor diretamente do arquivo, cadastrando
+              automaticamente o que ainda não existir. A escola abaixo é só um filtro opcional de referência.
+            </p>
+          )}
+          <FormField label={isSelfContained ? 'Escola (opcional — filtro)' : 'Escola'} htmlFor="schoolId" required={!isSelfContained}>
             <Select id="schoolId" value={schoolId} onChange={(e) => { setSchoolId(e.target.value); setClassId(''); }}>
-              <option value="">Selecione…</option>
+              <option value="">{isSelfContained ? 'Nenhum filtro' : 'Selecione…'}</option>
               {schools?.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </Select>
           </FormField>
@@ -401,6 +698,23 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
             <Stat label="Rejeitados" value={result.rejected} />
             <Stat label="Duplicados" value={result.duplicates} />
           </div>
+          {(result.createdSchools > 0 || result.createdClasses > 0 || result.createdStudents > 0 || result.createdTeachers > 0) && (
+            <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300">
+              <p className="mb-2 font-medium">Cadastrados automaticamente a partir do arquivo:</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <Stat label="Escolas" value={result.createdSchools} />
+                <Stat label="Turmas" value={result.createdClasses} />
+                <Stat label="Alunos" value={result.createdStudents} />
+                <Stat label="Professores" value={result.createdTeachers} />
+              </div>
+              {result.createdTeachers > 0 && (
+                <p className="mt-2">
+                  Os professores criados ficam com o acesso bloqueado (sem senha utilizável) — um Owner/Admin
+                  precisa liberar o acesso e definir uma senha real na tela <strong>Professores</strong>.
+                </p>
+              )}
+            </div>
+          )}
           <p className="text-xs text-slate-500">
             {storageDestination === 'local' ? 'Armazenado somente neste navegador.' : 'Armazenado no banco de dados e sincronizado.'}
           </p>
@@ -420,7 +734,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
                 if (step === 4) await runPreview();
                 setStep((s) => s + 1);
               }}
-              disabled={(step === 0 && !documentType) || (step === 1 && (!schoolId || !period)) || (step === 3 && !table)}
+              disabled={(step === 0 && !documentType) || (step === 1 && ((!schoolId && !isSelfContained) || !period)) || (step === 3 && !table)}
             >
               Avançar <ArrowRight className="h-4 w-4" />
             </Button>

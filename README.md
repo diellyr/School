@@ -125,12 +125,14 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
   observações, motor de alertas educacionais (testado), eventos com confirmação de presença, portfólio
   com upload de arquivo, central de documentos, recomendações, o assistente completo de importação de
   CSV/XLSX/PDF/OCR (com criação real de alunos e frequência a partir do arquivo, confiança por linha e
-  revisão humana obrigatória para PDF/OCR), a fila de sincronização simulada com resolução de
+  revisão humana obrigatória para PDF/OCR) — **incluindo os relatórios de Educação Infantil e Ensino
+  Fundamental, que leem escola/turma/aluno/professor/atividade direto do arquivo e cadastram
+  automaticamente o que ainda não existir**, a fila de sincronização simulada com resolução de
   conflitos, as políticas de retenção de dados, e a prontidão de código para Supabase (repositórios,
   schema SQL, RLS, funções privilegiadas — nunca aplicados a um projeto real sem decisão explícita).
 - **Simulado nesta fase:** relatórios/exportações formais em PDF/XLSX, banco de dados em nuvem
   (Supabase — código pronto, mas nenhum projeto real provisionado) e a criação automática de registros
-  para os demais tipos de importação (relatórios, eventos, observações, alertas, portfólio importados)
+  para os demais tipos de importação (eventos, observações, alertas, portfólio importados)
   — navegáveis pelo menu com indicação clara do que é simulado.
 
 ## Plano de fases

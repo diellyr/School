@@ -25,17 +25,28 @@ function mapRow(row: Record<string, string>, columnMapping: Record<string, strin
   return interpreted;
 }
 
+const RBO_CODES = ['R', 'B', 'O'];
+
 export async function buildPreview(
   documentType: ImportDocumentType,
   table: ParsedTable,
   columnMapping: Record<string, string>,
-  scope: { schoolId?: string; classId?: string },
+  scope: { schoolId?: string; classId?: string; period?: string },
 ): Promise<PreviewRow[]> {
   const existingStudents = scope.schoolId
     ? await db.students.filter((s) => s.schoolId === scope.schoolId && s.status === 'active').toArray()
     : [];
   const existingAttendance = await db.attendance.filter((a) => a.status === 'active').toArray();
   const classes = scope.schoolId ? await db.classes.filter((c) => c.schoolId === scope.schoolId && c.status === 'active').toArray() : [];
+
+  const isSelfContainedReport = documentType === 'early_childhood_report' || documentType === 'elementary_report';
+  const allSchools = isSelfContainedReport ? await db.schools.filter((s) => s.status === 'active').toArray() : [];
+  const allClasses = isSelfContainedReport ? await db.classes.filter((c) => c.status === 'active').toArray() : [];
+  const allStudents = isSelfContainedReport ? await db.students.filter((s) => s.status === 'active').toArray() : [];
+  const allTeachers = isSelfContainedReport ? await db.users.filter((u) => u.role === 'teacher' && u.status === 'active').toArray() : [];
+  const allActivities = documentType === 'early_childhood_report' ? await db.activities.filter((a) => a.status === 'active').toArray() : [];
+  const allAssessments = documentType === 'early_childhood_report' ? await db.assessments.filter((a) => a.status === 'active').toArray() : [];
+  const allGrades = documentType === 'elementary_report' ? await db.grades.filter((g) => g.status === 'active' && !g.isRecovery).toArray() : [];
 
   return table.rows.map((row, index) => {
     const interpreted = mapRow(row, columnMapping);
@@ -102,7 +113,116 @@ export async function buildPreview(
       }
     }
 
-    if (documentType !== 'student_registration' && documentType !== 'attendance') {
+    if (documentType === 'early_childhood_report') {
+      if (!interpreted.schoolName) {
+        validation = 'error';
+        notes = 'Escola é obrigatória.';
+      } else if (!interpreted.className) {
+        validation = 'error';
+        notes = 'Turma é obrigatória.';
+      } else if (!interpreted.studentName) {
+        validation = 'error';
+        notes = 'Nome do aluno é obrigatório.';
+      } else if (!interpreted.activityTitle) {
+        validation = 'error';
+        notes = 'Atividade é obrigatória.';
+      } else {
+        const level = interpreted.rboLevel?.trim().toUpperCase();
+        if (!level || !RBO_CODES.includes(level)) {
+          validation = 'error';
+          notes = 'Nível inválido — use R, B ou O.';
+        } else {
+          const autoCreateNotes: string[] = [];
+          const school = allSchools.find((s) => s.name.toLowerCase() === interpreted.schoolName.toLowerCase());
+          if (!school) autoCreateNotes.push(`Escola "${interpreted.schoolName}" será cadastrada automaticamente.`);
+          const klass = school ? allClasses.find((c) => c.schoolId === school.id && c.name.toLowerCase() === interpreted.className.toLowerCase()) : undefined;
+          if (!klass) autoCreateNotes.push(`Turma "${interpreted.className}" será cadastrada automaticamente.`);
+          const student = school
+            ? allStudents.find((s) => s.schoolId === school.id && s.fullName.toLowerCase() === interpreted.studentName.toLowerCase())
+            : undefined;
+          if (!student) autoCreateNotes.push(`Aluno "${interpreted.studentName}" será cadastrado automaticamente.`);
+          if (interpreted.teacherName) {
+            const teacher = allTeachers.find((t) => t.fullName.toLowerCase() === interpreted.teacherName.toLowerCase());
+            if (!teacher) autoCreateNotes.push(`Professor(a) "${interpreted.teacherName}" será cadastrado(a) automaticamente (conta criada bloqueada, sem senha utilizável, até um administrador liberar o acesso).`);
+          }
+
+          if (student && klass) {
+            const activity = allActivities.find(
+              (a) => a.classId === klass.id && a.title.toLowerCase() === interpreted.activityTitle.toLowerCase() && a.date === interpreted.activityDate,
+            );
+            const existingAssessment = activity ? allAssessments.find((a) => a.activityId === activity.id && a.studentId === student.id) : undefined;
+            if (existingAssessment) {
+              validation = 'duplicate';
+              notes = 'Já existe uma avaliação deste aluno para esta atividade — o nível será atualizado.';
+              resolution = 'update_existing';
+              matchedExistingId = existingAssessment.id;
+            }
+          }
+
+          if (validation !== 'duplicate') {
+            validation = autoCreateNotes.length > 0 ? 'warning' : 'valid';
+            notes = autoCreateNotes.join(' ') || undefined;
+          }
+        }
+      }
+    }
+
+    if (documentType === 'elementary_report') {
+      if (!interpreted.schoolName) {
+        validation = 'error';
+        notes = 'Escola é obrigatória.';
+      } else if (!interpreted.className) {
+        validation = 'error';
+        notes = 'Turma é obrigatória.';
+      } else if (!interpreted.studentName) {
+        validation = 'error';
+        notes = 'Nome do aluno é obrigatório.';
+      } else if (!interpreted.subject) {
+        validation = 'error';
+        notes = 'Disciplina é obrigatória.';
+      } else if (!interpreted.numericScore || Number.isNaN(Number(interpreted.numericScore.replace(',', '.')))) {
+        validation = 'error';
+        notes = 'Nota inválida — informe um número (ex.: 7.5).';
+      } else {
+        const autoCreateNotes: string[] = [];
+        const school = allSchools.find((s) => s.name.toLowerCase() === interpreted.schoolName.toLowerCase());
+        if (!school) autoCreateNotes.push(`Escola "${interpreted.schoolName}" será cadastrada automaticamente.`);
+        const klass = school ? allClasses.find((c) => c.schoolId === school.id && c.name.toLowerCase() === interpreted.className.toLowerCase()) : undefined;
+        if (!klass) autoCreateNotes.push(`Turma "${interpreted.className}" será cadastrada automaticamente.`);
+        const student = school
+          ? allStudents.find((s) => s.schoolId === school.id && s.fullName.toLowerCase() === interpreted.studentName.toLowerCase())
+          : undefined;
+        if (!student) autoCreateNotes.push(`Aluno "${interpreted.studentName}" será cadastrado automaticamente.`);
+        if (interpreted.teacherName) {
+          const teacher = allTeachers.find((t) => t.fullName.toLowerCase() === interpreted.teacherName.toLowerCase());
+          if (!teacher) autoCreateNotes.push(`Professor(a) "${interpreted.teacherName}" será cadastrado(a) automaticamente (conta criada bloqueada, sem senha utilizável, até um administrador liberar o acesso).`);
+        }
+
+        if (student && klass && scope.period) {
+          const dup = allGrades.find(
+            (g) => g.studentId === student.id && g.classId === klass.id && g.subject.toLowerCase() === interpreted.subject.toLowerCase() && g.period === scope.period,
+          );
+          if (dup) {
+            validation = 'duplicate';
+            notes = 'Já existe uma nota desta disciplina/período para este aluno — o valor será atualizado.';
+            resolution = 'update_existing';
+            matchedExistingId = dup.id;
+          }
+        }
+
+        if (validation !== 'duplicate') {
+          validation = autoCreateNotes.length > 0 ? 'warning' : 'valid';
+          notes = autoCreateNotes.join(' ') || undefined;
+        }
+      }
+    }
+
+    if (
+      documentType !== 'student_registration' &&
+      documentType !== 'attendance' &&
+      documentType !== 'early_childhood_report' &&
+      documentType !== 'elementary_report'
+    ) {
       notes = 'Este tipo de documento ainda não cria registros automaticamente — os dados ficam no log para revisão manual.';
       validation = 'warning';
       resolution = 'ignore';

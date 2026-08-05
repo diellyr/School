@@ -57,7 +57,8 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Assistente em etapas | Tipo de documento → escopo/período/periodicidade (nunca deduzida da data) → armazenamento (aviso em destaque) → upload → mapeamento de colunas → validação/duplicidades → pré-visualização com correção manual → confirmação → log |
 | Parsing real | CSV (Papa Parse) e XLSX (SheetJS) |
 | Criação automática de registros | **Cadastro de aluno** e **Frequência** criam/atualizam registros reais, com detecção de duplicidade (nome/aluno+data) |
-| Demais tipos | Relatórios EI/EF, eventos, observações, alertas e portfólio passam pelo pipeline completo (upload, mapeamento, log), mas ainda não criam os registros automaticamente — ficam no log de importação para revisão manual |
+| Relatórios EI/EF (cadastro completo) | Leem escola, turma, aluno, professor e atividade/disciplina diretamente do arquivo e **cadastram automaticamente o que ainda não existir** (escola, turma, ano letivo, aluno, categoria/atividade), em vez de exigir tudo pré-cadastrado. Professores criados por essa via ficam com o login bloqueado até um Owner/Admin definir uma senha real em Professores. Avaliações (R/B/O) e notas entram como rascunho, para revisão antes da publicação às famílias. |
+| Demais tipos | Eventos, observações, alertas e portfólio passam pelo pipeline completo (upload, mapeamento, log), mas ainda não criam os registros automaticamente — ficam no log de importação para revisão manual |
 | Log de importação | Tela própria com histórico, contagens de encontrados/importados/rejeitados/duplicados e local de armazenamento |
 
 ### Segurança e continuidade (Fase 6)
@@ -88,7 +89,7 @@ partir de um único registro).
 | Módulo | Fase prevista |
 |---|---|
 | Relatórios e exportações (PDF/XLSX/CSV, boletim) | Fase futura |
-| Criação automática de registros para relatórios EI/EF, eventos, observações, alertas e portfólio importados | Próxima iteração da Fase 3 |
+| Criação automática de registros para eventos, observações, alertas e portfólio importados | Próxima iteração da Fase 3 |
 
 ## 🔒 Simulado por natureza do MVP local (fica pronto, mas "desligado")
 
@@ -112,4 +113,9 @@ perfil, dashboards, lançamento de atividades/avaliações/notas/frequência, al
 documentos e importação de CSV e PDF — incluindo a criação real de um aluno via importação, a detecção
 de duplicidade, o bloqueio de confirmação sem revisão manual em importações de PDF/OCR, e o tratamento
 de erro (sem crash) quando o download dos dados de idioma do OCR falha por restrição de rede do
-ambiente de teste.
+ambiente de teste. Testado também, a partir de uma conta nova sem nenhum dado prévio: criação de conta →
+importação de um relatório de Educação Infantil e de um relatório do Ensino Fundamental, cada um
+citando escola/turma/aluno/professor/atividade ainda inexistentes — confirmando que o cadastro
+automático cria exatamente os registros que faltam (sem duplicar entidades já criadas por uma
+importação anterior na mesma sessão) e que os dados aparecem corretamente nas telas de Escolas, Turmas,
+Alunos e Professores.
