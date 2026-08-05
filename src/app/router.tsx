@@ -17,6 +17,17 @@ import { SettingsPage } from '../features/settings/SettingsPage';
 import { ProfilePage } from '../features/profile/ProfilePage';
 import { HelpPage } from '../features/help/HelpPage';
 import { ComingSoon } from '../components/ComingSoon';
+import { EarlyChildhoodDashboardPage } from '../features/early-childhood/EarlyChildhoodDashboardPage';
+import { ActivitiesPage } from '../features/early-childhood/ActivitiesPage';
+import { AssessmentsPage } from '../features/assessments/AssessmentsPage';
+import { ObservationsPage } from '../features/observations/ObservationsPage';
+import { ElementaryDashboardPage } from '../features/elementary/ElementaryDashboardPage';
+import { GradesPage } from '../features/elementary/GradesPage';
+import { AttendancePage } from '../features/attendance/AttendancePage';
+import { EventsPage } from '../features/events/EventsPage';
+import { AlertsPage } from '../features/alerts/AlertsPage';
+import { PortfolioPage } from '../features/portfolio/PortfolioPage';
+import { DocumentsPage } from '../features/documents/DocumentsPage';
 
 const comingSoon = (title: string, phase: string) => <ComingSoon title={title} phase={phase} />;
 
@@ -31,8 +42,8 @@ export const router = createHashRouter([
     ),
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'educacao-infantil', element: comingSoon('Dashboard Educação Infantil', 'Fase 2') },
-      { path: 'ensino-fundamental', element: comingSoon('Dashboard Ensino Fundamental', 'Fase 5') },
+      { path: 'educacao-infantil', element: <EarlyChildhoodDashboardPage /> },
+      { path: 'ensino-fundamental', element: <ElementaryDashboardPage /> },
 
       { path: 'alunos', element: <StudentsPage /> },
       { path: 'alunos/:id', element: <StudentDetailPage /> },
@@ -43,16 +54,16 @@ export const router = createHashRouter([
 
       { path: 'importacao', element: comingSoon('Importação', 'Fase 3') },
       { path: 'lancamento-manual', element: comingSoon('Lançamento manual', 'Fase 2') },
-      { path: 'atividades', element: comingSoon('Atividades', 'Fase 2') },
-      { path: 'avaliacoes', element: comingSoon('Avaliações', 'Fase 2') },
-      { path: 'notas', element: comingSoon('Notas', 'Fase 5') },
-      { path: 'frequencia', element: comingSoon('Frequência', 'Fase 4') },
+      { path: 'atividades', element: <ActivitiesPage /> },
+      { path: 'avaliacoes', element: <AssessmentsPage /> },
+      { path: 'notas', element: <GradesPage /> },
+      { path: 'frequencia', element: <AttendancePage /> },
 
-      { path: 'alertas', element: comingSoon('Alertas', 'Fase 4') },
-      { path: 'observacoes', element: comingSoon('Observações', 'Fase 4') },
-      { path: 'eventos', element: comingSoon('Eventos', 'Fase 4') },
-      { path: 'portfolio', element: comingSoon('Portfólio', 'Fase 4') },
-      { path: 'documentos', element: comingSoon('Documentos', 'Fase 4') },
+      { path: 'alertas', element: <AlertsPage /> },
+      { path: 'observacoes', element: <ObservationsPage /> },
+      { path: 'eventos', element: <EventsPage /> },
+      { path: 'portfolio', element: <PortfolioPage /> },
+      { path: 'documentos', element: <DocumentsPage /> },
       { path: 'relatorios', element: comingSoon('Relatórios', 'Fase 5/6') },
       { path: 'recomendacoes', element: comingSoon('Recomendações', 'Fase 4') },
 

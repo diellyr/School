@@ -14,6 +14,28 @@ import {
   LocalUserRepository,
 } from './local/userRepository';
 import { LocalAuditRepository } from './local/auditRepository';
+import {
+  LocalActivityRepository,
+  LocalAssessmentCategoryRepository,
+  LocalAssessmentRepository,
+  LocalAssessmentScaleRepository,
+  LocalGradeRepository,
+} from './local/assessmentRepository';
+import { LocalAttendanceRepository } from './local/attendanceRepository';
+import { LocalParentObservationRepository, LocalTeacherObservationRepository } from './local/observationRepository';
+import {
+  LocalAlertAcknowledgementRepository,
+  LocalAlertRepository,
+  LocalAlertRuleRepository,
+  LocalTeacherAlertRepository,
+} from './local/alertRepository';
+import {
+  LocalEventConfirmationRepository,
+  LocalEventParticipantRepository,
+  LocalSchoolEventRepository,
+} from './local/eventRepository';
+import { LocalDocumentRepository, LocalPortfolioRepository } from './local/portfolioRepository';
+import { LocalImportBatchRepository, LocalImportRowRepository } from './local/importRepository';
 
 /**
  * Ponto único de acesso aos repositórios. Hoje instancia as implementações Local*
@@ -36,6 +58,31 @@ export interface Repositories {
   teacherAssignments: LocalTeacherAssignmentRepository;
   userPermissions: LocalUserPermissionRepository;
   audit: LocalAuditRepository;
+
+  assessmentScales: LocalAssessmentScaleRepository;
+  assessmentCategories: LocalAssessmentCategoryRepository;
+  activities: LocalActivityRepository;
+  assessments: LocalAssessmentRepository;
+  grades: LocalGradeRepository;
+  attendance: LocalAttendanceRepository;
+
+  teacherObservations: LocalTeacherObservationRepository;
+  parentObservations: LocalParentObservationRepository;
+
+  alertRules: LocalAlertRuleRepository;
+  alerts: LocalAlertRepository;
+  alertAcknowledgements: LocalAlertAcknowledgementRepository;
+  teacherAlerts: LocalTeacherAlertRepository;
+
+  schoolEvents: LocalSchoolEventRepository;
+  eventParticipants: LocalEventParticipantRepository;
+  eventConfirmations: LocalEventConfirmationRepository;
+
+  portfolio: LocalPortfolioRepository;
+  documents: LocalDocumentRepository;
+
+  imports: LocalImportBatchRepository;
+  importRows: LocalImportRowRepository;
 }
 
 function createLocalRepositories(): Repositories {
@@ -53,6 +100,31 @@ function createLocalRepositories(): Repositories {
     teacherAssignments: new LocalTeacherAssignmentRepository(),
     userPermissions: new LocalUserPermissionRepository(),
     audit: new LocalAuditRepository(),
+
+    assessmentScales: new LocalAssessmentScaleRepository(),
+    assessmentCategories: new LocalAssessmentCategoryRepository(),
+    activities: new LocalActivityRepository(),
+    assessments: new LocalAssessmentRepository(),
+    grades: new LocalGradeRepository(),
+    attendance: new LocalAttendanceRepository(),
+
+    teacherObservations: new LocalTeacherObservationRepository(),
+    parentObservations: new LocalParentObservationRepository(),
+
+    alertRules: new LocalAlertRuleRepository(),
+    alerts: new LocalAlertRepository(),
+    alertAcknowledgements: new LocalAlertAcknowledgementRepository(),
+    teacherAlerts: new LocalTeacherAlertRepository(),
+
+    schoolEvents: new LocalSchoolEventRepository(),
+    eventParticipants: new LocalEventParticipantRepository(),
+    eventConfirmations: new LocalEventConfirmationRepository(),
+
+    portfolio: new LocalPortfolioRepository(),
+    documents: new LocalDocumentRepository(),
+
+    imports: new LocalImportBatchRepository(),
+    importRows: new LocalImportRowRepository(),
   };
 }
 
