@@ -258,6 +258,21 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   a duplicada é removida (exclusão lógica). Isso é o que resolve os dados já cadastrados incorretamente
   — sem precisar recriar atividades.
 
+## v0.9.5 — Corrigido o caminho que ainda deixava categoria "fantasma" nos gráficos
+
+- A mesclagem lançada na v0.9.4 resolve duplicatas, mas quem excluía uma categoria duplicada
+  **direto pelo ícone de lixeira** (em vez de usar "Mesclar") continuava com o problema: a
+  categoria some da lista, mas as atividades continuam apontando para o registro excluído, e
+  os gráficos buscam o nome da categoria pelo ID sem checar se ela foi excluída — por isso o
+  nome antigo insistia em aparecer mesmo depois de excluir.
+- **Exclusão direta agora é bloqueada** quando ainda há atividades usando a categoria (o botão de
+  lixeira fica desabilitado, com uma dica explicando para mesclar em outra categoria primeiro) —
+  isso evita esse problema para quem for excluir uma categoria daqui em diante.
+- **Reparo do que já ficou "fantasma"**: o gerenciador de Categorias agora detecta categorias já
+  excluídas que ainda têm atividades ligadas a elas e mostra um aviso no topo, com a opção de
+  "Mesclar" essas atividades para uma categoria ativa — corrigindo diretamente os gráficos sem
+  precisar recriar nada.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

@@ -188,11 +188,23 @@ function CategoriesManagerDialog({
 }) {
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
+  const allCategories = useLiveQuery(() => db.assessmentCategories.toArray(), []);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
   const [mergingId, setMergingId] = useState<string | null>(null);
   const [mergeTargetId, setMergeTargetId] = useState('');
+
+  function linkedCount(categoryId: string) {
+    return activities.filter((a) => a.categoryId === categoryId).length;
+  }
+
+  // Atividades ainda ligadas a categorias já excluídas (ex.: alguém excluiu uma duplicata direto,
+  // em vez de mesclar) — o nome "fantasma" continua aparecendo nos gráficos porque o registro da
+  // categoria ainda existe (só marcado como excluído) e a atividade nunca foi reatribuída.
+  const orphanedCategories = (allCategories ?? []).filter(
+    (c) => c.status === 'deleted' && linkedCount(c.id) > 0,
+  );
 
   function startEdit(c: AssessmentCategory) {
     setEditingId(c.id);
@@ -210,7 +222,7 @@ function CategoriesManagerDialog({
   }
 
   async function confirmDelete(c: AssessmentCategory) {
-    if (!session) return;
+    if (!session || linkedCount(c.id) > 0) return;
     const actor = { userId: session.user.id, organizationId: session.user.organizationId };
     await repositories.assessmentCategories.softDelete(c.id, actor, 'Removida pelo usuário');
     await repositories.audit.record({ ...actor, role: session.role }, { action: 'soft_delete', module: 'activities', entityId: c.id });
@@ -248,38 +260,25 @@ function CategoriesManagerDialog({
       description="Usadas para agrupar atividades — a mesma categoria pode ser reaproveitada em várias atividades."
       size="lg"
     >
-      {categories.length === 0 && (
-        <p className="text-sm text-slate-500">
-          Nenhuma categoria cadastrada ainda. Crie uma direto no formulário de "Nova atividade".
-        </p>
-      )}
-      {categories.length > 0 && (
-        <>
-          <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
-            Criou categorias repetidas por engano (ex.: "Convivência" e "convivencia")? Use "Mesclar" para juntar as
-            atividades de uma categoria duplicada em outra e remover a duplicada.
+      {orphanedCategories.length > 0 && (
+        <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/40">
+          <p className="mb-2 text-sm font-medium text-amber-800 dark:text-amber-300">
+            {orphanedCategories.length === 1 ? 'Categoria excluída ainda em uso' : 'Categorias excluídas ainda em uso'}
           </p>
-          <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
-            {categories.map((c) => (
-              <li key={c.id} className="flex flex-col gap-2 px-3 py-2">
-                {editingId === c.id ? (
-                  <div className="flex items-center gap-2">
-                    <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="flex-1" autoFocus />
-                    <Button size="sm" onClick={() => saveEdit(c)}>Salvar</Button>
-                    <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
-                  </div>
-                ) : confirmingDeleteId === c.id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="flex-1 text-sm text-rose-700 dark:text-rose-400">Excluir "{c.name}"?</span>
-                    <Button size="sm" variant="danger" onClick={() => confirmDelete(c)}>Confirmar</Button>
-                    <Button size="sm" variant="outline" onClick={() => setConfirmingDeleteId(null)}>Cancelar</Button>
-                  </div>
-                ) : mergingId === c.id ? (
+          <p className="mb-2 text-xs text-amber-700 dark:text-amber-400">
+            {orphanedCategories.length === 1 ? 'Esta categoria foi excluída, mas' : 'Estas categorias foram excluídas, mas'} ainda
+            existem atividades apontando para {orphanedCategories.length === 1 ? 'ela' : 'elas'} — por isso o nome antigo continua
+            aparecendo nos gráficos. Use "Mesclar" para mover essas atividades para a categoria correta.
+          </p>
+          <ul className="divide-y divide-amber-200 dark:divide-amber-900">
+            {orphanedCategories.map((c) => (
+              <li key={c.id} className="flex flex-col gap-2 py-2">
+                {mergingId === c.id ? (
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-600 dark:text-slate-300">Mesclar "{c.name}" em:</span>
                     <Select value={mergeTargetId} onChange={(e) => setMergeTargetId(e.target.value)} className="flex-1">
                       <option value="">Selecione a categoria de destino</option>
-                      {categories.filter((other) => other.id !== c.id && other.stage === c.stage).map((other) => (
+                      {categories.filter((other) => other.stage === c.stage).map((other) => (
                         <option key={other.id} value={other.id}>{other.name}</option>
                       ))}
                     </Select>
@@ -289,18 +288,80 @@ function CategoriesManagerDialog({
                 ) : (
                   <div className="flex items-center gap-2">
                     <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.name}</span>
-                    <Badge>{c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge>
-                    <Button size="sm" variant="outline" onClick={() => startMerge(c)}>Mesclar</Button>
-                    <Button size="sm" variant="ghost" onClick={() => startEdit(c)} title="Renomear">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="text-rose-600" onClick={() => setConfirmingDeleteId(c.id)} title="Excluir">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Badge>{linkedCount(c.id)} atividade(s)</Badge>
+                    <Button size="sm" onClick={() => startMerge(c)}>Mesclar</Button>
                   </div>
                 )}
               </li>
             ))}
+          </ul>
+        </div>
+      )}
+      {categories.length === 0 && (
+        <p className="text-sm text-slate-500">
+          Nenhuma categoria cadastrada ainda. Crie uma direto no formulário de "Nova atividade".
+        </p>
+      )}
+      {categories.length > 0 && (
+        <>
+          <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+            Criou categorias repetidas por engano (ex.: "Convivência" e "convivencia")? Use "Mesclar" para juntar as
+            atividades de uma categoria duplicada em outra e remover a duplicada. Uma categoria só pode ser excluída
+            diretamente quando nenhuma atividade estiver mais usando ela.
+          </p>
+          <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            {categories.map((c) => {
+              const inUse = linkedCount(c.id);
+              return (
+                <li key={c.id} className="flex flex-col gap-2 px-3 py-2">
+                  {editingId === c.id ? (
+                    <div className="flex items-center gap-2">
+                      <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="flex-1" autoFocus />
+                      <Button size="sm" onClick={() => saveEdit(c)}>Salvar</Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
+                    </div>
+                  ) : confirmingDeleteId === c.id ? (
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1 text-sm text-rose-700 dark:text-rose-400">Excluir "{c.name}"?</span>
+                      <Button size="sm" variant="danger" onClick={() => confirmDelete(c)}>Confirmar</Button>
+                      <Button size="sm" variant="outline" onClick={() => setConfirmingDeleteId(null)}>Cancelar</Button>
+                    </div>
+                  ) : mergingId === c.id ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-slate-600 dark:text-slate-300">Mesclar "{c.name}" em:</span>
+                      <Select value={mergeTargetId} onChange={(e) => setMergeTargetId(e.target.value)} className="flex-1">
+                        <option value="">Selecione a categoria de destino</option>
+                        {categories.filter((other) => other.id !== c.id && other.stage === c.stage).map((other) => (
+                          <option key={other.id} value={other.id}>{other.name}</option>
+                        ))}
+                      </Select>
+                      <Button size="sm" disabled={!mergeTargetId} onClick={() => confirmMerge(c)}>Confirmar</Button>
+                      <Button size="sm" variant="outline" onClick={() => setMergingId(null)}>Cancelar</Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.name}</span>
+                      {inUse > 0 && <Badge>{inUse} atividade(s)</Badge>}
+                      <Badge>{c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge>
+                      <Button size="sm" variant="outline" onClick={() => startMerge(c)}>Mesclar</Button>
+                      <Button size="sm" variant="ghost" onClick={() => startEdit(c)} title="Renomear">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={inUse > 0}
+                        onClick={() => setConfirmingDeleteId(c.id)}
+                        title={inUse > 0 ? 'Mescle esta categoria em outra antes de excluir — ainda há atividades usando ela' : 'Excluir'}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </>
       )}
