@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
-import { ClipboardList, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { ClipboardList, FolderCog, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -15,7 +15,7 @@ import { activitySchema, ACTIVITY_TYPE_LABELS, type ActivityFormValues } from '.
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
 import { usePermission } from '../../auth/usePermission';
-import type { Activity } from '../../domain';
+import type { Activity, AssessmentCategory } from '../../domain';
 import { formatDate } from '../../lib/utils';
 
 export function ActivitiesPage() {
@@ -35,6 +35,7 @@ export function ActivitiesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [deleting, setDeleting] = useState<Activity | null>(null);
+  const [categoriesDialogOpen, setCategoriesDialogOpen] = useState(false);
   const canCreate = usePermission('activities', 'create');
   const canEdit = usePermission('activities', 'edit');
   const canDelete = usePermission('activities', 'delete');
@@ -56,11 +57,18 @@ export function ActivitiesPage() {
             Infantil) ou <Link to="/notas" className="text-sky-600 hover:underline">Notas</Link> (Ensino Fundamental).
           </p>
         </div>
-        {canCreate && (
-          <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
-            <Plus className="h-4 w-4" /> Nova atividade
-          </Button>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {canEdit && (
+            <Button variant="outline" onClick={() => setCategoriesDialogOpen(true)}>
+              <FolderCog className="h-4 w-4" /> Categorias
+            </Button>
+          )}
+          {canCreate && (
+            <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
+              <Plus className="h-4 w-4" /> Nova atividade
+            </Button>
+          )}
+        </div>
       </div>
 
       {activities === undefined && <SkeletonList />}
@@ -156,7 +164,102 @@ export function ActivitiesPage() {
           </Button>
         </div>
       </Dialog>
+
+      <CategoriesManagerDialog
+        open={categoriesDialogOpen}
+        onClose={() => setCategoriesDialogOpen(false)}
+        categories={categories ?? []}
+      />
     </div>
+  );
+}
+
+function CategoriesManagerDialog({
+  open,
+  onClose,
+  categories,
+}: {
+  open: boolean;
+  onClose: () => void;
+  categories: AssessmentCategory[];
+}) {
+  const repositories = useRepositories();
+  const session = useAuthStore((s) => s.session);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+
+  function startEdit(c: AssessmentCategory) {
+    setEditingId(c.id);
+    setEditValue(c.name);
+    setConfirmingDeleteId(null);
+  }
+
+  async function saveEdit(c: AssessmentCategory) {
+    if (!session || !editValue.trim()) return;
+    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    await repositories.assessmentCategories.update(c.id, { name: editValue.trim() }, actor);
+    await repositories.audit.record({ ...actor, role: session.role }, { action: 'edit', module: 'activities', entityId: c.id });
+    setEditingId(null);
+  }
+
+  async function confirmDelete(c: AssessmentCategory) {
+    if (!session) return;
+    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    await repositories.assessmentCategories.softDelete(c.id, actor, 'Removida pelo usuário');
+    await repositories.audit.record({ ...actor, role: session.role }, { action: 'soft_delete', module: 'activities', entityId: c.id });
+    setConfirmingDeleteId(null);
+  }
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Categorias / campos de experiência"
+      description="Usadas para agrupar atividades — a mesma categoria pode ser reaproveitada em várias atividades."
+      size="lg"
+    >
+      {categories.length === 0 && (
+        <p className="text-sm text-slate-500">
+          Nenhuma categoria cadastrada ainda. Crie uma direto no formulário de "Nova atividade".
+        </p>
+      )}
+      {categories.length > 0 && (
+        <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+          {categories.map((c) => (
+            <li key={c.id} className="flex items-center gap-2 px-3 py-2">
+              {editingId === c.id ? (
+                <>
+                  <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="flex-1" autoFocus />
+                  <Button size="sm" onClick={() => saveEdit(c)}>Salvar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
+                </>
+              ) : confirmingDeleteId === c.id ? (
+                <>
+                  <span className="flex-1 text-sm text-rose-700 dark:text-rose-400">Excluir "{c.name}"?</span>
+                  <Button size="sm" variant="danger" onClick={() => confirmDelete(c)}>Confirmar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setConfirmingDeleteId(null)}>Cancelar</Button>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.name}</span>
+                  <Badge>{c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge>
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(c)} title="Renomear">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="text-rose-600" onClick={() => setConfirmingDeleteId(c.id)} title="Excluir">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="mt-4 flex justify-end">
+        <Button variant="outline" onClick={onClose}>Fechar</Button>
+      </div>
+    </Dialog>
   );
 }
 

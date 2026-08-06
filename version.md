@@ -221,6 +221,13 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
 - **Avaliações** e **Notas** agora indicam explicitamente para qual etapa são (Educação Infantil e
   Ensino Fundamental, respectivamente), com link cruzado para a outra tela.
 
+## v0.9.2 — Gerenciar categorias em Atividades
+
+- Botão **"Categorias"** em Atividades abre uma lista de todas as categorias/campos de experiência
+  já cadastrados, com opção de **renomear** e **excluir** (exclusão lógica) cada uma — antes só era
+  possível criar uma categoria nova direto no formulário de atividade, sem forma de corrigir o nome
+  de uma já existente.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
