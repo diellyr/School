@@ -9,6 +9,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Database,
+  DoorOpen,
   FileText,
   FolderOpen,
   GraduationCap,
@@ -53,6 +54,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/avaliacoes', label: 'Avaliações', icon: BookOpen, module: 'assessments', group: 'Registros' },
   { path: '/notas', label: 'Notas', icon: BarChart3, module: 'grades', group: 'Registros' },
   { path: '/frequencia', label: 'Frequência', icon: Activity, module: 'attendance', group: 'Registros' },
+  { path: '/entrada-saida', label: 'Entrada e saída', icon: DoorOpen, module: 'check_in_out', group: 'Registros' },
 
   { path: '/alertas', label: 'Alertas', icon: AlertTriangle, module: 'alerts', group: 'Comunicação' },
   { path: '/observacoes', label: 'Observações', icon: MessageSquare, module: 'observations', group: 'Comunicação' },

@@ -4,6 +4,7 @@ export * from './people';
 export * from './rbac';
 export * from './assessment';
 export * from './attendance';
+export * from './checkInOut';
 export * from './observations';
 export * from './alerts';
 export * from './events';

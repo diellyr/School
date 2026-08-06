@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  Activity, AlertTriangle, BookOpen, CalendarDays, GraduationCap, Images, MessageSquare, Sparkles,
+  Activity, AlertTriangle, BookOpen, CalendarDays, DoorOpen, GraduationCap, Images, MessageSquare, Sparkles,
 } from 'lucide-react';
 import { Card, CardContent } from '../../components/Card';
 import { usePermission } from '../../auth/usePermission';
@@ -11,6 +11,7 @@ const ENTRIES: { to: string; module: SystemModule; icon: typeof Sparkles; title:
   { to: '/avaliacoes', module: 'assessments', icon: BookOpen, title: 'Avaliações', description: 'Lançar R/B/O em lote para os alunos de uma atividade.' },
   { to: '/notas', module: 'grades', icon: GraduationCap, title: 'Notas', description: 'Lançar notas do Ensino Fundamental por turma, disciplina e período.' },
   { to: '/frequencia', module: 'attendance', icon: Activity, title: 'Frequência', description: 'Registrar presença por turma e data.' },
+  { to: '/entrada-saida', module: 'check_in_out', icon: DoorOpen, title: 'Entrada e saída', description: 'Registrar horário de entrada e saída dos alunos por escola, turma e período.' },
   { to: '/observacoes', module: 'observations', icon: MessageSquare, title: 'Observações', description: 'Anotações pedagógicas e comentários das famílias.' },
   { to: '/alertas', module: 'alerts', icon: AlertTriangle, title: 'Alertas', description: 'Analisar um aluno e registrar um alerta educacional.' },
   { to: '/eventos', module: 'events', icon: CalendarDays, title: 'Eventos', description: 'Cadastrar eventos escolares e acompanhar confirmações.' },

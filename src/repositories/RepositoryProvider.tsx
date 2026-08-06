@@ -22,6 +22,7 @@ import {
   LocalGradeRepository,
 } from './local/assessmentRepository';
 import { LocalAttendanceRepository } from './local/attendanceRepository';
+import { LocalCheckInOutRepository } from './local/checkInOutRepository';
 import { LocalParentObservationRepository, LocalTeacherObservationRepository } from './local/observationRepository';
 import {
   LocalAlertAcknowledgementRepository,
@@ -75,6 +76,7 @@ export interface Repositories {
   assessments: LocalAssessmentRepository;
   grades: LocalGradeRepository;
   attendance: LocalAttendanceRepository;
+  checkInOuts: LocalCheckInOutRepository;
 
   teacherObservations: LocalTeacherObservationRepository;
   parentObservations: LocalParentObservationRepository;
@@ -121,6 +123,7 @@ function createLocalRepositories(): Repositories {
     assessments: new LocalAssessmentRepository(),
     grades: new LocalGradeRepository(),
     attendance: new LocalAttendanceRepository(),
+    checkInOuts: new LocalCheckInOutRepository(),
 
     teacherObservations: new LocalTeacherObservationRepository(),
     parentObservations: new LocalParentObservationRepository(),

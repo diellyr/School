@@ -18,6 +18,7 @@ import type {
   Assessment,
   Grade,
   Attendance,
+  CheckInOut,
   TeacherObservation,
   ParentObservation,
   Alert,
@@ -66,6 +67,7 @@ export class SchoolTrackerDB extends Dexie {
   assessments!: EntityTable<Assessment, 'id'>;
   grades!: EntityTable<Grade, 'id'>;
   attendance!: EntityTable<Attendance, 'id'>;
+  checkInOuts!: EntityTable<CheckInOut, 'id'>;
 
   teacherObservations!: EntityTable<TeacherObservation, 'id'>;
   parentObservations!: EntityTable<ParentObservation, 'id'>;
@@ -116,6 +118,7 @@ export class SchoolTrackerDB extends Dexie {
       assessments: 'id, organizationId, activityId, studentId, stage, status',
       grades: 'id, organizationId, studentId, classId, subject, period, status',
       attendance: 'id, organizationId, studentId, classId, date, status',
+      checkInOuts: 'id, organizationId, studentId, classId, schoolId, date, status',
 
       teacherObservations: 'id, organizationId, studentId, teacherId, status',
       parentObservations: 'id, organizationId, studentId, guardianId, status',

@@ -25,6 +25,7 @@ import type {
   Alert,
   AppUser,
   Attendance,
+  CheckInOut,
   Class,
   Enrollment,
   Grade,
@@ -46,7 +47,7 @@ const DEMO_TABLES = [
   db.organizations, db.schools, db.academicYears, db.classes, db.enrollments,
   db.students, db.guardians, db.studentGuardians, db.users, db.teacherAssignments,
   db.assessmentScales, db.assessmentCategories, db.activities, db.assessments, db.grades,
-  db.attendance, db.teacherObservations, db.alerts, db.schoolEvents, db.eventConfirmations,
+  db.attendance, db.checkInOuts, db.teacherObservations, db.alerts, db.schoolEvents, db.eventConfirmations,
   db.recommendations,
 ];
 
@@ -238,6 +239,22 @@ export async function loadDemoData(): Promise<void> {
       attendanceRows.push({ ...base(), id: newId(), studentId: laura.id, classId: class1ano.id, date, attendanceStatus: date === '2026-04-08' ? 'justified_absence' : 'present', registeredBy: DEMO_CREDENTIALS[2].id });
     }
     await db.attendance.bulkAdd(attendanceRows);
+
+    // --- Entrada e saída ---
+    const checkInOutRows: CheckInOut[] = [];
+    for (const date of attendanceDates) {
+      checkInOutRows.push({
+        ...base(), id: newId(), schoolId: classInfantil.schoolId, classId: classInfantil.id, studentId: miguel.id,
+        stage: classInfantil.stage, date, period: '2026-B1', checkInTime: '07:30', checkOutTime: '11:30',
+        registeredBy: DEMO_CREDENTIALS[2].id,
+      });
+      checkInOutRows.push({
+        ...base(), id: newId(), schoolId: class1ano.schoolId, classId: class1ano.id, studentId: laura.id,
+        stage: class1ano.stage, date, period: '2026-B1', checkInTime: '07:15', checkOutTime: '12:00',
+        registeredBy: DEMO_CREDENTIALS[2].id,
+      });
+    }
+    await db.checkInOuts.bulkAdd(checkInOutRows);
 
     // --- Observação de professor ---
     const observation: TeacherObservation = {

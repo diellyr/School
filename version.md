@@ -306,6 +306,14 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   zero — a ordem de fora para dentro agora é **Ótimo → Bom → Regular → 0**, com a legenda abaixo
   do gráfico atualizada para mostrar os quatro anéis e suas cores.
 
+## v0.10.0 — Novo módulo: Entrada e saída
+
+- Registros ganhou o módulo **Entrada e saída**, para registrar o horário de chegada e de saída de
+  cada aluno por escola, turma, data e período — complementa a Frequência (presente/falta) com o
+  horário real de entrada/saída, quando a escola faz esse controle. Lançamento em lote por turma
+  (como em Frequência), com edição de um horário já lançado no mesmo dia. Também disponível a
+  partir de "Lançamento manual".
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
