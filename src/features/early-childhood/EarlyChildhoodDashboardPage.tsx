@@ -10,6 +10,7 @@ import {
   LineChart,
   PolarAngleAxis,
   PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
   ResponsiveContainer,
@@ -37,6 +38,19 @@ import { formatDate } from '../../lib/utils';
 const RBO_COLORS: Record<RboLevel, string> = { R: '#e11d48', B: '#f59e0b', O: '#059669' };
 const Y_LABELS = ['', 'R', 'B', 'O'];
 const GRANULARITIES: Granularity[] = ['year', 'semester', 'bimester'];
+
+// Anéis do gráfico radar: R (regular) no centro, B (bom) no meio, O (ótimo) na borda externa —
+// mesmas cores usadas em "Distribuição por categoria", para reforçar visualmente o mesmo código.
+function RadarRadiusTick(props: { x?: string | number; y?: string | number; payload?: { value: number } }) {
+  const { x, y, payload } = props;
+  const label = Y_LABELS[payload?.value ?? 0] as RboLevel | '';
+  if (!label) return null;
+  return (
+    <text x={x} y={y} dy={4} textAnchor="middle" fontSize={10} fontWeight={600} fill={RBO_COLORS[label]}>
+      {label}
+    </text>
+  );
+}
 
 export function EarlyChildhoodDashboardPage() {
   const [schoolId, setSchoolId] = useState('');
@@ -262,13 +276,30 @@ export function EarlyChildhoodDashboardPage() {
                     )}
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <RadarChart data={radarData.points.map((p) => ({ field: p.field, value: p.value ?? 0 }))}>
-                      <PolarGrid />
-                      <PolarAngleAxis dataKey="field" tick={{ fontSize: 10 }} />
-                      <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={240}>
+                      <RadarChart data={radarData.points.map((p) => ({ field: p.field, value: p.value ?? 0 }))}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="field" tick={{ fontSize: 10 }} />
+                        <PolarRadiusAxis domain={[1, 3]} ticks={[1, 2, 3]} tick={RadarRadiusTick} axisLine={false} />
+                        <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                    <div className="mt-2 flex items-center justify-center gap-4 text-xs text-slate-600 dark:text-slate-300">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.O }} />
+                        Ótimo — borda externa
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.B }} />
+                        Bom — meio
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.R }} />
+                        Regular — centro
+                      </span>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>

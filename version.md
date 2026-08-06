@@ -293,6 +293,13 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   quantas avaliações cada categoria/disciplina já tem (ex.: "Autonomia: 2/3"), para ficar claro o que
   falta lançar.
 
+## v0.9.8 — Gráfico radar com anéis e legenda R/B/O
+
+- O gráfico radar de Educação Infantil ("Comparação entre categorias") agora mostra os anéis
+  claramente rotulados e coloridos: **R (regular) no centro**, **B (bom) no meio**, **O (ótimo)**
+  na borda externa — mesmas cores usadas em "Distribuição por categoria" — com uma legenda abaixo
+  do gráfico explicando cada anel.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
