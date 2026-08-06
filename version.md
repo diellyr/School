@@ -151,6 +151,21 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   muda até a última etapa. Vale tanto para a importação de boletim BNCC quanto para a importação
   genérica por foto/OCR.
 
+## v0.8.3 — Falha isolada por arquivo na confirmação do boletim BNCC
+
+- Investigado relato "importou só o aluno, nada mais" após confirmar um boletim BNCC. Reproduzido em
+  teste automatizado ponta a ponta que a criação de escola/turma/aluno/documento é sempre feita em
+  conjunto — mas identificado que, se qualquer etapa depois da criação do aluno falhasse (ex.: gerar
+  o hash do arquivo via `crypto.subtle`, indisponível em alguns navegadores embutidos de apps mesmo
+  em HTTPS), a importação inteira parava sem aviso nenhum: o aluno já cadastrado ficava, mas escola
+  reaproveitada/nova, turma, documento e log de importação nunca eram concluídos.
+- **Hash do arquivo com alternativa**: se `crypto.subtle` não estiver disponível, usa um
+  identificador simples baseado em nome/tamanho/data do arquivo em vez de travar a importação
+  inteira — o hash aqui só serve para detectar duplicidade, não para segurança.
+- **Falha isolada por arquivo**: se mesmo assim algum arquivo do lote falhar ao confirmar, os demais
+  continuam sendo processados normalmente, e a tela de resultado agora lista quais arquivos falharam
+  e por quê, em vez de simplesmente não terminar em silêncio.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

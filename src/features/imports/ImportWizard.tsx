@@ -126,6 +126,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     createdClasses: number;
     createdStudents: number;
     attachedDocuments: { studentId: string; studentName: string; fileName: string }[];
+    failed: { fileName: string; message: string }[];
   } | null>(null);
   const boletimFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -254,6 +255,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     let createdClasses = 0;
     let createdStudentsCount = 0;
     const attachedDocuments: { studentId: string; studentName: string; fileName: string }[] = [];
+    const failed: { fileName: string; message: string }[] = [];
 
     try {
       const operationRef = newId();
@@ -339,74 +341,82 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         const h = entry.header;
         if (!h.schoolName.trim() || !h.studentName.trim()) continue;
 
-        const school = await ensureSchool(h.schoolName);
-        const klass = h.className.trim() ? await ensureClass(school.id, h.className) : undefined;
-        const student = await ensureStudent(school.id, klass?.id, h.studentName, h.birthDate);
+        // Cada arquivo é isolado: se um falhar (ex.: erro ao gerar o hash do arquivo, ou de
+        // gravação no IndexedDB) os demais arquivos do lote continuam sendo processados, e a falha
+        // aparece no resultado em vez de abortar a importação inteira em silêncio — o que antes
+        // podia deixar só o aluno cadastrado, sem escola/turma/documento e sem nenhum aviso.
+        try {
+          const school = await ensureSchool(h.schoolName);
+          const klass = h.className.trim() ? await ensureClass(school.id, h.className) : undefined;
+          const student = await ensureStudent(school.id, klass?.id, h.studentName, h.birthDate);
 
-        const [dataUrl, hash] = await Promise.all([readFileAsDataUrl(entry.file), sha256OfFile(entry.file)]);
-        await repositories.documents.create(
-          {
-            studentId: student.id,
-            schoolId: school.id,
-            classId: klass?.id,
-            category: 'boletim',
-            fileName: entry.file.name,
-            mimeType: entry.file.type || 'application/octet-stream',
-            sizeBytes: entry.file.size,
-            hash,
-            tags: ['boletim-bncc'],
-            storageLocation: 'local',
-            blobRef: dataUrl,
-          },
-          actor,
-        );
-        attachedDocuments.push({ studentId: student.id, studentName: student.fullName, fileName: entry.file.name });
-
-        const batch = await repositories.imports.create(
-          {
-            documentType: BNCC_CHECKLIST_TYPE,
-            fileFormat: FILE_FORMAT_FROM_NAME(entry.file.name) ?? 'jpeg',
-            fileName: entry.file.name,
-            fileSizeBytes: entry.file.size,
-            fileHash: hash,
-            schoolId: school.id,
-            classId: klass?.id,
-            studentId: student.id,
-            periodicity,
-            periodLabel: period,
-            storageDestination,
-            importStatus: 'completed',
-            totalRowsFound: 1,
-            totalImported: 1,
-            totalRejected: 0,
-            totalDuplicates: 0,
-            operationRef,
-          },
-          actor,
-        );
-        await repositories.importRows.create(
-          {
-            importId: batch.id,
-            rowIndex: 0,
-            rawValue: { texto: entry.result?.rawText.slice(0, 2000) ?? '' },
-            interpretedValue: {
-              escola: h.schoolName,
-              aluno: h.studentName,
-              turma: h.className,
-              dataNascimento: h.birthDate,
-              categoriasDetectadas: (entry.result?.categoriesFound ?? []).map((c) => c.label).join('; '),
+          const [dataUrl, hash] = await Promise.all([readFileAsDataUrl(entry.file), sha256OfFile(entry.file)]);
+          await repositories.documents.create(
+            {
+              studentId: student.id,
+              schoolId: school.id,
+              classId: klass?.id,
+              category: 'boletim',
+              fileName: entry.file.name,
+              mimeType: entry.file.type || 'application/octet-stream',
+              sizeBytes: entry.file.size,
+              hash,
+              tags: ['boletim-bncc'],
+              storageLocation: 'local',
+              blobRef: dataUrl,
             },
-            confidence: entry.result?.confidence,
-            validation: 'warning',
-            validationNotes: 'Cabeçalho lido automaticamente e conferido pelo usuário. As avaliações individuais (R/B/O) não foram preenchidas automaticamente — lance-as manualmente em Avaliações.',
-            linkedStudentId: student.id,
-          },
-          actor,
-        );
-        await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
+            actor,
+          );
+          attachedDocuments.push({ studentId: student.id, studentName: student.fullName, fileName: entry.file.name });
+
+          const batch = await repositories.imports.create(
+            {
+              documentType: BNCC_CHECKLIST_TYPE,
+              fileFormat: FILE_FORMAT_FROM_NAME(entry.file.name) ?? 'jpeg',
+              fileName: entry.file.name,
+              fileSizeBytes: entry.file.size,
+              fileHash: hash,
+              schoolId: school.id,
+              classId: klass?.id,
+              studentId: student.id,
+              periodicity,
+              periodLabel: period,
+              storageDestination,
+              importStatus: 'completed',
+              totalRowsFound: 1,
+              totalImported: 1,
+              totalRejected: 0,
+              totalDuplicates: 0,
+              operationRef,
+            },
+            actor,
+          );
+          await repositories.importRows.create(
+            {
+              importId: batch.id,
+              rowIndex: 0,
+              rawValue: { texto: entry.result?.rawText.slice(0, 2000) ?? '' },
+              interpretedValue: {
+                escola: h.schoolName,
+                aluno: h.studentName,
+                turma: h.className,
+                dataNascimento: h.birthDate,
+                categoriasDetectadas: (entry.result?.categoriesFound ?? []).map((c) => c.label).join('; '),
+              },
+              confidence: entry.result?.confidence,
+              validation: 'warning',
+              validationNotes: 'Cabeçalho lido automaticamente e conferido pelo usuário. As avaliações individuais (R/B/O) não foram preenchidas automaticamente — lance-as manualmente em Avaliações.',
+              linkedStudentId: student.id,
+            },
+            actor,
+          );
+          await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
+        } catch (err) {
+          failed.push({ fileName: entry.file.name, message: err instanceof Error ? err.message : 'Falha desconhecida ao processar este arquivo.' });
+        }
       }
 
-      setBoletimResult({ createdSchools, createdClasses, createdStudents: createdStudentsCount, attachedDocuments });
+      setBoletimResult({ createdSchools, createdClasses, createdStudents: createdStudentsCount, attachedDocuments, failed });
       setStep(6);
     } finally {
       setLoading(false);
@@ -1341,6 +1351,21 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               </li>
             ))}
           </ul>
+          {boletimResult.failed.length > 0 && (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+              <p className="mb-1 flex items-center gap-1.5 font-medium">
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                {boletimResult.failed.length} arquivo(s) não puderam ser importados:
+              </p>
+              <ul className="space-y-0.5">
+                {boletimResult.failed.map((f, i) => (
+                  <li key={`${f.fileName}-${i}`}>
+                    <span className="font-medium">{f.fileName}:</span> {f.message}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <p className="text-xs text-slate-500">
             {storageDestination === 'local' ? 'Armazenado somente neste navegador.' : 'Armazenado no banco de dados e sincronizado.'}
           </p>
