@@ -3,6 +3,7 @@ import { GraduationCap } from 'lucide-react';
 import { NAV_GROUPS, NAV_ITEMS } from './navigation';
 import { usePermission } from '../auth/usePermission';
 import { cn } from '../lib/utils';
+import { APP_VERSION } from '../app/version';
 
 function NavItems() {
   return (
@@ -81,7 +82,9 @@ function SidebarHeader() {
         <GraduationCap className="h-5 w-5" />
       </div>
       <div>
-        <p className="text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">Acompanha+</p>
+        <p className="text-sm font-bold leading-tight text-slate-900 dark:text-slate-100">
+          Acompanha+ <span className="font-normal text-slate-400">v{APP_VERSION}</span>
+        </p>
         <p className="text-[11px] leading-tight text-slate-400">Educação Infantil &amp; Fundamental</p>
       </div>
     </div>

@@ -18,6 +18,7 @@ import { FormField, Input } from '../../components/form/Field';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useDemoDataActions, useDemoDataStatus } from '../settings/useDemoData';
 import { Dialog } from '../../components/Dialog';
+import { APP_VERSION } from '../../app/version';
 
 export function LoginPage() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -106,7 +107,9 @@ export function LoginPage() {
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-600 text-white shadow-lg shadow-sky-600/30">
             <GraduationCap className="h-7 w-7" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Acompanha+</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            Acompanha+ <span className="align-middle text-xs font-normal text-slate-400">v{APP_VERSION}</span>
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">Acompanhamento escolar para famílias e educadores</p>
         </div>
 

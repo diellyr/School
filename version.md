@@ -103,6 +103,32 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   importação vinda de PDF ou OCR, a confirmação fica bloqueada até o usuário marcar
   explicitamente que revisou manualmente todas as linhas.
 
+## v0.8.0 — Contas reais, importação em lote e boletim BNCC
+
+- Renomeado de "Acompanha Escola" para **Acompanha+** (login, barra lateral, título da aba,
+  documentação).
+- **Conta real sem depender de dados de demonstração**: aba "Criar conta" na tela de login cria uma
+  organização própria e um usuário Owner reais (não-demo), permitindo logar num banco vazio e já
+  começar a importar dados de teste. Carregar dados de demonstração continua disponível, na tela de
+  login e em Configurações, para qualquer conta.
+- **Relatórios de Educação Infantil e Ensino Fundamental sem pré-cadastro**: leem escola, turma,
+  aluno, professor e atividade/disciplina direto do arquivo e cadastram automaticamente o que ainda
+  não existir. Professores criados por essa via ficam com o login bloqueado até um Owner/Admin
+  definir uma senha real em Professores.
+- **Upload de até 10 arquivos por importação**, combinando formatos, com lista individual, remoção
+  antes de confirmar, um mapeamento aplicado ao lote inteiro e resultado agregado + detalhado por
+  arquivo.
+- **Boletim por habilidades BNCC (checklist)**: interpretador dedicado para boletins impressos no
+  formato "uma habilidade por linha × colunas de semestre" — o único tipo de importação que não
+  exige nenhum pré-cadastro, já que lê escola/aluno/turma/data de nascimento do cabeçalho da
+  própria folha. Não preenche os níveis R/B/O automaticamente (testado contra fotos reais: a leitura
+  célula a célula não é confiável o suficiente) — anexa o arquivo original ao aluno em Documentos
+  para lançamento manual em Avaliações.
+- **OCR sem depender de CDN externo**: motor de reconhecimento, núcleo WebAssembly e dados de
+  idioma (português) passam a ser hospedados no próprio app; antes de reconhecer o texto, o app
+  testa as 4 rotações possíveis da imagem e usa a de maior confiança.
+- Número da versão visível na tela de login e na barra lateral (`src/app/version.ts`).
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
