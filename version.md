@@ -228,6 +228,20 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   possível criar uma categoria nova direto no formulário de atividade, sem forma de corrigir o nome
   de uma já existente.
 
+## v0.9.3 — Evolução por categoria em 3 granularidades e gráfico aranha corrigido
+
+- **Evolução por período** nos dois dashboards individuais (Educação Infantil e Ensino Fundamental)
+  agora mostra três gráficos de linha lado a lado — **Anual**, **Semestral** e **Bimestral** — cada
+  um só aparece preenchido quando há pelo menos dois pontos reais naquela granularidade (o período é
+  texto livre digitado nas Atividades/Notas; quando não dá para identificar o semestre com
+  confiança, o ponto fica de fora do gráfico semestral em vez de agrupar errado).
+- Um filtro de **categoria** (Educação Infantil) ou **disciplina** (Ensino Fundamental) permite ver a
+  evolução de um único campo isoladamente, em vez de sempre misturar tudo numa média geral.
+- **Gráfico aranha corrigido**: antes só considerava categorias com um campo BNCC pré-definido — uma
+  categoria criada manualmente pelo usuário (o caso mais comum hoje) nunca aparecia nele, mesmo com
+  avaliações lançadas. Agora usa o nome de qualquer categoria/disciplina, mostrando em quais delas o
+  aluno teve o melhor desempenho relativo.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

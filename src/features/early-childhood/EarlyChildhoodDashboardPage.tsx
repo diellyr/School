@@ -23,17 +23,20 @@ import { StudentPicker } from '../../components/StudentPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { EmptyState } from '../../components/EmptyState';
+import { Select } from '../../components/form/Field';
 import {
   MIN_RADAR_SAMPLES,
-  evolutionByPeriod,
   rboDistribution,
+  rowValue,
   useEarlyChildhoodDashboardData,
 } from './useEarlyChildhoodDashboardData';
+import { evolutionByGranularity, GRANULARITY_LABELS, type Granularity } from '../../lib/periodGranularity';
 import { ALERT_LEVEL_LABELS, RBO_LABELS, type RboLevel } from '../../domain';
 import { formatDate } from '../../lib/utils';
 
 const RBO_COLORS: Record<RboLevel, string> = { R: '#e11d48', B: '#f59e0b', O: '#059669' };
 const Y_LABELS = ['', 'R', 'B', 'O'];
+const GRANULARITIES: Granularity[] = ['year', 'semester', 'bimester'];
 
 export function EarlyChildhoodDashboardPage() {
   const [schoolId, setSchoolId] = useState('');
@@ -59,32 +62,59 @@ export function EarlyChildhoodDashboardPage() {
   }, [paramStudent]);
 
   const data = useEarlyChildhoodDashboardData(studentId);
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const distribution = useMemo(() => (data ? rboDistribution(data.rows) : { R: 0, B: 0, O: 0 }), [data]);
   const total = distribution.R + distribution.B + distribution.O;
-  const evolution = useMemo(() => (data ? evolutionByPeriod(data.rows) : []), [data]);
+
+  const categoryName = (row: NonNullable<typeof data>['rows'][number]) =>
+    data?.categoryById.get(row.activity.categoryId ?? '')?.name ?? 'Sem categoria';
+
+  const availableCategories = useMemo(() => {
+    if (!data) return [];
+    return [...new Set(data.rows.map(categoryName))].sort((a, b) => a.localeCompare(b));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const filteredRows = useMemo(() => {
+    if (!data) return [];
+    if (!categoryFilter) return data.rows;
+    return data.rows.filter((r) => categoryName(r) === categoryFilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, categoryFilter]);
+
+  const evolutionByGranularityMap = useMemo(() => {
+    const map = {} as Record<Granularity, { period: string; avg: number; count: number }[]>;
+    for (const g of GRANULARITIES) {
+      map[g] = evolutionByGranularity(filteredRows, g, (r) => r.activity.period, rowValue);
+    }
+    return map;
+  }, [filteredRows]);
 
   const byCategory = useMemo(() => {
     if (!data) return [];
     const map = new Map<string, { name: string; R: number; B: number; O: number }>();
     for (const row of data.rows) {
-      const name = data.categoryById.get(row.activity.categoryId ?? '')?.name ?? 'Sem categoria';
+      const name = categoryName(row);
       const entry = map.get(name) ?? { name, R: 0, B: 0, O: 0 };
       if (row.assessment.rboLevel) entry[row.assessment.rboLevel]++;
       map.set(name, entry);
     }
     return [...map.values()];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  // Compara todas as categorias entre si (não é afetado pelo filtro acima — o objetivo aqui é
+  // mostrar em quais categorias a criança teve o melhor desempenho relativo, não uma só isolada).
   const radarData = useMemo(() => {
     if (!data) return { points: [], hasEnoughData: false };
     const map = new Map<string, number[]>();
     for (const row of data.rows) {
-      const field = data.categoryById.get(row.activity.categoryId ?? '')?.bnccField;
-      if (!field || !row.assessment.rboLevel) continue;
-      const values = map.get(field) ?? [];
+      if (!row.assessment.rboLevel) continue;
+      const name = categoryName(row);
+      const values = map.get(name) ?? [];
       values.push({ R: 1, B: 2, O: 3 }[row.assessment.rboLevel]);
-      map.set(field, values);
+      map.set(name, values);
     }
     const points = [...map.entries()].map(([field, values]) => ({
       field,
@@ -92,6 +122,7 @@ export function EarlyChildhoodDashboardPage() {
       count: values.length,
     }));
     return { points, hasEnoughData: points.some((p) => p.value !== null) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const attendanceRate = useMemo(() => {
@@ -140,31 +171,54 @@ export function EarlyChildhoodDashboardPage() {
             <StatCard label="Regular" value={`${Math.round((distribution.R / total) * 100)}%`} icon={TrendingUp} tone="danger" />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <Card>
-              <CardHeader><CardTitle>Evolução ao longo dos períodos</CardTitle></CardHeader>
-              <CardContent>
-                {evolution.length < 2 ? (
-                  <p className="text-sm text-slate-500">Dados insuficientes para mostrar evolução (é preciso mais de um período com registros).</p>
-                ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={evolution}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-                      <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                      <YAxis domain={[1, 3]} ticks={[1, 2, 3]} tickFormatter={(v) => Y_LABELS[v]} width={30} />
-                      <Tooltip
-                        formatter={(_value, _name, item) => {
-                          const level = item.payload.avg >= 2.5 ? 'Ótimo' : item.payload.avg >= 1.5 ? 'Bom' : 'Regular';
-                          return [`Tendência predominante: ${level} (${item.payload.count} registro(s))`, 'Período'];
-                        }}
-                      />
-                      <Line type="monotone" dataKey="avg" stroke="#0284c7" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle>Evolução por período</CardTitle>
+                {availableCategories.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-500">Categoria:</span>
+                    <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="w-auto">
+                      <option value="">Todas</option>
+                      {availableCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </Select>
+                  </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {GRANULARITIES.map((granularity) => {
+                  const points = evolutionByGranularityMap[granularity];
+                  return (
+                    <div key={granularity}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{GRANULARITY_LABELS[granularity]}</p>
+                      {points.length < 2 ? (
+                        <p className="text-sm text-slate-500">Dados insuficientes (é preciso mais de um período com registros).</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={points}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                            <XAxis dataKey="period" tick={{ fontSize: 11 }} />
+                            <YAxis domain={[1, 3]} ticks={[1, 2, 3]} tickFormatter={(v) => Y_LABELS[v]} width={26} />
+                            <Tooltip
+                              formatter={(_value, _name, item) => {
+                                const level = item.payload.avg >= 2.5 ? 'Ótimo' : item.payload.avg >= 1.5 ? 'Bom' : 'Regular';
+                                return [`Tendência predominante: ${level} (${item.payload.count} registro(s))`, 'Período'];
+                              }}
+                            />
+                            <Line type="monotone" dataKey="avg" stroke="#0284c7" strokeWidth={2} dot={{ r: 3 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
 
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader><CardTitle>Distribuição por categoria</CardTitle></CardHeader>
               <CardContent>
@@ -188,12 +242,12 @@ export function EarlyChildhoodDashboardPage() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Campos de experiência (BNCC)</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Comparação entre categorias</CardTitle></CardHeader>
               <CardContent>
                 {!radarData.hasEnoughData ? (
                   <p className="text-sm text-slate-500">
                     Dados insuficientes para o gráfico radar — são necessárias pelo menos {MIN_RADAR_SAMPLES} atividades
-                    avaliadas por campo de experiência.
+                    avaliadas por categoria.
                   </p>
                 ) : (
                   <ResponsiveContainer width="100%" height={240}>

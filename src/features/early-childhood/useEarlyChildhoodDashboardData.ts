@@ -43,15 +43,7 @@ export function rboDistribution(rows: EarlyChildhoodRow[]): Record<RboLevel, num
   return dist;
 }
 
-export function evolutionByPeriod(rows: EarlyChildhoodRow[]): { period: string; avg: number; count: number }[] {
-  const map = new Map<string, number[]>();
-  for (const r of rows) {
-    if (!r.assessment.rboLevel) continue;
-    const list = map.get(r.activity.period) ?? [];
-    list.push(RBO_INTERNAL_VALUE[r.assessment.rboLevel]);
-    map.set(r.activity.period, list);
-  }
-  return [...map.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([period, values]) => ({ period, avg: values.reduce((s, v) => s + v, 0) / values.length, count: values.length }));
+/** Valor numérico de um registro para os gráficos de evolução — null quando não há nível lançado. */
+export function rowValue(row: EarlyChildhoodRow): number | null {
+  return row.assessment.rboLevel ? RBO_INTERNAL_VALUE[row.assessment.rboLevel] : null;
 }

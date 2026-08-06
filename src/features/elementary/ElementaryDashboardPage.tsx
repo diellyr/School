@@ -1,15 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { AlertTriangle, BookOpen, CalendarClock, GraduationCap, MessageSquare, RotateCcw } from 'lucide-react';
 import { db } from '../../db/schema';
 import { StudentPicker } from '../../components/StudentPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { EmptyState } from '../../components/EmptyState';
+import { Select } from '../../components/form/Field';
 import { useElementaryDashboardData, normalizedScore, displayGrade } from './useElementaryDashboardData';
+import { evolutionByGranularity, GRANULARITY_LABELS, type Granularity } from '../../lib/periodGranularity';
 import { ALERT_LEVEL_LABELS } from '../../domain';
+
+const GRANULARITIES: Granularity[] = ['year', 'semester', 'bimester'];
+const MIN_RADAR_SAMPLES = 3;
 
 export function ElementaryDashboardPage() {
   const [schoolId, setSchoolId] = useState('');
@@ -35,34 +54,62 @@ export function ElementaryDashboardPage() {
   }, [paramStudent]);
 
   const data = useElementaryDashboardData(studentId);
+  const [subjectFilter, setSubjectFilter] = useState('');
+
+  const scoreOf = (g: NonNullable<typeof data>['grades'][number]) => (data ? normalizedScore(g, data.scalesById.get(g.scaleId)) : null);
 
   const bySubject = useMemo(() => {
     if (!data) return [];
     const map = new Map<string, number[]>();
     for (const g of data.grades) {
-      const score = normalizedScore(g, data.scalesById.get(g.scaleId));
+      const score = scoreOf(g);
       if (score === null) continue;
       const values = map.get(g.subject) ?? [];
       values.push(score);
       map.set(g.subject, values);
     }
     return [...map.entries()].map(([subject, values]) => ({ subject, avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  const evolution = useMemo(() => {
+  const availableSubjects = useMemo(() => {
     if (!data) return [];
+    return [...new Set(data.grades.map((g) => g.subject))].sort((a, b) => a.localeCompare(b));
+  }, [data]);
+
+  const filteredGrades = useMemo(() => {
+    if (!data) return [];
+    if (!subjectFilter) return data.grades;
+    return data.grades.filter((g) => g.subject === subjectFilter);
+  }, [data, subjectFilter]);
+
+  const evolutionByGranularityMap = useMemo(() => {
+    const map = {} as Record<Granularity, { period: string; avg: number; count: number }[]>;
+    for (const g of GRANULARITIES) {
+      map[g] = evolutionByGranularity(filteredGrades, g, (grade) => grade.period, scoreOf);
+    }
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredGrades]);
+
+  // Compara todas as disciplinas entre si (não é afetado pelo filtro acima).
+  const radarData = useMemo(() => {
+    if (!data) return { points: [], hasEnoughData: false };
     const map = new Map<string, number[]>();
     for (const g of data.grades) {
-      const score = normalizedScore(g, data.scalesById.get(g.scaleId));
+      const score = scoreOf(g);
       if (score === null) continue;
-      const values = map.get(g.period) ?? [];
+      const values = map.get(g.subject) ?? [];
       values.push(score);
-      map.set(g.period, values);
+      map.set(g.subject, values);
     }
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([period, values]) => ({
-      period,
-      avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length),
+    const points = [...map.entries()].map(([subject, values]) => ({
+      subject,
+      value: values.length >= MIN_RADAR_SAMPLES ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : null,
+      count: values.length,
     }));
+    return { points, hasEnoughData: points.some((p) => p.value !== null) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const attendanceRate = useMemo(() => {
@@ -112,6 +159,48 @@ export function ElementaryDashboardPage() {
             <StatCard icon={AlertTriangle} label="Abaixo do critério (50%)" value={String(belowCriteria)} tone={belowCriteria > 0 ? 'danger' : undefined} />
           </div>
 
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <CardTitle>Evolução por período</CardTitle>
+                {availableSubjects.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-slate-500">Disciplina:</span>
+                    <Select value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)} className="w-auto">
+                      <option value="">Todas</option>
+                      {availableSubjects.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {GRANULARITIES.map((granularity) => {
+                  const points = evolutionByGranularityMap[granularity];
+                  return (
+                    <div key={granularity}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{GRANULARITY_LABELS[granularity]}</p>
+                      {points.length < 2 ? (
+                        <p className="text-sm text-slate-500">Dados insuficientes (é preciso mais de um período com notas).</p>
+                      ) : (
+                        <ResponsiveContainer width="100%" height={200}>
+                          <LineChart data={points}>
+                            <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                            <XAxis dataKey="period" tick={{ fontSize: 11 }} />
+                            <YAxis domain={[0, 100]} width={32} tickFormatter={(v) => `${v}%`} />
+                            <Tooltip formatter={(v) => [`${Math.round(Number(v))}%`, 'Desempenho relativo']} />
+                            <Line type="monotone" dataKey="avg" stroke="#0284c7" strokeWidth={2} dot={{ r: 3 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader><CardTitle>Média por disciplina (normalizada)</CardTitle></CardHeader>
@@ -129,19 +218,20 @@ export function ElementaryDashboardPage() {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>Evolução por período</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Comparação entre disciplinas</CardTitle></CardHeader>
               <CardContent>
-                {evolution.length < 2 ? (
-                  <p className="text-sm text-slate-500">Dados insuficientes para mostrar evolução (é preciso mais de um período com notas).</p>
+                {!radarData.hasEnoughData ? (
+                  <p className="text-sm text-slate-500">
+                    Dados insuficientes para o gráfico radar — são necessárias pelo menos {MIN_RADAR_SAMPLES} notas por
+                    disciplina.
+                  </p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={220}>
-                    <LineChart data={evolution}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-                      <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                      <YAxis domain={[0, 100]} width={35} tickFormatter={(v) => `${v}%`} />
-                      <Tooltip formatter={(v) => [`${v}%`, 'Desempenho relativo']} />
-                      <Line type="monotone" dataKey="avg" stroke="#0284c7" strokeWidth={2} dot={{ r: 4 }} />
-                    </LineChart>
+                  <ResponsiveContainer width="100%" height={240}>
+                    <RadarChart data={radarData.points.map((p) => ({ subject: p.subject, value: p.value ?? 0 }))}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
+                      <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
+                    </RadarChart>
                   </ResponsiveContainer>
                 )}
               </CardContent>
