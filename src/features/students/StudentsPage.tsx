@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,6 +17,9 @@ import { useAuthStore } from '../../auth/authStore';
 import { useCurrentRole, usePermission } from '../../auth/usePermission';
 import type { Student } from '../../domain';
 import { calculateAge, initials } from '../../lib/utils';
+import { readFileAsDataUrl } from '../../lib/files';
+
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 const STATUS_TONE = { active: 'success', pending: 'warning', transferred: 'info', graduated: 'purple', withdrawn: 'danger' } as const;
 const STATUS_LABEL = { active: 'Ativa', pending: 'Pendente', transferred: 'Transferido', graduated: 'Concluído', withdrawn: 'Desligado' } as const;
@@ -98,9 +101,13 @@ export function StudentsPage() {
               className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               <Link to={`/alunos/${student.id}`} className="flex min-w-0 flex-1 items-center gap-3">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-                  {initials(student.fullName)}
-                </span>
+                {student.photoUrl ? (
+                  <img src={student.photoUrl} alt={student.fullName} className="h-11 w-11 shrink-0 rounded-full object-cover" />
+                ) : (
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-100 text-sm font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+                    {initials(student.fullName)}
+                  </span>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-slate-900 dark:text-slate-100">{student.socialName || student.fullName}</p>
                   <p className="truncate text-xs text-slate-500 dark:text-slate-400">
@@ -145,6 +152,8 @@ function StudentFormDialog({
 }) {
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | undefined>(editing?.photoUrl);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -170,6 +179,24 @@ function StudentFormDialog({
         },
   });
 
+  useEffect(() => {
+    if (open) { setPhotoDataUrl(editing?.photoUrl); setPhotoError(null); }
+  }, [open, editing]);
+
+  async function handlePhotoSelected(file: File | undefined) {
+    setPhotoError(null);
+    if (!file) return;
+    if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+      setPhotoError('Use uma foto em JPEG ou PNG.');
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      setPhotoError('A foto deve ter até 5 MB.');
+      return;
+    }
+    setPhotoDataUrl(await readFileAsDataUrl(file));
+  }
+
   const selectedSchool = watch('schoolId');
   const filteredClasses = classes.filter((c) => c.schoolId === selectedSchool);
 
@@ -181,6 +208,7 @@ function StudentFormDialog({
       fullName: values.fullName,
       socialName: values.socialName || undefined,
       birthDate: values.birthDate,
+      photoUrl: photoDataUrl,
       schoolId: values.schoolId,
       classId: values.classId,
       grade: undefined,
@@ -212,6 +240,24 @@ function StudentFormDialog({
   return (
     <Dialog open={open} onClose={onClose} title={editing ? 'Editar aluno' : 'Novo aluno'} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        <div className="flex items-center gap-4">
+          {photoDataUrl ? (
+            <img src={photoDataUrl} alt="" className="h-16 w-16 shrink-0 rounded-full object-cover" />
+          ) : (
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800">
+              <Users className="h-6 w-6" />
+            </span>
+          )}
+          <FormField label="Foto (opcional)" htmlFor="photo" error={photoError ?? undefined} hint="JPEG ou PNG, até 5 MB.">
+            <input
+              id="photo"
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(e) => handlePhotoSelected(e.target.files?.[0])}
+              className="text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium hover:file:bg-slate-200 dark:text-slate-300 dark:file:bg-slate-800 dark:hover:file:bg-slate-700"
+            />
+          </FormField>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <FormField label="Nome completo" htmlFor="fullName" error={errors.fullName?.message} required>
             <Input id="fullName" {...register('fullName')} />

@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowLeft, Baby, Cake, GraduationCap, School as SchoolIcon, Users2 } from 'lucide-react';
+import { ArrowLeft, Baby, Cake, GraduationCap, LayoutDashboard, School as SchoolIcon, Users2 } from 'lucide-react';
 import { db } from '../../db/schema';
+import { Button } from '../../components/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
 import { EmptyState } from '../../components/EmptyState';
@@ -51,16 +52,29 @@ export function StudentDetailPage() {
       </Link>
 
       <div className="flex items-center gap-4">
-        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-lg font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-          {initials(student.fullName)}
-        </span>
-        <div>
+        {student.photoUrl ? (
+          <img
+            src={student.photoUrl}
+            alt={student.fullName}
+            className="h-16 w-16 shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-sky-100 text-lg font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+            {initials(student.fullName)}
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{student.socialName || student.fullName}</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {klass?.stage === 'early_childhood' ? 'Educação Infantil' : 'Ensino Fundamental'} · {klass?.name ?? 'Sem turma'}
           </p>
         </div>
         {student.isDemo && <Badge tone="default">demo</Badge>}
+        <Link to={`/${klass?.stage === 'elementary' ? 'ensino-fundamental' : 'educacao-infantil'}?studentId=${student.id}`}>
+          <Button variant="outline">
+            <LayoutDashboard className="h-4 w-4" /> Ver dashboard
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -114,10 +128,20 @@ export function StudentDetailPage() {
         </CardContent>
       </Card>
 
-      <EmptyState
-        title="Atividades, notas, frequência e portfólio chegam nas próximas fases"
-        description="Os dashboards de Educação Infantil (Fase 2) e Ensino Fundamental (Fase 5) trarão gráficos de evolução, frequência e alertas para este aluno."
-      />
+      <Card>
+        <CardHeader><CardTitle>Acesso rápido</CardTitle></CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Link to={`/${klass?.stage === 'elementary' ? 'ensino-fundamental' : 'educacao-infantil'}?studentId=${student.id}`}>
+            <Button variant="outline">Dashboard individual</Button>
+          </Link>
+          <Link to={klass?.stage === 'elementary' ? '/notas' : '/avaliacoes'}>
+            <Button variant="outline">{klass?.stage === 'elementary' ? 'Notas' : 'Avaliações'}</Button>
+          </Link>
+          <Link to="/frequencia"><Button variant="outline">Frequência</Button></Link>
+          <Link to="/portfolio"><Button variant="outline">Portfólio</Button></Link>
+          <Link to="/documentos"><Button variant="outline">Documentos</Button></Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }

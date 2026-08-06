@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useSearchParams } from 'react-router-dom';
 import { BookOpen, Save } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
@@ -17,12 +18,19 @@ const RBO_OPTIONS: RboLevel[] = ['R', 'B', 'O'];
 const RBO_TONE: Record<RboLevel, 'danger' | 'warning' | 'success'> = { R: 'danger', B: 'warning', O: 'success' };
 
 export function AssessmentsPage() {
-  const [activityId, setActivityId] = useState('');
+  const [searchParams] = useSearchParams();
+  const [activityId, setActivityId] = useState(() => searchParams.get('activityId') ?? '');
   const [draft, setDraft] = useState<Record<string, RboLevel | undefined>>({});
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
   const canEdit = usePermission('assessments', 'edit') || usePermission('assessments', 'create');
+
+  // Chegando de um link "Lançar" em Atividades (?activityId=...): já abre a atividade certa.
+  useEffect(() => {
+    const fromParam = searchParams.get('activityId');
+    if (fromParam) setActivityId(fromParam);
+  }, [searchParams]);
 
   const activities = useLiveQuery(async () => {
     const items = await db.activities.filter((a) => a.status === 'active').toArray();
@@ -78,9 +86,13 @@ export function AssessmentsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Avaliações</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Avaliações</h1>
+          <Badge tone="info">Educação Infantil</Badge>
+        </div>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Escolha uma atividade e registre a classificação R (Regular), B (Bom) ou O (Ótimo) de cada aluno.
+          Escolha uma atividade e registre a classificação R (Regular), B (Bom) ou O (Ótimo) de cada aluno. Para o
+          Ensino Fundamental, lance notas em <a href="#/notas" className="text-sky-600 hover:underline">Notas</a>.
         </p>
       </div>
 

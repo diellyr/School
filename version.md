@@ -204,6 +204,23 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   descrição da habilidade associada a cada uma frequentemente sai ilegível — a tela de revisão
   deixa isso visível (confiança baixa, texto estranho) em vez de esconder a limitação.
 
+## v0.9.1 — Dashboard individual do aluno, foto, edição de atividades
+
+- **Ficha do aluno**: removida a mensagem antiga "chegam nas próximas fases" (estava desatualizada
+  desde as Fases 2 e 5 — os dashboards já existem). Agora mostra um botão "Ver dashboard" que abre
+  o Dashboard de Educação Infantil ou Ensino Fundamental já com a escola, turma e aluno certos
+  selecionados, e uma seção de acesso rápido para Avaliações/Notas, Frequência, Portfólio e
+  Documentos deste aluno.
+- **Foto do aluno**: cadastro e edição de aluno passam a aceitar uma foto (JPEG ou PNG, até 5 MB),
+  exibida no lugar das iniciais em Alunos e na ficha do aluno.
+- **Atividades**: cada atividade agora pode ser **editada** e **excluída** (exclusão lógica,
+  restaurável), além de um atalho "Lançar" que abre Avaliações (Educação Infantil) ou Notas (Ensino
+  Fundamental) já com a atividade/turma/disciplina/período certos. A tabela também mostra o estágio
+  de cada atividade. A criação de categoria direto no formulário de atividade já existia e continua
+  disponível.
+- **Avaliações** e **Notas** agora indicam explicitamente para qual etapa são (Educação Infantil e
+  Ensino Fundamental, respectivamente), com link cruzado para a outra tela.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

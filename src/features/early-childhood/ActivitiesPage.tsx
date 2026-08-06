@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
-import { Plus, Sparkles } from 'lucide-react';
+import { ClipboardList, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
@@ -15,6 +15,7 @@ import { activitySchema, ACTIVITY_TYPE_LABELS, type ActivityFormValues } from '.
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
 import { usePermission } from '../../auth/usePermission';
+import type { Activity } from '../../domain';
 import { formatDate } from '../../lib/utils';
 
 export function ActivitiesPage() {
@@ -32,7 +33,14 @@ export function ActivitiesPage() {
   }, []);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Activity | null>(null);
+  const [deleting, setDeleting] = useState<Activity | null>(null);
   const canCreate = usePermission('activities', 'create');
+  const canEdit = usePermission('activities', 'edit');
+  const canDelete = usePermission('activities', 'delete');
+
+  const repositories = useRepositories();
+  const session = useAuthStore((s) => s.session);
 
   const className = (id: string) => classes?.find((c) => c.id === id)?.name ?? '—';
   const categoryName = (id?: string) => (id ? categories?.find((c) => c.id === id)?.name : undefined) ?? '—';
@@ -43,11 +51,13 @@ export function ActivitiesPage() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Atividades</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Atividades cadastradas por turma. Depois de criar, avalie os alunos em <Link to="/avaliacoes" className="text-sky-600 hover:underline">Avaliações</Link>.
+            Atividades cadastradas por turma, da Educação Infantil e do Ensino Fundamental. Depois de criar, lance
+            as avaliações de cada aluno em <Link to="/avaliacoes" className="text-sky-600 hover:underline">Avaliações</Link> (Educação
+            Infantil) ou <Link to="/notas" className="text-sky-600 hover:underline">Notas</Link> (Ensino Fundamental).
           </p>
         </div>
         {canCreate && (
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => { setEditing(null); setDialogOpen(true); }}>
             <Plus className="h-4 w-4" /> Nova atividade
           </Button>
         )}
@@ -65,11 +75,13 @@ export function ActivitiesPage() {
               <tr>
                 <th className="px-4 py-3">Título</th>
                 <th className="px-4 py-3">Turma</th>
+                <th className="px-4 py-3">Estágio</th>
                 <th className="px-4 py-3">Categoria/Disciplina</th>
                 <th className="px-4 py-3">Tipo</th>
                 <th className="px-4 py-3">Data</th>
                 <th className="px-4 py-3">Período</th>
                 <th className="px-4 py-3">Avaliações</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -77,11 +89,36 @@ export function ActivitiesPage() {
                 <tr key={a.id} className="border-b border-slate-50 last:border-0 dark:border-slate-800/60">
                   <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{a.title}</td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{className(a.classId)}</td>
+                  <td className="px-4 py-3"><Badge>{a.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge></td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{a.subject || categoryName(a.categoryId)}</td>
                   <td className="px-4 py-3"><Badge>{ACTIVITY_TYPE_LABELS[a.type]}</Badge></td>
                   <td className="px-4 py-3 text-slate-500">{formatDate(a.date)}</td>
                   <td className="px-4 py-3 text-slate-500">{a.period}</td>
                   <td className="px-4 py-3 text-slate-500">{assessmentCounts?.get(a.id) ?? 0}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        to={
+                          a.stage === 'early_childhood'
+                            ? `/avaliacoes?activityId=${a.id}`
+                            : `/notas?classId=${a.classId}&subject=${encodeURIComponent(a.subject ?? a.title)}&period=${encodeURIComponent(a.period)}`
+                        }
+                        title="Lançar avaliações/notas desta atividade"
+                      >
+                        <Button size="sm" variant="ghost"><ClipboardList className="h-4 w-4" /></Button>
+                      </Link>
+                      {canEdit && (
+                        <Button size="sm" variant="ghost" onClick={() => { setEditing(a); setDialogOpen(true); }} title="Editar">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button size="sm" variant="ghost" className="text-rose-600" onClick={() => setDeleting(a)} title="Excluir">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -89,7 +126,36 @@ export function ActivitiesPage() {
         </div>
       )}
 
-      <ActivityFormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} classes={classes ?? []} categories={categories ?? []} />
+      <ActivityFormDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        editing={editing}
+        classes={classes ?? []}
+        categories={categories ?? []}
+      />
+
+      <Dialog
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        title={`Excluir "${deleting?.title}"?`}
+        description="A atividade será marcada como excluída (exclusão lógica) e pode ser restaurada depois. Avaliações/notas já lançadas para ela não são apagadas automaticamente."
+      >
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setDeleting(null)}>Cancelar</Button>
+          <Button
+            variant="danger"
+            onClick={async () => {
+              if (!session || !deleting) return;
+              const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+              await repositories.activities.softDelete(deleting.id, actor, 'Removida pelo usuário');
+              await repositories.audit.record({ ...actor, role: session.role }, { action: 'soft_delete', module: 'activities', entityId: deleting.id });
+              setDeleting(null);
+            }}
+          >
+            Confirmar exclusão
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }
@@ -97,11 +163,13 @@ export function ActivitiesPage() {
 function ActivityFormDialog({
   open,
   onClose,
+  editing,
   classes,
   categories,
 }: {
   open: boolean;
   onClose: () => void;
+  editing: Activity | null;
   classes: { id: string; name: string; schoolId: string; stage: 'early_childhood' | 'elementary' }[];
   categories: { id: string; name: string; schoolId: string; stage: 'early_childhood' | 'elementary' }[];
 }) {
@@ -115,7 +183,18 @@ function ActivityFormDialog({
     formState: { errors, isSubmitting },
   } = useForm<ActivityFormValues>({
     resolver: zodResolver(activitySchema),
-    values: { classId: classes[0]?.id ?? '', title: '', description: '', categoryId: '', newCategoryName: '', type: 'atividade', date: new Date().toISOString().slice(0, 10), period: '' },
+    values: editing
+      ? {
+          classId: editing.classId,
+          title: editing.title,
+          description: editing.description ?? '',
+          categoryId: editing.categoryId ?? '',
+          newCategoryName: '',
+          type: editing.type,
+          date: editing.date,
+          period: editing.period,
+        }
+      : { classId: classes[0]?.id ?? '', title: '', description: '', categoryId: '', newCategoryName: '', type: 'atividade', date: new Date().toISOString().slice(0, 10), period: '' },
   });
 
   const selectedClassId = watch('classId');
@@ -135,33 +214,52 @@ function ActivityFormDialog({
       categoryId = created.id;
     }
 
-    const created = await repositories.activities.create(
-      {
-        schoolId: selectedClass.schoolId,
-        classId: values.classId,
-        academicYearId: selectedClass.stage ? (await db.classes.get(values.classId))?.academicYearId ?? '' : '',
-        stage: selectedClass.stage,
-        title: values.title,
-        description: values.description || undefined,
-        categoryId,
-        type: values.type,
-        date: values.date,
-        period: values.period,
-        createdByTeacherId: session.user.id,
-      },
-      actor,
-    );
-    await repositories.audit.record({ ...actor, role: session.role }, { action: 'create', module: 'activities', entityId: created.id });
+    if (editing) {
+      await repositories.activities.update(
+        editing.id,
+        {
+          schoolId: selectedClass.schoolId,
+          classId: values.classId,
+          stage: selectedClass.stage,
+          title: values.title,
+          description: values.description || undefined,
+          categoryId,
+          type: values.type,
+          date: values.date,
+          period: values.period,
+        },
+        actor,
+      );
+      await repositories.audit.record({ ...actor, role: session.role }, { action: 'edit', module: 'activities', entityId: editing.id });
+    } else {
+      const created = await repositories.activities.create(
+        {
+          schoolId: selectedClass.schoolId,
+          classId: values.classId,
+          academicYearId: (await db.classes.get(values.classId))?.academicYearId ?? '',
+          stage: selectedClass.stage,
+          title: values.title,
+          description: values.description || undefined,
+          categoryId,
+          type: values.type,
+          date: values.date,
+          period: values.period,
+          createdByTeacherId: session.user.id,
+        },
+        actor,
+      );
+      await repositories.audit.record({ ...actor, role: session.role }, { action: 'create', module: 'activities', entityId: created.id });
+    }
     reset();
     onClose();
   }
 
   return (
-    <Dialog open={open} onClose={onClose} title="Nova atividade" size="lg">
+    <Dialog open={open} onClose={onClose} title={editing ? 'Editar atividade' : 'Nova atividade'} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <FormField label="Turma" htmlFor="classId" error={errors.classId?.message} required>
           <Select id="classId" {...register('classId')}>
-            {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            {classes.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'})</option>)}
           </Select>
         </FormField>
         <FormField label="Título" htmlFor="title" error={errors.title?.message} required>
@@ -196,7 +294,7 @@ function ActivityFormDialog({
         </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button type="submit" loading={isSubmitting}>Cadastrar atividade</Button>
+          <Button type="submit" loading={isSubmitting}>{editing ? 'Salvar alterações' : 'Cadastrar atividade'}</Button>
         </div>
       </form>
     </Dialog>

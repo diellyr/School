@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { AlertTriangle, BookOpen, CalendarClock, GraduationCap, MessageSquare, RotateCcw } from 'lucide-react';
+import { db } from '../../db/schema';
 import { StudentPicker } from '../../components/StudentPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/Card';
 import { Badge } from '../../components/Badge';
@@ -12,6 +15,24 @@ export function ElementaryDashboardPage() {
   const [schoolId, setSchoolId] = useState('');
   const [classId, setClassId] = useState('');
   const [studentId, setStudentId] = useState('');
+
+  // Chegando de um link "Ver dashboard" na ficha do aluno (?studentId=...): pré-seleciona escola,
+  // turma e aluno de uma vez, em vez de deixar os filtros em branco.
+  const [searchParams] = useSearchParams();
+  const initialStudentId = searchParams.get('studentId');
+  const initializedFromParam = useRef(false);
+  const paramStudent = useLiveQuery(
+    () => (initialStudentId && !initializedFromParam.current ? db.students.get(initialStudentId) : undefined),
+    [initialStudentId],
+  );
+  useEffect(() => {
+    if (paramStudent && !initializedFromParam.current) {
+      initializedFromParam.current = true;
+      setSchoolId(paramStudent.schoolId);
+      setClassId(paramStudent.classId ?? '');
+      setStudentId(paramStudent.id);
+    }
+  }, [paramStudent]);
 
   const data = useElementaryDashboardData(studentId);
 

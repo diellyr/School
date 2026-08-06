@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useSearchParams } from 'react-router-dom';
 import { GraduationCap, Save } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
@@ -16,10 +17,21 @@ import { initials } from '../../lib/utils';
 const SUBJECT_OPTIONS = ['Língua Portuguesa', 'Matemática', 'Ciências', 'História', 'Geografia', 'Arte', 'Educação Física', 'Inglês'];
 
 export function GradesPage() {
-  const [classId, setClassId] = useState('');
-  const [subject, setSubject] = useState('');
-  const [period, setPeriod] = useState('');
+  const [searchParams] = useSearchParams();
+  const [classId, setClassId] = useState(() => searchParams.get('classId') ?? '');
+  const [subject, setSubject] = useState(() => searchParams.get('subject') ?? '');
+  const [period, setPeriod] = useState(() => searchParams.get('period') ?? '');
   const [isRecovery, setIsRecovery] = useState(false);
+
+  // Chegando de um link "Lançar" em Atividades (?classId=&subject=&period=): já abre a turma certa.
+  useEffect(() => {
+    const c = searchParams.get('classId');
+    const s = searchParams.get('subject');
+    const p = searchParams.get('period');
+    if (c) setClassId(c);
+    if (s) setSubject(s);
+    if (p) setPeriod(p);
+  }, [searchParams]);
   const [draft, setDraft] = useState<Record<string, { scaleLevelCode?: string; numericScore?: number }>>({});
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
@@ -97,9 +109,13 @@ export function GradesPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Notas</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Notas</h1>
+          <Badge tone="info">Ensino Fundamental</Badge>
+        </div>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Lançamento de notas por turma, disciplina e período, respeitando a escala configurada pela escola.
+          Lançamento de notas por turma, disciplina e período, respeitando a escala configurada pela escola. Para a
+          Educação Infantil, lance avaliações em <a href="#/avaliacoes" className="text-sky-600 hover:underline">Avaliações</a>.
         </p>
       </div>
 
@@ -110,7 +126,7 @@ export function GradesPage() {
             {classes?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </Select>
         </FormField>
-        <FormField label="Disciplina" htmlFor="subject">
+        <FormField label="Disciplina" htmlFor="subject" hint="Digite uma disciplina não listada para criá-la.">
           <Input id="subject" list="subjects" value={subject} onChange={(e) => { setSubject(e.target.value); setSavedMessage(null); }} placeholder="Ex.: Matemática" />
           <datalist id="subjects">{SUBJECT_OPTIONS.map((s) => <option key={s} value={s} />)}</datalist>
         </FormField>
