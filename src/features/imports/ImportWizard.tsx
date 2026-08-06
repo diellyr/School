@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, ScanEye, Upload } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, FileWarning, ScanEye, Upload, X } from 'lucide-react';
 import { db } from '../../db/schema';
 import { Button } from '../../components/Button';
 import { Card, CardContent } from '../../components/Card';
@@ -9,7 +9,7 @@ import { FormField, Input, Select } from '../../components/form/Field';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
 import { DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, SELF_CONTAINED_TYPES, TARGET_FIELDS } from './importTypes';
-import { parseTabularFile, type ImportSource, type ParsedTable } from './parseFile';
+import { parseTabularFile, type ParsedTable } from './parseFile';
 import { buildPreview, type PreviewRow } from './validateRows';
 import { sha256OfFile } from '../../lib/files';
 import { sha256Hex } from '../../lib/hash';
@@ -30,7 +30,10 @@ import type {
   TeacherAssignment,
 } from '../../domain';
 
-const STEPS = ['Tipo de documento', 'Escopo e período', 'Armazenamento', 'Arquivo', 'Mapeamento', 'Pré-visualização', 'Resultado'];
+const STEPS = ['Tipo de documento', 'Escopo e período', 'Armazenamento', 'Arquivos', 'Mapeamento', 'Pré-visualização', 'Resultado'];
+
+/** Máximo de arquivos que podem ser selecionados de uma vez para uma mesma importação. */
+export const MAX_IMPORT_FILES = 10;
 
 /** Normaliza um cabeçalho para comparação: minúsculas, sem acentos, sem pontuação. */
 function normalizeHeader(text: string): string {
@@ -59,6 +62,21 @@ function slugifyName(text: string): string {
   );
 }
 
+interface FileEntry {
+  file: File;
+  table: ParsedTable | null;
+  parseError: string | null;
+}
+
+interface FilePreview {
+  fileIndex: number;
+  file: File;
+  table: ParsedTable;
+  rows: PreviewRow[];
+}
+
+type RowOutcome = 'imported' | 'rejected' | 'duplicate' | 'skipped';
+
 export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [step, setStep] = useState(0);
   const [documentType, setDocumentType] = useState<ImportDocumentType>('student_registration');
@@ -67,11 +85,13 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [period, setPeriod] = useState('');
   const [periodicity, setPeriodicity] = useState<ImportPeriodicity>('bimonthly');
   const [storageDestination, setStorageDestination] = useState<StorageDestination>('local');
-  const [file, setFile] = useState<File | null>(null);
-  const [table, setTable] = useState<ParsedTable | null>(null);
+  const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
+  const [filesLoading, setFilesLoading] = useState(false);
+  const [fileSelectError, setFileSelectError] = useState<string | null>(null);
+  const [ocrProgress, setOcrProgress] = useState<{ fileName: string; progress: number } | null>(null);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState<PreviewRow[] | null>(null);
-  const [resolutions, setResolutions] = useState<Record<number, PreviewRow['resolution']>>({});
+  const [filePreviews, setFilePreviews] = useState<FilePreview[] | null>(null);
+  const [resolutions, setResolutions] = useState<Record<string, PreviewRow['resolution']>>({});
   const [result, setResult] = useState<{
     imported: number;
     rejected: number;
@@ -80,10 +100,9 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     createdClasses: number;
     createdStudents: number;
     createdTeachers: number;
+    fileResults: { fileName: string; imported: number; rejected: number; duplicates: number }[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
-  const [ocrProgress, setOcrProgress] = useState<number | null>(null);
   const [reviewedManually, setReviewedManually] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,44 +117,83 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const targetFields = TARGET_FIELDS[documentType];
   const isAutomated = targetFields.length > 0;
   const isSelfContained = SELF_CONTAINED_TYPES.includes(documentType);
+  const parsedFiles = fileEntries.filter((e) => e.table);
+  const hasNonStructuredSource = parsedFiles.some((e) => e.table?.source !== 'structured');
 
-  async function handleFileSelected(f: File) {
-    setFile(f);
-    setTable(null);
-    setParseError(null);
-    setReviewedManually(false);
-    const format = FILE_FORMAT_FROM_NAME(f.name);
-    if (!format) {
-      setParseError('Formato de arquivo não suportado. Use CSV, XLSX, PDF, JPEG ou PNG.');
+  const combinedHeaders = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of fileEntries) if (e.table) e.table.headers.forEach((h) => set.add(h));
+    return [...set];
+  }, [fileEntries]);
+
+  async function handleFilesSelected(selected: FileList) {
+    const incoming = Array.from(selected);
+    setFileSelectError(null);
+    if (fileEntries.length + incoming.length > MAX_IMPORT_FILES) {
+      setFileSelectError(
+        `Máximo de ${MAX_IMPORT_FILES} arquivos por importação — você já tem ${fileEntries.length} selecionado(s) e tentou adicionar mais ${incoming.length}.`,
+      );
       return;
     }
-    const isImage = format === 'jpeg' || format === 'jpg' || format === 'png';
-    if (isImage) setOcrProgress(0);
+    setReviewedManually(false);
+    setFilesLoading(true);
+    const newEntries: FileEntry[] = [];
     try {
-      const parsed = await parseTabularFile(f, isImage ? (p) => setOcrProgress(p) : undefined);
-      setTable(parsed);
-      const autoMapping: Record<string, string> = {};
-      for (const field of targetFields) {
-        const candidates = [field.key, field.label, ...field.synonyms].map(normalizeHeader);
-        const match = parsed.headers.find((h) => candidates.includes(normalizeHeader(h)));
-        if (match) autoMapping[field.key] = match;
+      for (const f of incoming) {
+        const format = FILE_FORMAT_FROM_NAME(f.name);
+        if (!format) {
+          newEntries.push({ file: f, table: null, parseError: 'Formato de arquivo não suportado. Use CSV, XLSX, PDF, JPEG ou PNG.' });
+          continue;
+        }
+        const isImage = format === 'jpeg' || format === 'jpg' || format === 'png';
+        try {
+          const parsed = await parseTabularFile(f, isImage ? (p) => setOcrProgress({ fileName: f.name, progress: p }) : undefined);
+          newEntries.push({ file: f, table: parsed, parseError: null });
+        } catch (err) {
+          newEntries.push({ file: f, table: null, parseError: err instanceof Error ? err.message : 'Não foi possível ler este arquivo.' });
+        }
       }
-      setColumnMapping(autoMapping);
-    } catch (err) {
-      setParseError(err instanceof Error ? err.message : 'Não foi possível ler este arquivo.');
     } finally {
       setOcrProgress(null);
+      setFilesLoading(false);
     }
+
+    const merged = [...fileEntries, ...newEntries];
+    setFileEntries(merged);
+
+    const allHeaders = new Set<string>();
+    for (const e of merged) if (e.table) e.table.headers.forEach((h) => allHeaders.add(h));
+    setColumnMapping((prev) => {
+      const next = { ...prev };
+      for (const field of targetFields) {
+        if (next[field.key]) continue;
+        const candidates = [field.key, field.label, ...field.synonyms].map(normalizeHeader);
+        const match = [...allHeaders].find((h) => candidates.includes(normalizeHeader(h)));
+        if (match) next[field.key] = match;
+      }
+      return next;
+    });
+  }
+
+  function removeFile(index: number) {
+    setFileEntries((prev) => prev.filter((_, i) => i !== index));
+    setFileSelectError(null);
   }
 
   async function runPreview() {
-    if (!table) return;
+    if (parsedFiles.length === 0) return;
     setLoading(true);
     try {
-      const rows = await buildPreview(documentType, table, columnMapping, { schoolId, classId, period });
-      setPreview(rows);
-      const initialResolutions: Record<number, PreviewRow['resolution']> = {};
-      for (const r of rows) initialResolutions[r.index] = r.resolution;
+      const previews: FilePreview[] = [];
+      for (let i = 0; i < fileEntries.length; i++) {
+        const entry = fileEntries[i];
+        if (!entry.table) continue;
+        const rows = await buildPreview(documentType, entry.table, columnMapping, { schoolId, classId, period });
+        previews.push({ fileIndex: i, file: entry.file, table: entry.table, rows });
+      }
+      setFilePreviews(previews);
+      const initialResolutions: Record<string, PreviewRow['resolution']> = {};
+      for (const p of previews) for (const r of p.rows) initialResolutions[`${p.fileIndex}:${r.index}`] = r.resolution;
       setResolutions(initialResolutions);
     } finally {
       setLoading(false);
@@ -143,9 +201,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   }
 
   async function confirmImport() {
-    if (!session || !preview || !file) return;
+    if (!session || !filePreviews || filePreviews.length === 0) return;
     setLoading(true);
-    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    const currentUserId = session.user.id;
+    const actor = { userId: currentUserId, organizationId: session.user.organizationId };
     let imported = 0;
     let rejected = 0;
     let duplicates = 0;
@@ -153,9 +212,9 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     let createdClasses = 0;
     let createdStudentsCount = 0;
     let createdTeachers = 0;
+    const fileResults: { fileName: string; imported: number; rejected: number; duplicates: number }[] = [];
 
     try {
-      const fileHash = await sha256OfFile(file);
       const operationRef = newId();
 
       const students = schoolId ? await db.students.filter((s) => s.schoolId === schoolId && s.status === 'active').toArray() : [];
@@ -163,7 +222,9 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
       // --- Cadastro automático (só usado por early_childhood_report / elementary_report) ---
       // Lê escola/turma/aluno/professor/atividade direto da planilha e cadastra o que ainda não
-      // existir, em vez de exigir que tudo já esteja pré-cadastrado antes da importação.
+      // existir, em vez de exigir que tudo já esteja pré-cadastrado antes da importação. As caches
+      // abaixo são compartilhadas entre TODOS os arquivos desta importação, para que o mesmo nome
+      // citado em arquivos diferentes não seja cadastrado em duplicidade.
       const allSchools = isSelfContained ? await db.schools.filter((s) => s.status === 'active').toArray() : [];
       const allClasses = isSelfContained ? await db.classes.filter((c) => c.status === 'active').toArray() : [];
       const allStudents = isSelfContained ? await db.students.filter((s) => s.status === 'active').toArray() : [];
@@ -364,12 +425,11 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         return created.id;
       }
 
-      for (const row of preview) {
-        const resolution = resolutions[row.index];
+      async function processRow(row: PreviewRow, resolution: PreviewRow['resolution'] | undefined): Promise<RowOutcome> {
         if (row.validation === 'error' || resolution === 'ignore') {
-          if (row.validation === 'error') rejected++;
-          if (row.validation === 'duplicate') duplicates++;
-          continue;
+          if (row.validation === 'error') return 'rejected';
+          if (row.validation === 'duplicate') return 'duplicate';
+          return 'skipped';
         }
 
         if (documentType === 'student_registration') {
@@ -390,28 +450,29 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               actor,
             );
           }
-          imported++;
-        } else if (documentType === 'attendance') {
+          return 'imported';
+        }
+
+        if (documentType === 'attendance') {
           const student = students.find((s) => s.fullName.toLowerCase() === row.interpreted.studentName?.toLowerCase());
-          if (!student) {
-            rejected++;
-            continue;
-          }
+          if (!student) return 'rejected';
           if (resolution === 'update_existing' && row.matchedExistingId) {
             await repositories.attendance.update(row.matchedExistingId, { attendanceStatus: row.interpreted.status as never }, actor);
           } else {
             await repositories.attendance.create(
-              { studentId: student.id, classId: student.classId ?? classId, date: row.interpreted.date, attendanceStatus: row.interpreted.status as never, registeredBy: session.user.id },
+              { studentId: student.id, classId: student.classId ?? classId, date: row.interpreted.date, attendanceStatus: row.interpreted.status as never, registeredBy: currentUserId },
               actor,
             );
           }
-          imported++;
-        } else if (documentType === 'early_childhood_report') {
+          return 'imported';
+        }
+
+        if (documentType === 'early_childhood_report') {
           const school = await ensureSchool(row.interpreted.schoolName);
           const klass = await ensureClass(school.id, row.interpreted.className, 'early_childhood');
           const student = await ensureStudent(school.id, klass.id, row.interpreted.studentName);
           const academicYearId = await ensureAcademicYear(school.id);
-          let teacherId = session.user.id;
+          let teacherId = currentUserId;
           if (row.interpreted.teacherName) {
             const teacher = await ensureTeacher(row.interpreted.teacherName);
             teacherId = teacher.id;
@@ -432,8 +493,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               actor,
             );
           }
-          imported++;
-        } else if (documentType === 'elementary_report') {
+          return 'imported';
+        }
+
+        if (documentType === 'elementary_report') {
           const school = await ensureSchool(row.interpreted.schoolName);
           const klass = await ensureClass(school.id, row.interpreted.className, 'elementary');
           const student = await ensureStudent(school.id, klass.id, row.interpreted.studentName);
@@ -452,54 +515,80 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               actor,
             );
           }
-          imported++;
-        } else {
-          // Tipos ainda sem criação automática: registrado apenas no log (import_rows) para revisão manual.
-          duplicates += row.validation === 'duplicate' ? 1 : 0;
+          return 'imported';
         }
+
+        // Tipos ainda sem criação automática: registrado apenas no log (import_rows) para revisão manual.
+        return row.validation === 'duplicate' ? 'duplicate' : 'skipped';
       }
 
-      const batch = await repositories.imports.create(
-        {
-          documentType,
-          fileFormat: FILE_FORMAT_FROM_NAME(file.name) ?? 'csv',
-          fileName: file.name,
-          fileSizeBytes: file.size,
-          fileHash,
-          schoolId: schoolId || undefined,
-          classId: classId || undefined,
-          periodicity,
-          periodLabel: period,
-          storageDestination,
-          importStatus: rejected === 0 ? 'completed' : imported > 0 ? 'partially_completed' : 'failed',
-          totalRowsFound: preview.length,
-          totalImported: imported,
-          totalRejected: rejected,
-          totalDuplicates: duplicates,
-          columnMapping,
-          operationRef,
-        },
-        actor,
-      );
+      for (const filePreview of filePreviews) {
+        let fileImported = 0;
+        let fileRejected = 0;
+        let fileDuplicates = 0;
 
-      for (const row of preview) {
-        await repositories.importRows.create(
+        for (const row of filePreview.rows) {
+          const key = `${filePreview.fileIndex}:${row.index}`;
+          const outcome = await processRow(row, resolutions[key]);
+          if (outcome === 'imported') { imported++; fileImported++; }
+          else if (outcome === 'rejected') { rejected++; fileRejected++; }
+          else if (outcome === 'duplicate') { duplicates++; fileDuplicates++; }
+        }
+
+        const fileHash = await sha256OfFile(filePreview.file);
+        const batch = await repositories.imports.create(
           {
-            importId: batch.id,
-            rowIndex: row.index,
-            rawValue: row.original,
-            interpretedValue: row.interpreted,
-            confidence: row.confidence,
-            validation: row.validation,
-            validationNotes: row.validationNotes,
-            resolution: toDomainResolution(resolutions[row.index]),
+            documentType,
+            fileFormat: FILE_FORMAT_FROM_NAME(filePreview.file.name) ?? 'csv',
+            fileName: filePreview.file.name,
+            fileSizeBytes: filePreview.file.size,
+            fileHash,
+            schoolId: schoolId || undefined,
+            classId: classId || undefined,
+            periodicity,
+            periodLabel: period,
+            storageDestination,
+            importStatus: fileRejected === 0 ? 'completed' : fileImported > 0 ? 'partially_completed' : 'failed',
+            totalRowsFound: filePreview.rows.length,
+            totalImported: fileImported,
+            totalRejected: fileRejected,
+            totalDuplicates: fileDuplicates,
+            columnMapping,
+            operationRef,
           },
           actor,
         );
+
+        for (const row of filePreview.rows) {
+          await repositories.importRows.create(
+            {
+              importId: batch.id,
+              rowIndex: row.index,
+              rawValue: row.original,
+              interpretedValue: row.interpreted,
+              confidence: row.confidence,
+              validation: row.validation,
+              validationNotes: row.validationNotes,
+              resolution: toDomainResolution(resolutions[`${filePreview.fileIndex}:${row.index}`]),
+            },
+            actor,
+          );
+        }
+
+        await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
+        fileResults.push({ fileName: filePreview.file.name, imported: fileImported, rejected: fileRejected, duplicates: fileDuplicates });
       }
 
-      await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
-      setResult({ imported, rejected, duplicates, createdSchools, createdClasses, createdStudents: createdStudentsCount, createdTeachers });
+      setResult({
+        imported,
+        rejected,
+        duplicates,
+        createdSchools,
+        createdClasses,
+        createdStudents: createdStudentsCount,
+        createdTeachers,
+        fileResults,
+      });
       setStep(6);
     } finally {
       setLoading(false);
@@ -601,48 +690,81 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             accept=".csv,.xlsx,.xls,.pdf,.jpeg,.jpg,.png"
             className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelected(f); }}
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) handleFilesSelected(e.target.files);
+              e.target.value = '';
+            }}
           />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={ocrProgress !== null}
+            disabled={filesLoading || fileEntries.length >= MAX_IMPORT_FILES}
             className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-10 text-center hover:border-sky-400 disabled:opacity-60 dark:border-slate-700"
           >
             <Upload className="h-8 w-8 text-slate-400" />
             <span className="text-sm text-slate-600 dark:text-slate-300">
-              {file ? file.name : 'Clique para selecionar um arquivo CSV, XLSX, PDF, JPEG ou PNG'}
+              {fileEntries.length > 0
+                ? `Adicionar mais arquivos (${fileEntries.length}/${MAX_IMPORT_FILES} selecionados)`
+                : `Clique para selecionar até ${MAX_IMPORT_FILES} arquivos — CSV, XLSX, PDF, JPEG ou PNG`}
             </span>
           </button>
           <p className="text-xs text-slate-500">
             CSV e XLSX são lidos como tabela estruturada. PDF tem o texto extraído diretamente (não funciona para PDFs
-            escaneados). JPEG/PNG passam por reconhecimento óptico de caracteres (OCR) — nesses dois casos, a revisão
-            humana da pré-visualização é obrigatória antes de confirmar a importação.
+            escaneados). JPEG/PNG passam por reconhecimento óptico de caracteres (OCR) — inclusive fotos de relatórios
+            impressos. Nesses dois últimos casos, a revisão humana da pré-visualização é obrigatória antes de
+            confirmar a importação. Você pode selecionar vários arquivos de uma vez (até {MAX_IMPORT_FILES}), por
+            exemplo um relatório por aluno.
           </p>
           {ocrProgress !== null && (
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-sky-700 dark:text-sky-400">
                 <ScanEye className="h-4 w-4 animate-pulse" />
-                Reconhecendo texto na imagem… {Math.round(ocrProgress * 100)}%
+                Reconhecendo texto em "{ocrProgress.fileName}"… {Math.round(ocrProgress.progress * 100)}%
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${Math.round(ocrProgress * 100)}%` }} />
+                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${Math.round(ocrProgress.progress * 100)}%` }} />
               </div>
             </div>
           )}
-          {parseError && (
+          {fileSelectError && (
             <p className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              {parseError}
+              {fileSelectError}
             </p>
           )}
-          {table && (
-            <p className="text-sm text-emerald-700 dark:text-emerald-400">
-              {table.rows.length} linha(s) e {table.headers.length} coluna(s) identificadas: {table.headers.join(', ')}
-              {table.source !== 'structured' && ' — confira cada linha com atenção na pré-visualização antes de confirmar.'}
-            </p>
+          {fileEntries.length > 0 && (
+            <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+              {fileEntries.map((entry, i) => (
+                <li key={`${entry.file.name}-${i}`} className="flex items-start justify-between gap-3 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-slate-700 dark:text-slate-200">{entry.file.name}</p>
+                    {entry.table ? (
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                        {entry.table.rows.length} linha(s), {entry.table.headers.length} coluna(s)
+                        {entry.table.source !== 'structured' && ' — revisar na pré-visualização'}
+                      </p>
+                    ) : entry.parseError ? (
+                      <p className="flex items-center gap-1 text-xs text-rose-700 dark:text-rose-400">
+                        <FileWarning className="h-3 w-3 shrink-0" /> {entry.parseError}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-slate-400">Processando…</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800"
+                    aria-label={`Remover ${entry.file.name}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           )}
         </CardContent></Card>
       )}
@@ -655,26 +777,34 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               log de importação, sem mapeamento campo a campo.
             </p>
           ) : (
-            targetFields.map((field) => (
-              <FormField key={field.key} label={field.label} htmlFor={`map-${field.key}`} required={field.required}>
-                <Select
-                  id={`map-${field.key}`}
-                  value={columnMapping[field.key] ?? ''}
-                  onChange={(e) => setColumnMapping((m) => ({ ...m, [field.key]: e.target.value }))}
-                >
-                  <option value="">Não mapear</option>
-                  {table?.headers.map((h) => <option key={h} value={h}>{h}</option>)}
-                </Select>
-              </FormField>
-            ))
+            <>
+              {fileEntries.length > 1 && (
+                <p className="text-xs text-slate-500">
+                  O mapeamento abaixo vale para todos os {fileEntries.length} arquivos selecionados — as opções
+                  combinam as colunas encontradas em todos eles.
+                </p>
+              )}
+              {targetFields.map((field) => (
+                <FormField key={field.key} label={field.label} htmlFor={`map-${field.key}`} required={field.required}>
+                  <Select
+                    id={`map-${field.key}`}
+                    value={columnMapping[field.key] ?? ''}
+                    onChange={(e) => setColumnMapping((m) => ({ ...m, [field.key]: e.target.value }))}
+                  >
+                    <option value="">Não mapear</option>
+                    {combinedHeaders.map((h) => <option key={h} value={h}>{h}</option>)}
+                  </Select>
+                </FormField>
+              ))}
+            </>
           )}
         </CardContent></Card>
       )}
 
       {step === 5 && (
         <PreviewStep
-          preview={preview}
-          source={table?.source ?? 'structured'}
+          filePreviews={filePreviews}
+          hasNonStructuredSource={hasNonStructuredSource}
           loading={loading}
           resolutions={resolutions}
           setResolutions={setResolutions}
@@ -698,9 +828,33 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
             <Stat label="Rejeitados" value={result.rejected} />
             <Stat label="Duplicados" value={result.duplicates} />
           </div>
+          {result.fileResults.length > 1 && (
+            <div className="rounded-lg border border-slate-200 dark:border-slate-800">
+              <table className="w-full text-xs">
+                <thead className="border-b border-slate-100 bg-slate-50 text-left uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:bg-slate-900">
+                  <tr>
+                    <th className="px-3 py-2">Arquivo</th>
+                    <th className="px-3 py-2">Importados</th>
+                    <th className="px-3 py-2">Rejeitados</th>
+                    <th className="px-3 py-2">Duplicados</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {result.fileResults.map((fr) => (
+                    <tr key={fr.fileName} className="border-b border-slate-50 last:border-0 dark:border-slate-800/60">
+                      <td className="max-w-[240px] truncate px-3 py-2 text-slate-700 dark:text-slate-200">{fr.fileName}</td>
+                      <td className="px-3 py-2">{fr.imported}</td>
+                      <td className="px-3 py-2">{fr.rejected}</td>
+                      <td className="px-3 py-2">{fr.duplicates}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           {(result.createdSchools > 0 || result.createdClasses > 0 || result.createdStudents > 0 || result.createdTeachers > 0) && (
             <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300">
-              <p className="mb-2 font-medium">Cadastrados automaticamente a partir do arquivo:</p>
+              <p className="mb-2 font-medium">Cadastrados automaticamente a partir dos arquivos:</p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <Stat label="Escolas" value={result.createdSchools} />
                 <Stat label="Turmas" value={result.createdClasses} />
@@ -730,11 +884,15 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
           {step === 5 ? null : (
             <Button
               onClick={async () => {
-                if (step === 3 && !table) return;
+                if (step === 3 && parsedFiles.length === 0) return;
                 if (step === 4) await runPreview();
                 setStep((s) => s + 1);
               }}
-              disabled={(step === 0 && !documentType) || (step === 1 && ((!schoolId && !isSelfContained) || !period)) || (step === 3 && !table)}
+              disabled={
+                (step === 0 && !documentType) ||
+                (step === 1 && ((!schoolId && !isSelfContained) || !period)) ||
+                (step === 3 && (parsedFiles.length === 0 || filesLoading))
+              }
             >
               Avançar <ArrowRight className="h-4 w-4" />
             </Button>
@@ -755,8 +913,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 }
 
 function PreviewStep({
-  preview,
-  source,
+  filePreviews,
+  hasNonStructuredSource,
   loading,
   resolutions,
   setResolutions,
@@ -765,43 +923,55 @@ function PreviewStep({
   onRunPreview,
   onConfirm,
 }: {
-  preview: PreviewRow[] | null;
-  source: ImportSource;
+  filePreviews: FilePreview[] | null;
+  hasNonStructuredSource: boolean;
   loading: boolean;
-  resolutions: Record<number, PreviewRow['resolution']>;
-  setResolutions: (updater: (r: Record<number, PreviewRow['resolution']>) => Record<number, PreviewRow['resolution']>) => void;
+  resolutions: Record<string, PreviewRow['resolution']>;
+  setResolutions: (updater: (r: Record<string, PreviewRow['resolution']>) => Record<string, PreviewRow['resolution']>) => void;
   reviewedManually: boolean;
   setReviewedManually: (v: boolean) => void;
   onRunPreview: () => void;
   onConfirm: () => void;
 }) {
-  const requiresManualReview = source !== 'structured';
-  const counts = useMemo(() => {
-    if (!preview) return { valid: 0, warning: 0, error: 0, duplicate: 0 };
-    return {
-      valid: preview.filter((r) => r.validation === 'valid').length,
-      warning: preview.filter((r) => r.validation === 'warning').length,
-      error: preview.filter((r) => r.validation === 'error').length,
-      duplicate: preview.filter((r) => r.validation === 'duplicate').length,
-    };
-  }, [preview]);
+  const requiresManualReview = hasNonStructuredSource;
 
-  if (!preview) {
+  const flatRows = useMemo(() => {
+    if (!filePreviews) return [];
+    return filePreviews.flatMap((fp) =>
+      fp.rows.map((row) => ({
+        key: `${fp.fileIndex}:${row.index}`,
+        fileName: fp.file.name,
+        source: fp.table.source,
+        row,
+      })),
+    );
+  }, [filePreviews]);
+
+  const counts = useMemo(() => {
+    return {
+      valid: flatRows.filter((r) => r.row.validation === 'valid').length,
+      warning: flatRows.filter((r) => r.row.validation === 'warning').length,
+      error: flatRows.filter((r) => r.row.validation === 'error').length,
+      duplicate: flatRows.filter((r) => r.row.validation === 'duplicate').length,
+    };
+  }, [flatRows]);
+
+  if (!filePreviews) {
     return (
       <Card><CardContent className="flex flex-col items-center gap-3 py-10">
-        <p className="text-sm text-slate-500">Clique para validar as linhas do arquivo e identificar duplicidades.</p>
+        <p className="text-sm text-slate-500">Clique para validar as linhas dos arquivos e identificar duplicidades.</p>
         <Button onClick={onRunPreview} loading={loading}>Validar e pré-visualizar</Button>
       </CardContent></Card>
     );
   }
 
+  const showFileColumn = filePreviews.length > 1;
+
   return (
     <Card>
       <CardContent>
         <div className="mb-4 flex flex-wrap gap-2">
-          <Badge tone={source === 'structured' ? 'info' : source === 'pdf' ? 'warning' : 'danger'}>
-            Origem: {source === 'structured' ? 'arquivo estruturado (CSV/XLSX)' : source === 'pdf' ? 'texto extraído de PDF' : 'OCR de imagem'}
-          </Badge>
+          <Badge tone="info">{filePreviews.length} arquivo(s)</Badge>
           <Badge tone="success">{counts.valid} válidas</Badge>
           <Badge tone="warning">{counts.warning} avisos</Badge>
           <Badge tone="danger">{counts.error} erros</Badge>
@@ -811,10 +981,9 @@ function PreviewStep({
         {requiresManualReview && (
           <p className="mb-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-            {source === 'pdf'
-              ? 'O texto foi extraído automaticamente do PDF e as colunas foram reconstruídas por heurística — confira cada linha.'
-              : 'Estes dados vieram de reconhecimento óptico de caracteres (OCR) e podem conter erros de leitura, mesmo com confiança alta.'}
-            {' '}Linhas com confiança abaixo de 70% estão destacadas abaixo.
+            Um ou mais arquivos vieram de PDF ou OCR de imagem — o texto foi extraído automaticamente e as colunas
+            reconstruídas por heurística. Linhas com confiança abaixo de 70% estão destacadas abaixo; confira cada
+            uma com atenção.
           </p>
         )}
 
@@ -823,6 +992,7 @@ function PreviewStep({
             <thead className="sticky top-0 border-b border-slate-100 bg-white text-left uppercase tracking-wide text-slate-400 dark:border-slate-800 dark:bg-slate-900">
               <tr>
                 <th className="px-3 py-2">#</th>
+                {showFileColumn && <th className="px-3 py-2">Arquivo</th>}
                 <th className="px-3 py-2">Interpretado</th>
                 <th className="px-3 py-2">Confiança</th>
                 <th className="px-3 py-2">Situação</th>
@@ -830,16 +1000,17 @@ function PreviewStep({
               </tr>
             </thead>
             <tbody>
-              {preview.map((row) => {
-                const lowConfidence = requiresManualReview && row.confidence < 0.7;
+              {flatRows.map(({ key, fileName, source, row }) => {
+                const lowConfidence = source !== 'structured' && row.confidence < 0.7;
                 return (
                 <tr
-                  key={row.index}
+                  key={key}
                   className={`border-b border-slate-50 last:border-0 dark:border-slate-800/60 ${
                     row.validation === 'error' ? 'bg-rose-50/60 dark:bg-rose-950/20' : lowConfidence ? 'bg-amber-50/60 dark:bg-amber-950/20' : ''
                   }`}
                 >
                   <td className="px-3 py-2 text-slate-400">{row.index + 1}</td>
+                  {showFileColumn && <td className="max-w-[140px] truncate px-3 py-2 text-slate-400" title={fileName}>{fileName}</td>}
                   <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
                     {Object.entries(row.interpreted).map(([k, v]) => `${k}: ${v}`).join(' · ') || '—'}
                     {row.validationNotes && <p className="mt-0.5 text-[11px] text-slate-400">{row.validationNotes}</p>}
@@ -855,8 +1026,8 @@ function PreviewStep({
                   <td className="px-3 py-2">
                     <select
                       className="rounded border border-slate-300 bg-white px-1.5 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
-                      value={resolutions[row.index] ?? row.resolution}
-                      onChange={(e) => setResolutions((r) => ({ ...r, [row.index]: e.target.value as PreviewRow['resolution'] }))}
+                      value={resolutions[key] ?? row.resolution}
+                      onChange={(e) => setResolutions((r) => ({ ...r, [key]: e.target.value as PreviewRow['resolution'] }))}
                       disabled={row.validation === 'error'}
                     >
                       <option value="import">Importar</option>
@@ -888,7 +1059,7 @@ function PreviewStep({
           <Button
             onClick={onConfirm}
             loading={loading}
-            disabled={counts.error === preview.length || (requiresManualReview && !reviewedManually)}
+            disabled={counts.error === flatRows.length || (requiresManualReview && !reviewedManually)}
           >
             Confirmar importação
           </Button>

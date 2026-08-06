@@ -55,6 +55,7 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Área | Detalhe |
 |---|---|
 | Assistente em etapas | Tipo de documento → escopo/período/periodicidade (nunca deduzida da data) → armazenamento (aviso em destaque) → upload → mapeamento de colunas → validação/duplicidades → pré-visualização com correção manual → confirmação → log |
+| Upload de múltiplos arquivos | Até **10 arquivos por importação** (CSV/XLSX/PDF/JPEG/PNG, combináveis), com lista individual (nome, linhas/colunas identificadas ou erro, remoção antes de confirmar), um único mapeamento de colunas aplicado a todos e resultado agregado + detalhado por arquivo. O mesmo aluno/escola/turma citado em arquivos diferentes da mesma importação não é cadastrado em duplicidade. |
 | Parsing real | CSV (Papa Parse) e XLSX (SheetJS) |
 | Criação automática de registros | **Cadastro de aluno** e **Frequência** criam/atualizam registros reais, com detecção de duplicidade (nome/aluno+data) |
 | Relatórios EI/EF (cadastro completo) | Leem escola, turma, aluno, professor e atividade/disciplina diretamente do arquivo e **cadastram automaticamente o que ainda não existir** (escola, turma, ano letivo, aluno, categoria/atividade), em vez de exigir tudo pré-cadastrado. Professores criados por essa via ficam com o login bloqueado até um Owner/Admin definir uma senha real em Professores. Avaliações (R/B/O) e notas entram como rascunho, para revisão antes da publicação às famílias. |
@@ -99,6 +100,7 @@ partir de um único registro).
 | Autenticação real (Supabase Auth) | `authStore.loginWithPassword()` isola o ponto de troca; hoje compara hash local |
 | Row Level Security | Políticas SQL reais em `supabase/migrations/0002_rls_policies.sql`, nunca aplicadas contra um banco real; localmente a restrição de escopo é feita na camada de aplicação (hooks de permissão) |
 | OCR em ambiente com rede restrita | O reconhecimento em si depende de um download de dados de idioma (Tesseract.js); em ambientes com bloqueio de saída para CDNs esse download falha — a extração de PDF e todo o resto do fluxo (progresso, confiança, revisão obrigatória) funcionam normalmente |
+| OCR de boletins em formato de checklist (foto de tabela com uma linha por habilidade BNCC × colunas de semestre) | O upload/anexo desse tipo de arquivo é aceito normalmente (sem erro, sem travar) e o texto é extraído quando o ambiente tem acesso à internet, mas a reconstrução automática de colunas (heurística por espaçamento) não foi desenhada para esse layout específico — diferente de uma lista simples de alunos, aqui não há uma coluna "aluno"/"escola" por linha, e sim um cabeçalho único no topo da folha com dezenas de linhas de habilidades por baixo. Nesse caso a pré-visualização mostra o texto extraído para revisão manual, mas o cadastro automático linha a linha (Fase 7) não interpreta esse formato — fica para uma iteração futura dedicada a boletins em checklist. |
 
 ## Como verificar
 
@@ -118,4 +120,9 @@ importação de um relatório de Educação Infantil e de um relatório do Ensin
 citando escola/turma/aluno/professor/atividade ainda inexistentes — confirmando que o cadastro
 automático cria exatamente os registros que faltam (sem duplicar entidades já criadas por uma
 importação anterior na mesma sessão) e que os dados aparecem corretamente nas telas de Escolas, Turmas,
-Alunos e Professores.
+Alunos e Professores. Testado também o limite de 10 arquivos por importação (seleção de 11 é recusada
+com aviso, seleção de 10 funciona, tentar adicionar um 11º com 10 já selecionados também é recusado),
+a remoção individual de arquivos antes de confirmar, o resultado agregado + detalhado por arquivo em
+um lote de várias planilhas, e o anexo de fotos reais de boletim impresso (fotos de celular, ~4000×3000
+pixels) — confirmando que o upload aceita o arquivo e degrada de forma segura (mensagem de erro por
+arquivo, sem travar a tela) quando a extração de texto não está disponível.

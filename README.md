@@ -18,7 +18,8 @@ React Hook Form + Zod · Recharts · dexie-react-hooks · Vitest
 
 A importação de CSV (Papa Parse), XLSX (SheetJS), PDF (PDF.js) e imagens com OCR (Tesseract.js) está
 funcionando no assistente de importação (Fases 3 e 7) — importações vindas de PDF ou OCR exigem revisão
-humana explícita antes de confirmar.
+humana explícita antes de confirmar. É possível anexar até **10 arquivos de uma vez** numa mesma
+importação (combinando formatos), com resultado agregado e detalhado por arquivo.
 
 ## Como executar
 
