@@ -270,10 +270,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       const academicYearCache = new Map<string, string>();
 
       async function ensureSchool(name: string): Promise<School> {
-        const key = name.trim().toLowerCase();
+        const key = normalizeHeader(name);
         const cached = schoolCache.get(key);
         if (cached) return cached;
-        const existing = allSchools.find((s) => s.name.toLowerCase() === key);
+        const existing = allSchools.find((s) => normalizeHeader(s.name) === key);
         if (existing) { schoolCache.set(key, existing); return existing; }
         const created = await repositories.schools.create({ name: name.trim() }, actor);
         allSchools.push(created);
@@ -298,10 +298,14 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       async function ensureClass(schoolIdArg: string, name: string): Promise<Class> {
-        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const key = `${schoolIdArg}::${normalizeHeader(name)}`;
         const cached = classCache.get(key);
         if (cached) return cached;
-        const existing = allClasses.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        // Casa só com turmas de Educação Infantil — um nome de turma como "B2" é comum em várias
+        // escolas/estágios, e sem esse filtro o aluno podia acabar numa turma de outro estágio.
+        const existing = allClasses.find(
+          (c) => c.schoolId === schoolIdArg && c.stage === 'early_childhood' && normalizeHeader(c.name) === normalizeHeader(name),
+        );
         if (existing) { classCache.set(key, existing); return existing; }
         const academicYearId = await ensureAcademicYear(schoolIdArg);
         const created = await repositories.classes.create(
@@ -315,10 +319,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       async function ensureStudent(schoolIdArg: string, classIdArg: string | undefined, name: string, birthDate: string): Promise<Student> {
-        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const key = `${schoolIdArg}::${normalizeHeader(name)}`;
         const cached = studentCache.get(key);
         if (cached) return cached;
-        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && s.fullName.toLowerCase() === name.trim().toLowerCase());
+        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && normalizeHeader(s.fullName) === normalizeHeader(name));
         if (existing) { studentCache.set(key, existing); return existing; }
         const created = await repositories.students.create(
           {
@@ -489,10 +493,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       const scaleCache = new Map<string, string>();
 
       async function ensureSchool(name: string): Promise<School> {
-        const key = name.trim().toLowerCase();
+        const key = normalizeHeader(name);
         const cached = schoolCache.get(key);
         if (cached) return cached;
-        const existing = allSchools.find((s) => s.name.toLowerCase() === key);
+        const existing = allSchools.find((s) => normalizeHeader(s.name) === key);
         if (existing) { schoolCache.set(key, existing); return existing; }
         const created = await repositories.schools.create({ name: name.trim() }, actor);
         allSchools.push(created);
@@ -517,10 +521,14 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       async function ensureClass(schoolIdArg: string, name: string, stage: EducationStage): Promise<Class> {
-        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const key = `${schoolIdArg}::${normalizeHeader(name)}`;
         const cached = classCache.get(key);
         if (cached) return cached;
-        const existing = allClasses.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        // Casa só com turmas do mesmo estágio — um nome de turma pode se repetir entre Educação
+        // Infantil e Ensino Fundamental na mesma escola.
+        const existing = allClasses.find(
+          (c) => c.schoolId === schoolIdArg && c.stage === stage && normalizeHeader(c.name) === normalizeHeader(name),
+        );
         if (existing) { classCache.set(key, existing); return existing; }
         const academicYearId = await ensureAcademicYear(schoolIdArg);
         const created = await repositories.classes.create(
@@ -534,10 +542,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       async function ensureStudent(schoolIdArg: string, classIdArg: string, name: string): Promise<Student> {
-        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const key = `${schoolIdArg}::${normalizeHeader(name)}`;
         const cached = studentCache.get(key);
         if (cached) return cached;
-        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && s.fullName.toLowerCase() === name.trim().toLowerCase());
+        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && normalizeHeader(s.fullName) === normalizeHeader(name));
         if (existing) { studentCache.set(key, existing); return existing; }
         const created = await repositories.students.create(
           {
@@ -559,10 +567,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       /** Professor citado na planilha, mas ainda sem cadastro: criado com login bloqueado — um
        *  Owner/Admin precisa liberar o acesso e definir uma senha real depois, na tela Professores. */
       async function ensureTeacher(name: string): Promise<AppUser> {
-        const key = name.trim().toLowerCase();
+        const key = normalizeHeader(name);
         const cached = teacherCache.get(key);
         if (cached) return cached;
-        const existing = allTeachers.find((t) => t.fullName.toLowerCase() === key);
+        const existing = allTeachers.find((t) => normalizeHeader(t.fullName) === key);
         if (existing) { teacherCache.set(key, existing); return existing; }
         const placeholderEmail = `${slugifyName(name)}.${newId().slice(0, 6)}@pendente.importacao`;
         const created = await repositories.users.create(
@@ -598,10 +606,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
 
       async function ensureCategory(schoolIdArg: string, stage: EducationStage, name: string | undefined): Promise<string | undefined> {
         if (!name?.trim()) return undefined;
-        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const key = `${schoolIdArg}::${normalizeHeader(name)}`;
         const cached = categoryCache.get(key);
         if (cached) return cached.id;
-        const existing = allCategories.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        const existing = allCategories.find((c) => c.schoolId === schoolIdArg && normalizeHeader(c.name) === normalizeHeader(name));
         if (existing) { categoryCache.set(key, existing); return existing.id; }
         const created = await repositories.assessmentCategories.create({ schoolId: schoolIdArg, stage, kind: 'custom', name: name.trim() }, actor);
         allCategories.push(created);
@@ -618,10 +626,10 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         categoryId: string | undefined,
         teacherId: string,
       ): Promise<Activity> {
-        const key = `${classIdArg}::${title.trim().toLowerCase()}::${date}`;
+        const key = `${classIdArg}::${normalizeHeader(title)}::${date}`;
         const cached = activityCache.get(key);
         if (cached) return cached;
-        const existing = allActivities.find((a) => a.classId === classIdArg && a.title.toLowerCase() === title.trim().toLowerCase() && a.date === date);
+        const existing = allActivities.find((a) => a.classId === classIdArg && normalizeHeader(a.title) === normalizeHeader(title) && a.date === date);
         if (existing) { activityCache.set(key, existing); return existing; }
         const created = await repositories.activities.create(
           {

@@ -166,6 +166,25 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   continuam sendo processados normalmente, e a tela de resultado agora lista quais arquivos falharam
   e por quê, em vez de simplesmente não terminar em silêncio.
 
+## v0.8.4 — Casamento de escola/turma/aluno por nome tolera acentuação e espaçamento
+
+- Investigado relato de que uma importação criou o documento e o aluno, mas o aluno não aparecia
+  no Dashboard de Educação Infantil ao filtrar por escola/turma. A causa mais provável: como o
+  nome da escola/turma é digitado (ou lido por OCR) de novo a cada importação, uma pequena
+  diferença — acento, espaço duplo, maiúscula/minúscula — fazia o casamento por nome não
+  reconhecer um registro já existente e criar um **novo** escola/turma quase idêntico, em vez de
+  reaproveitar o correto. O aluno ficava então associado a uma escola/turma "duplicada" diferente
+  da que aparecia selecionada no filtro do dashboard.
+- **Casamento por nome agora ignora acentos, maiúsculas/minúsculas e espaçamento** ao decidir se
+  cria escola, turma, aluno, professor, categoria/campo de experiência ou atividade — em todos os
+  tipos de importação automática (EI, EF e boletim BNCC).
+- **Turma agora também precisa ser do mesmo estágio (Educação Infantil/Ensino Fundamental)** para
+  ser reaproveitada — um nome de turma como "B2" pode existir em mais de um estágio na mesma
+  escola.
+- Isso evita duplicidade em importações **futuras**; não mescla automaticamente duplicidades já
+  criadas em tentativas anteriores — para essas, edite a ficha do aluno (em Alunos) e corrija a
+  escola/turma manualmente.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
