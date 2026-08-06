@@ -25,6 +25,7 @@ import { ElementaryDashboardPage } from '../features/elementary/ElementaryDashbo
 import { GradesPage } from '../features/elementary/GradesPage';
 import { AttendancePage } from '../features/attendance/AttendancePage';
 import { CheckInOutPage } from '../features/check-in-out/CheckInOutPage';
+import { DevelopmentPage } from '../features/pedagogical/DevelopmentPage';
 import { EventsPage } from '../features/events/EventsPage';
 import { AlertsPage } from '../features/alerts/AlertsPage';
 import { PortfolioPage } from '../features/portfolio/PortfolioPage';
@@ -64,6 +65,7 @@ export const router = createHashRouter([
       { path: 'notas', element: <GradesPage /> },
       { path: 'frequencia', element: <AttendancePage /> },
       { path: 'entrada-saida', element: <CheckInOutPage /> },
+      { path: 'desenvolvimento', element: <DevelopmentPage /> },
 
       { path: 'alertas', element: <AlertsPage /> },
       { path: 'observacoes', element: <ObservationsPage /> },

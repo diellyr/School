@@ -81,11 +81,21 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Imagem (OCR) | Reconhecimento de texto real via Tesseract.js (`parseImageFile`), com indicador de progresso durante o reconhecimento e confiança por linha vinda diretamente do motor (nunca inventada) |
 | Confiança e revisão humana | Linhas com confiança abaixo de 70% são destacadas na pré-visualização; para qualquer importação vinda de PDF ou OCR, o botão "Confirmar importação" fica bloqueado até o usuário marcar explicitamente que revisou manualmente todas as linhas |
 
+### Desenvolvimento — recomendações pedagógicas para famílias (Educação Infantil)
+
+| Área | Detalhe |
+|---|---|
+| Catálogo pedagógico | `src/data/pedagogical-rules.json` (5 Campos de Experiência da BNCC, 25 habilidades, 158 atividades em família), lido só através de `PedagogicalRepository` — nunca hardcoded na interface. Ver [`docs/pedagogical-recommendations.md`](pedagogical-recommendations.md) |
+| Análise e recomendação | `assessmentAnalysisService` liga cada `Activity`/`Assessment` a uma habilidade por casamento de texto (nunca inventa habilidade); `recommendationPriorityService` implementa os 7 casos de recorrência/transição sem linguagem diagnóstica; `activitySelectionService` evita repetir a mesma atividade recente |
+| Plano da semana | Gerado com 2 a 5 atividades, distribuídas pelos dias disponíveis da família, com ações reais (marcar realizada, feedback, substituir, remover) gravadas em `ActivityHistory`/`WeeklyPlan` (IndexedDB) |
+| Painel administrativo de revisão pedagógica | Não construído nesta versão (arquitetura já preparada — `PedagogicalRepository` é trocável) |
+
 ### Testes automatizados
 
 RBAC (perfis e precedência de sobreposições), CRUD + exclusão lógica/restauração do repositório base,
-carregamento/remoção idempotente dos dados de demonstração, e o motor de alertas (nunca conclui a
-partir de um único registro).
+carregamento/remoção idempotente dos dados de demonstração, o motor de alertas (nunca conclui a
+partir de um único registro), e os services de recomendação pedagógica (casamento de habilidade,
+prioridade sem linguagem diagnóstica, anti-repetição, limite semanal, explicação sempre presente).
 
 ## 🚧 Navegável, mas simulado (chega em fase futura)
 

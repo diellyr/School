@@ -85,6 +85,7 @@ Em **Configurações → Dados de demonstração** é possível remover todos os
 src/
   app/            bootstrap, roteamento, tema (claro/escuro)
   domain/         tipos de todas as entidades do modelo de dados (seção "Modelo de dados")
+  data/           conteúdo desacoplado do código (ex.: pedagogical-rules.json), lido só via repository
   db/             schema Dexie (IndexedDB) + seed de dados de demonstração
   repositories/   camada de repositório (interfaces + implementação Local*/Dexie + stub Supabase*)
   auth/           autenticação demo, RBAC (matriz de permissões) e hooks de autorização
@@ -92,14 +93,16 @@ src/
   components/     componentes de UI reutilizáveis (Button, Card, Dialog, formulários, estados vazios…)
   features/       telas por módulo: alunos, responsáveis, escolas, turmas, auditoria, backup,
                   early-childhood (atividades/dashboard EI), elementary (notas/dashboard EF),
-                  assessments, attendance, alerts (+ motor de regras), events, observations,
-                  portfolio, documents, imports (assistente CSV/XLSX/PDF/OCR), sync (fila de
-                  sincronização), recommendations…
+                  assessments, attendance, check-in-out, pedagogical (Desenvolvimento — recomendações
+                  em família por Campo de Experiência da BNCC), alerts (+ motor de regras), events,
+                  observations, portfolio, documents, imports (assistente CSV/XLSX/PDF/OCR), sync
+                  (fila de sincronização), recommendations…
   test/           setup do Vitest (fake-indexeddb, jest-dom)
 docs/
-  data-model.md            entidades, campos e relacionamentos
-  supabase-migration.md    plano de migração, schema SQL e políticas RLS
-  status.md                o que é real e o que está simulado, por módulo
+  data-model.md                    entidades, campos e relacionamentos
+  pedagogical-recommendations.md   arquitetura do módulo Desenvolvimento (recomendações em família)
+  supabase-migration.md            plano de migração, schema SQL e políticas RLS
+  status.md                        o que é real e o que está simulado, por módulo
 supabase/
   migrations/*.sql         schema completo, políticas RLS e funções privilegiadas (não aplicadas)
   README.md                passo a passo para ativar a nuvem quando/se decidido

@@ -5,6 +5,7 @@ export * from './rbac';
 export * from './assessment';
 export * from './attendance';
 export * from './checkInOut';
+export * from './pedagogical';
 export * from './observations';
 export * from './alerts';
 export * from './events';

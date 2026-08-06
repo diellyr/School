@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   ClipboardList,
+  Compass,
   Database,
   DoorOpen,
   FileText,
@@ -63,6 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/documentos', label: 'Documentos', icon: FolderOpen, module: 'documents', group: 'Comunicação' },
   { path: '/relatorios', label: 'Relatórios', icon: FileText, module: 'reports', group: 'Comunicação' },
   { path: '/recomendacoes', label: 'Recomendações', icon: Sparkles, module: 'recommendations', group: 'Comunicação' },
+  { path: '/desenvolvimento', label: 'Desenvolvimento', icon: Compass, module: 'family_development', group: 'Comunicação' },
 
   { path: '/usuarios', label: 'Usuários', icon: Users, module: 'users', group: 'Administração' },
   { path: '/permissoes', label: 'Permissões do Owner', icon: ShieldCheck, module: 'permissions', group: 'Administração' },

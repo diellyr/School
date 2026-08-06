@@ -23,6 +23,13 @@ import {
 } from './local/assessmentRepository';
 import { LocalAttendanceRepository } from './local/attendanceRepository';
 import { LocalCheckInOutRepository } from './local/checkInOutRepository';
+import {
+  LocalActivityHistoryRepository,
+  LocalFamilyPreferencesRepository,
+  LocalRecommendationHistoryRepository,
+  LocalWeeklyPlanRepository,
+} from './local/pedagogicalHistoryRepository';
+import { JsonPedagogicalRepository } from './pedagogical/JsonPedagogicalRepository';
 import { LocalParentObservationRepository, LocalTeacherObservationRepository } from './local/observationRepository';
 import {
   LocalAlertAcknowledgementRepository,
@@ -78,6 +85,12 @@ export interface Repositories {
   attendance: LocalAttendanceRepository;
   checkInOuts: LocalCheckInOutRepository;
 
+  pedagogical: JsonPedagogicalRepository;
+  activityHistory: LocalActivityHistoryRepository;
+  recommendationHistory: LocalRecommendationHistoryRepository;
+  weeklyPlans: LocalWeeklyPlanRepository;
+  familyPreferences: LocalFamilyPreferencesRepository;
+
   teacherObservations: LocalTeacherObservationRepository;
   parentObservations: LocalParentObservationRepository;
 
@@ -124,6 +137,12 @@ function createLocalRepositories(): Repositories {
     grades: new LocalGradeRepository(),
     attendance: new LocalAttendanceRepository(),
     checkInOuts: new LocalCheckInOutRepository(),
+
+    pedagogical: new JsonPedagogicalRepository(),
+    activityHistory: new LocalActivityHistoryRepository(),
+    recommendationHistory: new LocalRecommendationHistoryRepository(),
+    weeklyPlans: new LocalWeeklyPlanRepository(),
+    familyPreferences: new LocalFamilyPreferencesRepository(),
 
     teacherObservations: new LocalTeacherObservationRepository(),
     parentObservations: new LocalParentObservationRepository(),

@@ -39,6 +39,10 @@ import type {
   Recommendation,
   Notification,
   DataRetentionRule,
+  ActivityHistory,
+  RecommendationHistory,
+  WeeklyPlan,
+  FamilyPreferences,
 } from '../domain';
 
 /**
@@ -95,6 +99,11 @@ export class SchoolTrackerDB extends Dexie {
   notifications!: EntityTable<Notification, 'id'>;
   dataRetentionRules!: EntityTable<DataRetentionRule, 'id'>;
 
+  activityHistory!: EntityTable<ActivityHistory, 'id'>;
+  recommendationHistory!: EntityTable<RecommendationHistory, 'id'>;
+  weeklyPlans!: EntityTable<WeeklyPlan, 'id'>;
+  familyPreferences!: EntityTable<FamilyPreferences, 'id'>;
+
   constructor() {
     super('school-tracker-db');
 
@@ -145,6 +154,11 @@ export class SchoolTrackerDB extends Dexie {
       recommendations: 'id, organizationId, ageRange, published, status',
       notifications: 'id, organizationId, userId, read',
       dataRetentionRules: 'id, organizationId, entityType, status',
+
+      activityHistory: 'id, organizationId, studentId, skillId, activityId, weeklyPlanId, status',
+      recommendationHistory: 'id, organizationId, studentId, skillId, weeklyPlanId, status',
+      weeklyPlans: 'id, organizationId, studentId, weekStart, status',
+      familyPreferences: 'id, organizationId, studentId, status',
     });
   }
 }

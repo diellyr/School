@@ -139,6 +139,9 @@ export function StudentDetailPage() {
           </Link>
           <Link to="/frequencia"><Button variant="outline">Frequência</Button></Link>
           <Link to="/entrada-saida"><Button variant="outline">Entrada e saída</Button></Link>
+          {klass?.stage === 'early_childhood' && (
+            <Link to={`/desenvolvimento?studentId=${student.id}`}><Button variant="outline">Desenvolvimento</Button></Link>
+          )}
           <Link to="/portfolio"><Button variant="outline">Portfólio</Button></Link>
           <Link to="/documentos"><Button variant="outline">Documentos</Button></Link>
         </CardContent>

@@ -329,6 +329,36 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   Comunicação, Administração) — para quem usa o sistema não precisar sair do app para aprender a
   usá-lo.
 
+## v0.11.0 — Novo módulo: Desenvolvimento (recomendações pedagógicas para famílias)
+
+Educação Infantil ganha um módulo dedicado a ajudar a família a entender e apoiar o
+desenvolvimento da criança — nunca a transformar R/B/O em nota, nunca um diagnóstico. Ver
+[`docs/pedagogical-recommendations.md`](docs/pedagogical-recommendations.md) para a arquitetura
+completa.
+
+- **Catálogo pedagógico separado do código**: `src/data/pedagogical-rules.json` (5 Campos de
+  Experiência da BNCC, 25 habilidades, 158 atividades em família) — nenhuma regra, atividade ou
+  texto de orientação está hardcoded na interface. Lido através de um `PedagogicalRepository`
+  trocável (hoje lê o JSON; no futuro lê uma API/banco, sem mudar nenhuma tela).
+- **Dashboard por Campo de Experiência**: mostra quantas habilidades estão em R/B/O, agrupa
+  automaticamente quando há concentração de atenção num campo, e permite abrir cada habilidade
+  individualmente.
+- **"Como podemos ajudar?"**: para cada habilidade em desenvolvimento, mostra por que ela é
+  importante, como ajudar, uma atividade prática (com alternativas, para nunca repetir sempre a
+  mesma), tempo e frequência sugeridos, e **por que aquela recomendação foi mostrada** — nunca só
+  "recomendado pela IA".
+- **Plano da semana**: gera automaticamente de 2 a 5 atividades leves por semana, priorizando
+  recorrência real (não um R isolado), com reforço leve após evolução de R para B e nenhuma
+  prioridade para quem já evoluiu para Ótimo. Nunca cria streak, ranking ou penalidade — marcar
+  como realizada, dar feedback, substituir ou remover uma atividade são só sinais para melhorar a
+  próxima sugestão.
+- **Evita repetição**: uma atividade recomendada recentemente só volta a aparecer depois de sair
+  da janela configurada pela família (padrão: 3 semanas), a não ser que a família peça para
+  repetir.
+- Mudanças de nível (R↔B↔O) nunca são tratadas como diagnóstico — mesmo quedas de B para R são
+  apresentadas como "variação a observar", nunca como regressão grave, seguindo a mesma lógica
+  já usada nos Alertas.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

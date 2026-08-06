@@ -15,6 +15,19 @@ export function normalizeForMatch(text: string): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
+/** Como `normalizeForMatch`, mas preserva espaços entre palavras — usado para casar frases
+ *  inteiras (ex.: título de atividade × texto de habilidade cadastrada) por sobreposição de
+ *  palavras, não só por igualdade exata do bloco inteiro. */
+export function normalizeSentence(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export function formatDate(iso?: string): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');

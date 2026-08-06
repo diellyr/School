@@ -17,7 +17,7 @@ const NONE: PermissionAction[] = [];
 function moduleMap(actions: PermissionAction[]): Record<SystemModule, PermissionAction[]> {
   const modules: SystemModule[] = [
     'students', 'guardians', 'teachers', 'schools', 'classes', 'imports', 'manual_entry',
-    'activities', 'assessments', 'grades', 'attendance', 'check_in_out', 'alerts', 'observations', 'events',
+    'activities', 'assessments', 'grades', 'attendance', 'check_in_out', 'family_development', 'alerts', 'observations', 'events',
     'portfolio', 'documents', 'reports', 'users', 'permissions', 'audit', 'sync', 'backup',
     'recommendations', 'settings',
   ];
@@ -50,6 +50,7 @@ const TEACHER_MATRIX: Record<SystemModule, PermissionAction[]> = {
   classes: ['view'],
   attendance: ['view', 'create', 'edit'],
   check_in_out: ['view', 'create', 'edit'],
+  family_development: ['view', 'create', 'edit'],
   activities: ['view', 'create', 'edit'],
   assessments: ['view', 'create', 'edit', 'approve'],
   grades: ['view', 'create', 'edit', 'approve'],
@@ -77,6 +78,7 @@ const GUARDIAN_MATRIX: Record<SystemModule, PermissionAction[]> = {
   students: ['view'],
   attendance: ['view'],
   check_in_out: ['view'],
+  family_development: ['view', 'create', 'edit'],
   activities: ['view'],
   assessments: ['view'],
   grades: ['view'],
@@ -106,6 +108,7 @@ const STUDENT_MATRIX: Record<SystemModule, PermissionAction[]> = {
   students: ['view'],
   attendance: ['view'],
   check_in_out: ['view'],
+  family_development: ['view'],
   activities: ['view'],
   assessments: ['view'],
   grades: ['view'],

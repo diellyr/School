@@ -25,6 +25,7 @@ export type SystemModule =
   | 'grades'
   | 'attendance'
   | 'check_in_out'
+  | 'family_development'
   | 'alerts'
   | 'observations'
   | 'events'

@@ -1,0 +1,863 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "schemaVersion": 1,
+    "framework": "BNCC",
+    "country": "BR",
+    "language": "pt-BR",
+    "ageGroups": ["0-1", "1-2", "2-3", "3-4", "4-5"],
+    "status": "published",
+    "lastUpdatedAt": "2026-08-06"
+  },
+  "experienceFields": [
+    {
+      "id": "eu_outro_nos",
+      "slug": "o-eu-o-outro-e-o-nos",
+      "name": "O eu, o outro e o nós",
+      "description": "Convívio, relações interpessoais, autoconhecimento, respeito às diferenças e resolução de conflitos.",
+      "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "official-framework" },
+      "skills": [
+        {
+          "id": "cooperation-participation",
+          "slug": "cooperacao-e-participacao",
+          "name": "Cooperação e participação",
+          "description": "Participar de brincadeiras e tarefas em grupo, cooperando com colegas e ajudando quando necessário.",
+          "keywords": ["cooperação", "participação", "amizade", "grupo"],
+          "matchTexts": [
+            "amplia as relacoes interpessoais desenvolvendo atitudes de participacao e cooperacao",
+            "apresenta atitudes de cuidado e ajuda com colegas e professor",
+            "apresenta facilidade para relacionar se e fazer novas amizades"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Cooperar e participar de atividades em grupo ajuda a criança a se sentir parte de uma comunidade e a desenvolver habilidades sociais que serão a base de todas as relações futuras.",
+            "howToHelp": ["Envolver a criança em pequenas tarefas domésticas em conjunto", "Elogiar quando ela ajudar um irmão, primo ou colega", "Brincar de jogos que exigem trabalho em equipe"],
+            "generalRecommendations": ["Evitar comparar com outras crianças", "Valorizar o esforço de participar, não só o resultado"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 20
+          },
+          "activityOptions": [
+            { "id": "cooperation-participation-01", "skillId": "cooperation-participation", "title": "Arrumando juntos", "shortDescription": "Uma tarefa simples da casa feita em dupla.", "objective": "Cooperação em tarefa compartilhada", "instructions": ["Escolha uma tarefa curta (guardar brinquedos, pôr a mesa)", "Façam juntos, dividindo partes da tarefa", "Agradeça a ajuda ao final"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "cooperative-task", "requiresAdult": true, "tags": ["cooperação"], "active": true },
+            { "id": "cooperation-participation-02", "skillId": "cooperation-participation", "title": "Jogo cooperativo em família", "shortDescription": "Um jogo de tabuleiro simples onde todos vencem juntos.", "objective": "Cooperação e participação em grupo", "instructions": ["Escolha um jogo simples de regras", "Combine que o objetivo é ajudar uns aos outros", "Comemorem juntos ao final"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["jogo de tabuleiro simples"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "game", "requiresAdult": true, "tags": ["cooperação", "jogo"], "active": true },
+            { "id": "cooperation-participation-03", "skillId": "cooperation-participation", "title": "Construindo juntos", "shortDescription": "Montar uma torre ou construção com blocos, cada um colocando uma peça.", "objective": "Participação alternada em uma construção conjunta", "instructions": ["Sentem-se próximos com blocos ou peças de encaixe", "Cada pessoa coloca uma peça por vez", "Observem juntos o resultado final"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["blocos de montar"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "construction", "requiresAdult": false, "tags": ["cooperação"], "active": true },
+            { "id": "cooperation-participation-04", "skillId": "cooperation-participation", "title": "Ajudante do dia", "shortDescription": "A criança recebe uma pequena responsabilidade especial no dia.", "objective": "Senso de participação e contribuição", "instructions": ["Escolha uma tarefa pequena e adequada à idade", "Explique por que essa ajuda é importante", "Agradeça publicamente ao final do dia"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "responsibility", "requiresAdult": true, "tags": ["cooperação", "autonomia"], "active": true },
+            { "id": "cooperation-participation-05", "skillId": "cooperation-participation", "title": "Brincadeira com amigos ou irmãos", "shortDescription": "Uma brincadeira de roda ou de regras simples com mais de uma criança.", "objective": "Participação social em grupo", "instructions": ["Convide outra criança (irmão, primo, colega)", "Escolham uma brincadeira com regras simples", "Observe e apoie quando necessário"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 20, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "social-play", "requiresAdult": false, "tags": ["cooperação", "amizade"], "active": true }
+          ]
+        },
+        {
+          "id": "empathy-emotional-awareness",
+          "slug": "empatia-e-cuidado",
+          "name": "Empatia e cuidado com o outro",
+          "description": "Perceber os sentimentos das outras pessoas e demonstrar carinho, respeito e cuidado.",
+          "keywords": ["empatia", "carinho", "respeito", "sentimentos"],
+          "matchTexts": [
+            "demonstra empatia pelos outros percebendo que as pessoas tem diferentes sentimentos necessidades e maneiras de pensar e agir",
+            "mostra que se importa com os outros demonstrando atitudes de carinho e respeito",
+            "valoriza seu corpo e respeita caracteristicas proprias e dos outros",
+            "manifesta interesse e respeito por diferentes culturas e modos de vida"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Reconhecer e nomear sentimentos, próprios e dos outros, é a base da empatia e ajuda a criança a construir relações mais saudáveis.",
+            "howToHelp": ["Nomear os próprios sentimentos em voz alta", "Perguntar como a criança acha que o outro está se sentindo", "Valorizar gestos de cuidado espontâneos"],
+            "generalRecommendations": ["Evitar minimizar os sentimentos da criança", "Modelar o comportamento de cuidado no dia a dia"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "empathy-emotional-awareness-01", "skillId": "empathy-emotional-awareness", "title": "Cartões de sentimentos", "shortDescription": "Desenhar ou apontar rostos com diferentes emoções e conversar sobre elas.", "objective": "Reconhecimento e nomeação de emoções", "instructions": ["Desenhem juntos rostos com emoções diferentes (feliz, triste, bravo)", "Pergunte quando a criança já sentiu cada uma", "Converse sobre como ajudar alguém que está triste"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "emotional-literacy", "requiresAdult": true, "tags": ["empatia", "sentimentos"], "active": true },
+            { "id": "empathy-emotional-awareness-02", "skillId": "empathy-emotional-awareness", "title": "Cuidando de um bichinho de pelúcia", "shortDescription": "Brincar de cuidar de um boneco ou bicho de pelúcia que está \"triste\" ou \"machucado\".", "objective": "Expressão de cuidado através do brincar", "instructions": ["Escolha um boneco ou bicho de pelúcia", "Diga que ele está triste ou machucado", "Pergunte à criança como ela pode ajudá-lo"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["boneco ou pelúcia"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "pretend-play", "requiresAdult": false, "tags": ["empatia", "cuidado"], "active": true },
+            { "id": "empathy-emotional-awareness-03", "skillId": "empathy-emotional-awareness", "title": "O que você acha que ele sentiu?", "shortDescription": "Ao ler uma história, parar e perguntar sobre os sentimentos dos personagens.", "objective": "Perspectiva do outro através da narrativa", "instructions": ["Durante a leitura, pare em um momento importante", "Pergunte: \"O que você acha que ele sentiu?\"", "Converse sobre como a criança se sentiria na mesma situação"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["empatia", "leitura"], "active": true },
+            { "id": "empathy-emotional-awareness-04", "skillId": "empathy-emotional-awareness", "title": "Gesto de cuidado do dia", "shortDescription": "Combinar um pequeno gesto de carinho para fazer por alguém durante o dia.", "objective": "Prática concreta de cuidado com o outro", "instructions": ["Converse sobre pessoas que a criança poderia cuidar hoje", "Combine um gesto simples (um abraço, ajudar em algo)", "Comente juntos como foi ao final do dia"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "routine", "requiresAdult": true, "tags": ["empatia", "cuidado"], "active": true },
+            { "id": "empathy-emotional-awareness-05", "skillId": "empathy-emotional-awareness", "title": "Conhecendo outras famílias e culturas", "shortDescription": "Ver fotos, comidas ou músicas de outras culturas e conversar com curiosidade.", "objective": "Respeito à diversidade", "instructions": ["Escolha uma música, comida ou imagem de outra cultura", "Explore juntos com curiosidade, sem julgamento", "Converse sobre semelhanças e diferenças com a família"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "cultural-exploration", "requiresAdult": true, "tags": ["empatia", "diversidade"], "active": true }
+          ]
+        },
+        {
+          "id": "self-confidence-autonomy",
+          "slug": "autoconfianca-e-autonomia",
+          "name": "Autoconfiança e autonomia",
+          "description": "Agir de forma independente, reconhecendo suas próprias conquistas e limites.",
+          "keywords": ["autonomia", "confiança", "independência"],
+          "matchTexts": ["age de maneira independente com confianca em suas capacidades reconhecendo suas conquistas e limitacoes"],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Sentir-se capaz de fazer coisas sozinha fortalece a autoestima da criança e a prepara para lidar com desafios futuros.",
+            "howToHelp": ["Deixar a criança tentar antes de ajudar", "Elogiar o esforço e a tentativa, não só o acerto", "Oferecer pequenas escolhas ao longo do dia"],
+            "generalRecommendations": ["Evitar fazer tudo pela criança por impaciência", "Comemorar pequenas conquistas"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "self-confidence-autonomy-01", "skillId": "self-confidence-autonomy", "title": "Eu consigo sozinho", "shortDescription": "Escolher uma tarefa do dia a dia para a criança fazer sem ajuda.", "objective": "Prática de autonomia supervisionada", "instructions": ["Escolha uma tarefa simples e segura (vestir uma peça de roupa, servir água)", "Deixe a criança tentar sozinha", "Elogie a tentativa, independente do resultado"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "self-care", "requiresAdult": true, "tags": ["autonomia"], "active": true },
+            { "id": "self-confidence-autonomy-02", "skillId": "self-confidence-autonomy", "title": "Escolha do dia", "shortDescription": "Oferecer duas opções simples para a criança escolher (roupa, brincadeira, lanche).", "objective": "Exercício de tomada de decisão", "instructions": ["Apresente duas opções seguras", "Deixe a criança escolher livremente", "Respeite a escolha feita"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["autonomia", "confiança"], "active": true },
+            { "id": "self-confidence-autonomy-03", "skillId": "self-confidence-autonomy", "title": "Quadro de conquistas", "shortDescription": "Um mural simples onde a criança marca coisas que já conseguiu fazer sozinha.", "objective": "Reconhecimento das próprias conquistas", "instructions": ["Crie um quadro simples com desenhos ou adesivos", "A cada conquista, marquem juntos", "Revejam o quadro semanalmente celebrando o progresso"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["papel", "adesivos"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "self-esteem", "requiresAdult": true, "tags": ["autonomia", "confiança"], "active": true },
+            { "id": "self-confidence-autonomy-04", "skillId": "self-confidence-autonomy", "title": "Missão do dia", "shortDescription": "Um pequeno desafio alcançável proposto pela manhã.", "objective": "Superação de pequenos desafios com autonomia", "instructions": ["Combine uma \"missão\" simples para o dia", "Não interfira, apenas acompanhe à distância", "Comemorem juntos ao final do dia"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "challenge", "requiresAdult": true, "tags": ["autonomia", "confiança"], "active": true },
+            { "id": "self-confidence-autonomy-05", "skillId": "self-confidence-autonomy", "title": "Contando o que consegui fazer", "shortDescription": "No fim do dia, a criança conta algo que fez sozinha.", "objective": "Reflexão sobre as próprias conquistas", "instructions": ["Na hora de dormir, pergunte o que ela conseguiu fazer sozinha hoje", "Ouça com atenção e valorize a resposta", "Evite corrigir ou comparar com outras crianças"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "reflection", "requiresAdult": true, "tags": ["autonomia", "confiança"], "active": true }
+          ]
+        },
+        {
+          "id": "communication-social",
+          "slug": "comunicacao-social",
+          "name": "Comunicação social",
+          "description": "Comunicar ideias e sentimentos a diferentes pessoas, buscando compreender e ser compreendido.",
+          "keywords": ["comunicação", "diálogo", "expressão"],
+          "matchTexts": [
+            "comunica suas ideias e seus sentimentos a pessoas e grupos diversos",
+            "comunica se com colegas e adultos buscando compreende los e fazendo se compreender"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Comunicar-se bem com diferentes pessoas ajuda a criança a se expressar e a resolver mal-entendidos por conta própria.",
+            "howToHelp": ["Fazer perguntas abertas no dia a dia", "Esperar a criança terminar de falar sem interromper", "Incentivar conversas com pessoas diferentes (avós, vizinhos)"],
+            "generalRecommendations": ["Modelar boa comunicação em casa", "Evitar falar pela criança quando ela consegue se expressar"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "communication-social-01", "skillId": "communication-social", "title": "Telefone sem fio", "shortDescription": "Brincadeira de passar uma mensagem sussurrada entre as pessoas.", "objective": "Comunicação clara e escuta atenta", "instructions": ["Sentem-se em círculo (mínimo 3 pessoas)", "Uma pessoa sussurra uma frase curta para a próxima", "No final, comparem a mensagem original com a última"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "communication-game", "requiresAdult": false, "tags": ["comunicação"], "active": true },
+            { "id": "communication-social-02", "skillId": "communication-social", "title": "Conte para o vovô/vovó", "shortDescription": "Ligar ou visitar um familiar e a criança contar como foi seu dia.", "objective": "Comunicação com diferentes interlocutores", "instructions": ["Escolha um familiar querido", "Peça que a criança conte algo que fez no dia", "Deixe-a falar sem interromper ou corrigir"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["comunicação"], "active": true },
+            { "id": "communication-social-03", "skillId": "communication-social", "title": "Entrevista em família", "shortDescription": "A criança faz perguntas simples para um adulto da família.", "objective": "Iniciativa de comunicação", "instructions": ["Ajude a criança a pensar em 2-3 perguntas simples", "Ela entrevista um adulto da casa", "Comentem juntos as respostas"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["comunicação"], "active": true },
+            { "id": "communication-social-04", "skillId": "communication-social", "title": "Explique para mim", "shortDescription": "Pedir que a criança explique como brincar de um jogo que ela gosta.", "objective": "Organização da fala para transmitir uma ideia", "instructions": ["Peça que a criança ensine uma brincadeira que ela conhece", "Finja não saber jogar e siga as instruções dela", "Agradeça a explicação ao final"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["comunicação"], "active": true },
+            { "id": "communication-social-05", "skillId": "communication-social", "title": "Roda de conversa em família", "shortDescription": "Um pequeno momento diário em que cada um conta algo do dia.", "objective": "Prática regular de comunicação em grupo", "instructions": ["Reúnam-se por alguns minutos (jantar, antes de dormir)", "Cada pessoa conta algo bom do dia", "Ouçam uns aos outros sem interromper"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["comunicação"], "active": true }
+          ]
+        },
+        {
+          "id": "conflict-resolution",
+          "slug": "resolucao-de-conflitos",
+          "name": "Resolução de conflitos",
+          "description": "Resolver conflitos respeitando regras e combinações, buscando soluções em vez de reações impulsivas.",
+          "keywords": ["conflito", "regras", "combinações", "negociação"],
+          "matchTexts": ["resolve conflitos respeitando regras e combinacoes"],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "O eu, o outro e o nós", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Aprender a resolver pequenos conflitos com calma é uma habilidade que a criança vai usar a vida toda — na escola, com amigos e, futuramente, no trabalho.",
+            "howToHelp": [
+              "Conversar sobre conflitos ocorridos durante o dia",
+              "Perguntar: \"O que você poderia fazer diferente?\"",
+              "Ajudar a identificar os sentimentos das pessoas envolvidas",
+              "Ouvir os dois lados de uma situação antes de opinar",
+              "Procurar soluções em conjunto com a criança",
+              "Ensinar frases como \"Eu não gostei disso\"",
+              "Ensinar a pedir ajuda a um adulto quando necessário",
+              "Ensinar a esperar a vez em brincadeiras e jogos",
+              "Ensinar a propor uma troca ou acordo"
+            ],
+            "generalRecommendations": ["Usar jogos com regras e brincadeiras com turnos para praticar espera e combinação", "Usar histórias com conflitos simples como ponto de partida para conversar"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "conflict-resolution-01", "skillId": "conflict-resolution", "title": "Teatro com bonecos", "shortDescription": "Representar um pequeno conflito com bonecos e buscar soluções juntos.", "objective": "Praticar resolução de conflitos em um contexto seguro e lúdico", "instructions": ["Escolha dois bonecos ou brinquedos", "Crie uma pequena disputa simples entre eles (querem o mesmo brinquedo)", "Pergunte à criança: \"O que eles podem fazer?\"", "Deixe-a propor e encenar a solução"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["bonecos ou brinquedos"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "roleplay", "requiresAdult": true, "tags": ["conflito", "empatia"], "active": true },
+            { "id": "conflict-resolution-02", "skillId": "conflict-resolution", "title": "O que você faria?", "shortDescription": "Apresentar pequenas situações hipotéticas de conflito e conversar sobre soluções.", "objective": "Antecipar estratégias de resolução de conflitos", "instructions": ["Conte uma situação curta (\"dois amigos querem o mesmo balanço\")", "Pergunte: \"O que você faria?\"", "Explore diferentes soluções possíveis sem julgar as respostas"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "conversation", "requiresAdult": true, "tags": ["conflito"], "active": true },
+            { "id": "conflict-resolution-03", "skillId": "conflict-resolution", "title": "Jogo de esperar a vez", "shortDescription": "Um jogo simples de tabuleiro ou de bola em que é preciso esperar a vez.", "objective": "Praticar espera e regras compartilhadas", "instructions": ["Escolham um jogo com turnos claros", "Combinem a regra de esperar a vez antes de começar", "Elogie quando a criança esperar sem se frustrar"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["jogo ou bola"], "materialLevel": "basic", "difficulty": "easy", "environment": "either", "activityType": "game", "requiresAdult": true, "tags": ["conflito", "regras"], "active": true },
+            { "id": "conflict-resolution-04", "skillId": "conflict-resolution", "title": "História com outro final", "shortDescription": "Ler uma história com um conflito simples e imaginar outro final possível.", "objective": "Explorar diferentes formas de resolver um conflito através da narrativa", "instructions": ["Leiam uma história curta com um pequeno conflito", "Perguntem: \"Como mais essa história poderia terminar?\"", "Deixe a criança imaginar uma solução diferente"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["conflito", "leitura"], "active": true },
+            { "id": "conflict-resolution-05", "skillId": "conflict-resolution", "title": "Cartões de sentimentos do conflito", "shortDescription": "Usar cartões com rostos de emoções para identificar como cada pessoa se sentiu num conflito.", "objective": "Reconhecer sentimentos envolvidos em uma situação de conflito", "instructions": ["Depois de um conflito real, peça calma antes de conversar", "Use os cartões (ou desenhe rostos) para nomear como cada um se sentiu", "Pergunte o que poderia ajudar a resolver"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["cartões de emoções ou papel"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "emotional-literacy", "requiresAdult": true, "tags": ["conflito", "sentimentos"], "active": true },
+            { "id": "conflict-resolution-06", "skillId": "conflict-resolution", "title": "Solução em três passos", "shortDescription": "Ensinar uma sequência simples: parar, contar o que aconteceu, pensar numa solução.", "objective": "Estrutura simples e repetível para lidar com conflitos", "instructions": ["Ensine a sequência: 1) Pare e respire, 2) Conte o que aconteceu, 3) Pense em uma solução", "Pratique com uma situação leve do dia a dia", "Relembre a sequência da próxima vez que surgir um conflito"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "strategy", "requiresAdult": true, "tags": ["conflito", "autorregulação"], "active": true },
+            { "id": "conflict-resolution-07", "skillId": "conflict-resolution", "title": "Brincadeira do combinado", "shortDescription": "Antes de uma brincadeira, combinar juntos as regras e o que fazer se algo der errado.", "objective": "Prevenção de conflitos através de combinados prévios", "instructions": ["Antes de começar a brincar, combinem 2-3 regras simples", "Combinem também o que fazer se alguém não gostar de algo", "Relembrem o combinado se um conflito surgir"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "routine", "requiresAdult": true, "tags": ["conflito", "regras"], "active": true },
+            { "id": "conflict-resolution-08", "skillId": "conflict-resolution", "title": "Jogo cooperativo em família", "shortDescription": "Um jogo onde todos vencem ou perdem juntos, sem competição direta entre a criança e outra pessoa.", "objective": "Reduzir a chance de conflito através de um objetivo compartilhado", "instructions": ["Escolham um jogo cooperativo (todos jogam do mesmo lado)", "Joguem juntos apoiando uns aos outros", "Conversem sobre como foi trabalhar em equipe"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["jogo cooperativo"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "game", "requiresAdult": true, "tags": ["conflito", "cooperação"], "active": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "corpo_gestos_movimentos",
+      "slug": "corpo-gestos-e-movimentos",
+      "name": "Corpo, gestos e movimentos",
+      "description": "Coordenação motora ampla e fina, orientação espacial, equilíbrio, expressão corporal e autonomia no autocuidado.",
+      "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "official-framework" },
+      "skills": [
+        {
+          "id": "gross-motor-coordination",
+          "slug": "coordenacao-motora-ampla",
+          "name": "Coordenação motora ampla",
+          "description": "Controle corporal em brincadeiras, corridas, pulos, saltos e circuitos.",
+          "keywords": ["correr", "pular", "saltar", "coordenação"],
+          "matchTexts": [
+            "controle corporal em brincadeiras e jogos",
+            "correr pular saltar e realizar circuitos"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Correr, pular e se movimentar livremente fortalece o corpo da criança e desenvolve a coordenação necessária para atividades futuras, inclusive a escrita.",
+            "howToHelp": ["Reservar momentos de movimento livre ao ar livre", "Propor circuitos simples com o que houver em casa", "Participar das brincadeiras de movimento junto com a criança"],
+            "generalRecommendations": ["Priorizar espaços seguros para correr e pular", "Evitar competitividade excessiva"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 15,
+            "estimatedMinutesMax": 20
+          },
+          "activityOptions": [
+            { "id": "gross-motor-coordination-01", "skillId": "gross-motor-coordination", "title": "Circuito com obstáculos seguros", "shortDescription": "Montar um pequeno circuito com almofadas, cadeiras e fita no chão.", "objective": "Coordenação motora ampla e planejamento de movimento", "instructions": ["Monte um circuito simples com objetos seguros de casa", "Mostre o caminho e deixe a criança repetir", "Varie o circuito a cada semana"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["almofadas", "cadeiras"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "gross-motor", "requiresAdult": true, "tags": ["coordenação"], "active": true },
+            { "id": "gross-motor-coordination-02", "skillId": "gross-motor-coordination", "title": "Imitação de animais", "shortDescription": "Imitar o jeito de andar de diferentes animais.", "objective": "Movimento corporal variado e expressivo", "instructions": ["Escolham animais (sapo, urso, cobra, canguru)", "Imitem o jeito de se mover de cada um", "Peça que a criança escolha o próximo animal"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "movement-play", "requiresAdult": false, "tags": ["coordenação", "expressão"], "active": true },
+            { "id": "gross-motor-coordination-03", "skillId": "gross-motor-coordination", "title": "Estátua", "shortDescription": "Brincadeira clássica de correr e congelar ao sinal.", "objective": "Controle corporal e autorregulação de movimento", "instructions": ["Toque uma música ou conte até um número", "A criança se move livremente enquanto isso", "Ao parar, ela deve congelar como uma estátua"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "movement-play", "requiresAdult": false, "tags": ["coordenação"], "active": true },
+            { "id": "gross-motor-coordination-04", "skillId": "gross-motor-coordination", "title": "Corrida do sapo", "shortDescription": "Pular como um sapo até um ponto marcado.", "objective": "Força e coordenação nas pernas", "instructions": ["Marque um ponto de partida e chegada", "Peça que a criança pule com os pés juntos, como um sapo", "Repitam algumas vezes, aumentando a distância"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "outdoor", "activityType": "movement-play", "requiresAdult": false, "tags": ["coordenação"], "active": true },
+            { "id": "gross-motor-coordination-05", "skillId": "gross-motor-coordination", "title": "Dança livre", "shortDescription": "Dançar livremente ao som de uma música.", "objective": "Expressão corporal e coordenação global", "instructions": ["Escolham uma música animada", "Dancem livremente, sem passos definidos", "Alternem entre movimentos rápidos e devagar"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "movement-play", "requiresAdult": false, "tags": ["coordenação", "expressão"], "active": true }
+          ]
+        },
+        {
+          "id": "spatial-orientation",
+          "slug": "orientacao-espacial",
+          "name": "Orientação espacial",
+          "description": "Compreender noções de frente/atrás, em cima/embaixo, dentro/fora/ao lado.",
+          "keywords": ["espaço", "orientação", "posição"],
+          "matchTexts": [
+            "nocoes de frente e atras",
+            "nocoes de alto em cima e embaixo",
+            "nocoes de dentro fora e ao lado"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Entender a posição do próprio corpo no espaço ajuda a criança a se localizar, seguir instruções e, mais tarde, entender conceitos matemáticos.",
+            "howToHelp": ["Usar palavras de posição no dia a dia (\"coloque em cima\", \"atrás de você\")", "Brincar de esconde-esconde e caça ao tesouro", "Pedir que a criança siga instruções com palavras de posição"],
+            "generalRecommendations": ["Reforçar as noções em situações reais, não só em exercícios"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "spatial-orientation-01", "skillId": "spatial-orientation", "title": "Caça ao tesouro com pistas de posição", "shortDescription": "Esconder um objeto e dar pistas usando palavras de posição.", "objective": "Aplicação prática de noções espaciais", "instructions": ["Esconda um brinquedo em casa", "Dê pistas como \"está embaixo de algo\" ou \"está atrás da porta\"", "Deixe a criança procurar seguindo as pistas"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["um brinquedo"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "spatial-game", "requiresAdult": true, "tags": ["espaço"], "active": true },
+            { "id": "spatial-orientation-02", "skillId": "spatial-orientation", "title": "Siga o comando", "shortDescription": "Dar comandos simples de posição para a criança seguir com o corpo.", "objective": "Compreensão auditiva de noções espaciais", "instructions": ["Dê comandos como \"fique atrás da cadeira\" ou \"em cima do tapete\"", "A criança deve seguir cada comando com o corpo", "Inverta os papéis e deixe a criança dar os comandos"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "spatial-game", "requiresAdult": true, "tags": ["espaço"], "active": true },
+            { "id": "spatial-orientation-03", "skillId": "spatial-orientation", "title": "Organizando os brinquedos por posição", "shortDescription": "Guardar brinquedos seguindo instruções de posição (dentro da caixa, ao lado da estante).", "objective": "Aplicação de posições na organização do espaço", "instructions": ["Peça que a criança guarde um brinquedo \"dentro\" da caixa", "Depois peça outro \"ao lado\" da estante", "Continue variando as posições"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["espaço", "autonomia"], "active": true },
+            { "id": "spatial-orientation-04", "skillId": "spatial-orientation", "title": "Esconde-esconde", "shortDescription": "Brincadeira clássica de se esconder e procurar.", "objective": "Percepção espacial em contexto lúdico", "instructions": ["Combinem os limites do espaço de brincadeira", "Um se esconde enquanto o outro conta", "Ao encontrar, descreva onde a pessoa estava escondida"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "movement-play", "requiresAdult": false, "tags": ["espaço"], "active": true },
+            { "id": "spatial-orientation-05", "skillId": "spatial-orientation", "title": "Desenho com posições", "shortDescription": "Desenhar uma casa e pedir para colocar elementos em posições diferentes.", "objective": "Representação gráfica de noções espaciais", "instructions": ["Desenhe uma casa simples", "Peça para desenhar o sol \"em cima\" e uma flor \"ao lado\"", "Continue com outras posições"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "drawing", "requiresAdult": true, "tags": ["espaço", "desenho"], "active": true }
+          ]
+        },
+        {
+          "id": "balance",
+          "slug": "equilibrio",
+          "name": "Equilíbrio",
+          "description": "Equilíbrio estático e dinâmico do corpo.",
+          "keywords": ["equilíbrio"],
+          "matchTexts": ["equilibrio estatico e dinamico"],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "O equilíbrio é fundamental para a segurança e a confiança nos movimentos do dia a dia.",
+            "howToHelp": ["Oferecer superfícies seguras para caminhar em equilíbrio", "Brincar de ficar parado em um pé só", "Praticar com supervisão, sem forçar"],
+            "generalRecommendations": ["Priorizar sempre a segurança ao praticar equilíbrio"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "balance-01", "skillId": "balance", "title": "Caminhada sobre a linha", "shortDescription": "Caminhar sobre uma fita ou linha desenhada no chão.", "objective": "Equilíbrio dinâmico", "instructions": ["Cole uma fita reta no chão ou desenhe uma linha", "Peça que a criança caminhe sobre a linha sem sair", "Aumente a dificuldade fazendo curvas"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["fita adesiva"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "balance", "requiresAdult": true, "tags": ["equilíbrio"], "active": true },
+            { "id": "balance-02", "skillId": "balance", "title": "Um pé só", "shortDescription": "Brincar de ficar parado em um pé só o máximo de tempo possível.", "objective": "Equilíbrio estático", "instructions": ["Peça que a criança fique em um pé só", "Conte quantos segundos ela consegue", "Repitam trocando de perna"], "ageGroups": ["4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "balance", "requiresAdult": false, "tags": ["equilíbrio"], "active": true },
+            { "id": "balance-03", "skillId": "balance", "title": "Levando um objeto na cabeça ou na mão espalmada", "shortDescription": "Caminhar equilibrando um objeto leve.", "objective": "Equilíbrio dinâmico com controle corporal fino", "instructions": ["Escolha um objeto leve (bolinha, livro leve)", "Peça que a criança caminhe equilibrando o objeto", "Aumente a distância aos poucos"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objeto leve"], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "balance", "requiresAdult": true, "tags": ["equilíbrio"], "active": true },
+            { "id": "balance-04", "skillId": "balance", "title": "Pular de um lado para o outro", "shortDescription": "Pular entre duas almofadas mantendo o equilíbrio ao aterrissar.", "objective": "Equilíbrio dinâmico com aterrissagem controlada", "instructions": ["Coloque duas almofadas próximas no chão", "Peça que a criança pule de uma para a outra", "Observe e apoie a aterrissagem"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["almofadas"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "balance", "requiresAdult": true, "tags": ["equilíbrio"], "active": true },
+            { "id": "balance-05", "skillId": "balance", "title": "Estátua em posições diferentes", "shortDescription": "Brincar de estátua desafiando posições de equilíbrio.", "objective": "Equilíbrio estático em diferentes posições", "instructions": ["Combine posições desafiadoras (um pé só, agachado)", "Toque música e peça para congelar na posição combinada", "Alternem quem escolhe a posição"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "balance", "requiresAdult": false, "tags": ["equilíbrio"], "active": true }
+          ]
+        },
+        {
+          "id": "fine-motor-coordination",
+          "slug": "coordenacao-motora-fina",
+          "name": "Coordenação motora fina",
+          "description": "Habilidades manuais: desenhar, pintar, folhear livros, rasgar, recortar, modelar e colar.",
+          "keywords": ["coordenação fina", "desenho", "recorte", "massinha"],
+          "matchTexts": [
+            "habilidades manuais",
+            "controle motor para desenhar e pintar",
+            "folhear livros",
+            "rasgar recortar modelar e colar"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "A coordenação motora fina prepara a mão da criança para futuras tarefas como a escrita, além de estimular a criatividade.",
+            "howToHelp": ["Oferecer massinha, blocos e materiais para recortar/colar", "Deixar a criança folhear livros sozinha", "Elogiar o processo, não só o resultado final"],
+            "generalRecommendations": ["Usar tesoura sem ponta e com supervisão", "Não exigir perfeição no traço ou no recorte"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 20
+          },
+          "activityOptions": [
+            { "id": "fine-motor-coordination-01", "skillId": "fine-motor-coordination", "title": "Massinha de modelar", "shortDescription": "Modelar formas livres ou objetos simples com massinha.", "objective": "Força e destreza dos dedos e mãos", "instructions": ["Ofereça massinha (caseira ou industrializada)", "Deixe a criança modelar livremente", "Sugira formas simples (bolinha, cobra, bolo)"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["massinha"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "fine-motor", "requiresAdult": false, "tags": ["coordenação fina"], "active": true },
+            { "id": "fine-motor-coordination-02", "skillId": "fine-motor-coordination", "title": "Rasgando papel colorido", "shortDescription": "Rasgar pedaços de papel para fazer uma colagem livre.", "objective": "Preensão e força dos dedos", "instructions": ["Ofereça papéis coloridos e um papel base", "Deixe a criança rasgar pedaços livremente", "Cole os pedaços formando uma colagem"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["papel colorido", "cola"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "fine-motor", "requiresAdult": true, "tags": ["coordenação fina", "colagem"], "active": true },
+            { "id": "fine-motor-coordination-03", "skillId": "fine-motor-coordination", "title": "Desenho e pintura livre", "shortDescription": "Um momento livre de desenho ou pintura sem tema definido.", "objective": "Controle do traço e expressão gráfica", "instructions": ["Ofereça papel e lápis/giz de cera ou tinta", "Deixe a criança desenhar livremente", "Pergunte sobre o desenho sem exigir explicações"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["papel", "lápis ou tinta"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "drawing", "requiresAdult": false, "tags": ["coordenação fina", "desenho"], "active": true },
+            { "id": "fine-motor-coordination-04", "skillId": "fine-motor-coordination", "title": "Recorte com tesoura sem ponta", "shortDescription": "Recortar linhas simples desenhadas em papel, com supervisão.", "objective": "Controle motor fino com uso de tesoura", "instructions": ["Desenhe linhas retas e curvas simples no papel", "Supervisione o uso de uma tesoura sem ponta", "Elogie o esforço em seguir a linha"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "tesoura sem ponta"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "fine-motor", "requiresAdult": true, "tags": ["coordenação fina", "recorte"], "active": true },
+            { "id": "fine-motor-coordination-05", "skillId": "fine-motor-coordination", "title": "Hora do livro", "shortDescription": "Deixar a criança folhear livros sozinha, virando as páginas.", "objective": "Coordenação fina no manuseio de páginas", "instructions": ["Ofereça alguns livros de capa dura ou papel resistente", "Deixe a criança folhear no seu próprio ritmo", "Converse sobre as imagens que ela encontrar"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["livros"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "book-handling", "requiresAdult": false, "tags": ["coordenação fina", "livros"], "active": true }
+          ]
+        },
+        {
+          "id": "self-care-autonomy",
+          "slug": "autocuidado-e-autonomia",
+          "name": "Autocuidado e autonomia",
+          "description": "Hábitos de autocuidado e autonomia no banheiro e na higiene pessoal.",
+          "keywords": ["autocuidado", "higiene", "autonomia"],
+          "matchTexts": [
+            "habitos de autocuidado",
+            "autonomia no banheiro e higiene"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Cuidar de si mesma dá à criança sensação de competência e prepara para a rotina escolar com mais independência.",
+            "howToHelp": ["Criar uma rotina visual simples de higiene", "Deixar tempo extra para a criança tentar sozinha", "Elogiar tentativas, mesmo que precisem de ajuste"],
+            "generalRecommendations": ["Manter consistência na rotina diária", "Evitar pressa excessiva nesses momentos"],
+            "recommendedFrequencyPerWeek": 5,
+            "estimatedMinutesMin": 5,
+            "estimatedMinutesMax": 10
+          },
+          "activityOptions": [
+            { "id": "self-care-autonomy-01", "skillId": "self-care-autonomy", "title": "Rotina de higiene com figuras", "shortDescription": "Montar um quadro simples com os passos da rotina de higiene (escovar dentes, lavar mãos).", "objective": "Autonomia guiada por rotina visual", "instructions": ["Desenhe ou imprima os passos da rotina (lavar as mãos, escovar os dentes)", "Cole em um lugar visível no banheiro", "A criança segue os passos, com apoio quando necessário"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["papel", "figuras"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["autocuidado"], "active": true },
+            { "id": "self-care-autonomy-02", "skillId": "self-care-autonomy", "title": "Vestindo-se sozinha", "shortDescription": "Deixar a criança escolher e vestir uma peça de roupa simples sozinha.", "objective": "Autonomia motora no vestir-se", "instructions": ["Escolha uma peça fácil (calça elástica, camiseta)", "Dê tempo para a criança tentar sem ajuda", "Ajude só se ela pedir"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "self-care", "requiresAdult": true, "tags": ["autocuidado", "autonomia"], "active": true },
+            { "id": "self-care-autonomy-03", "skillId": "self-care-autonomy", "title": "Jogo de vestir e cuidar de bonecos", "shortDescription": "Brincar de vestir, dar banho ou cuidar de um boneco.", "objective": "Prática de autocuidado através do brincar simbólico", "instructions": ["Ofereça um boneco e roupas ou acessórios simples", "A criança pratica vestir, cuidar e cobrir o boneco", "Converse sobre o que o boneco está \"sentindo\""], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["boneco", "roupas pequenas"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "pretend-play", "requiresAdult": false, "tags": ["autocuidado"], "active": true },
+            { "id": "self-care-autonomy-04", "skillId": "self-care-autonomy", "title": "Organizando a mochila", "shortDescription": "A criança ajuda a separar o que vai levar para a escola no dia seguinte.", "objective": "Autonomia e organização pessoal", "instructions": ["Reserve um momento à noite para preparar a mochila", "Deixe a criança escolher e guardar os itens", "Confira juntos ao final"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["autocuidado", "autonomia"], "active": true },
+            { "id": "self-care-autonomy-05", "skillId": "self-care-autonomy", "title": "Abrir e fechar potes e recipientes", "shortDescription": "Praticar abrir e fechar potes de tampa, com supervisão.", "objective": "Coordenação motora fina aplicada ao autocuidado", "instructions": ["Ofereça potes vazios e seguros com tampas diferentes", "Deixe a criança tentar abrir e fechar", "Transforme em um pequeno jogo de qual pote é mais difícil"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["potes com tampa"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "fine-motor", "requiresAdult": true, "tags": ["autocuidado", "coordenação fina"], "active": true }
+          ]
+        },
+        {
+          "id": "body-expression",
+          "slug": "expressao-corporal",
+          "name": "Expressão corporal",
+          "description": "Expressar-se através de movimentos, gestos, olhares, mímicas e sons.",
+          "keywords": ["expressão", "gestos", "mímica"],
+          "matchTexts": ["movimentos gestos olhares mimicas e sons"],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Corpo, gestos e movimentos", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Expressar-se com o corpo é uma forma importante de comunicação antes (e além) das palavras.",
+            "howToHelp": ["Brincar de mímica e imitação", "Valorizar gestos e expressões da criança", "Dançar e se mover juntos ao som de músicas"],
+            "generalRecommendations": ["Não corrigir a forma como a criança se expressa corporalmente"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "body-expression-01", "skillId": "body-expression", "title": "Mímica de sentimentos", "shortDescription": "Representar sentimentos e ações apenas com o corpo, sem palavras.", "objective": "Expressão corporal de emoções e ações", "instructions": ["Combine palavras simples (feliz, com sono, com frio)", "A criança representa cada uma só com o corpo", "Tentem adivinhar juntos"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "expression", "requiresAdult": false, "tags": ["expressão"], "active": true },
+            { "id": "body-expression-02", "skillId": "body-expression", "title": "Espelho de movimentos", "shortDescription": "Uma pessoa faz um movimento e a outra imita como um espelho.", "objective": "Observação e reprodução de movimentos", "instructions": ["Fiquem de frente um para o outro", "Um faz movimentos lentos, o outro imita", "Troquem os papéis"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "expression", "requiresAdult": false, "tags": ["expressão"], "active": true },
+            { "id": "body-expression-03", "skillId": "body-expression", "title": "Dançando as emoções", "shortDescription": "Dançar de forma diferente para representar cada emoção.", "objective": "Associação entre movimento corporal e emoção", "instructions": ["Toque uma música", "Peça para dançar \"feliz\", depois \"cansado\", depois \"animado\"", "Observem juntos as diferenças"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "expression", "requiresAdult": false, "tags": ["expressão"], "active": true },
+            { "id": "body-expression-04", "skillId": "body-expression", "title": "Contando uma história só com gestos", "shortDescription": "Contar uma pequena história usando apenas gestos e expressões.", "objective": "Comunicação não verbal", "instructions": ["Escolha uma cena simples (comer uma fruta, brincar na chuva)", "Represente só com gestos, sem falar", "Peça que a criança tente adivinhar e depois crie a dela"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "expression", "requiresAdult": false, "tags": ["expressão"], "active": true },
+            { "id": "body-expression-05", "skillId": "body-expression", "title": "Sombras na parede", "shortDescription": "Criar formas com as mãos e o corpo usando sombra projetada.", "objective": "Exploração corporal criativa", "instructions": ["Use uma lanterna em um ambiente escurecido", "Façam sombras diferentes com as mãos e o corpo", "Tentem adivinhar o que cada sombra representa"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["lanterna"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "expression", "requiresAdult": true, "tags": ["expressão"], "active": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tracos_sons_cores_formas",
+      "slug": "tracos-sons-cores-e-formas",
+      "name": "Traços, sons, cores e formas",
+      "description": "Expressão musical e artística: sons, ritmos, desenho, pintura, colagem e exploração de materiais.",
+      "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Traços, sons, cores e formas", "reference": null, "sourceType": "official-framework" },
+      "skills": [
+        {
+          "id": "musical-exploration",
+          "slug": "exploracao-musical",
+          "name": "Exploração musical e sonora",
+          "description": "Utilizar sons e instrumentos, acompanhar ritmos, reconhecer intensidade, duração, altura e timbre dos sons.",
+          "keywords": ["música", "som", "ritmo"],
+          "matchTexts": [
+            "utilizar sons e instrumentos durante brincadeiras",
+            "acompanhar brincadeiras cantadas e melodias",
+            "bater palmas ritmadas",
+            "criar sons com materiais objetos e instrumentos",
+            "acompanhar ritmos musicais",
+            "reconhecer caracteristicas dos sons intensidade duracao altura e timbre"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Traços, sons, cores e formas", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "A exploração sonora e musical estimula a escuta atenta, o ritmo e a criatividade — habilidades também importantes para a linguagem.",
+            "howToHelp": ["Criar instrumentos simples com objetos de casa", "Cantar e acompanhar ritmos juntos", "Brincar de identificar sons do ambiente"],
+            "generalRecommendations": ["Não é preciso ter instrumentos de verdade — panelas, potes e caixas já funcionam bem"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "musical-exploration-01", "skillId": "musical-exploration", "title": "Instrumentos caseiros", "shortDescription": "Criar instrumentos simples com potes, arroz e elásticos.", "objective": "Criação e exploração de sons", "instructions": ["Junte potes, arroz ou feijão, e elásticos", "Montem juntos chocalhos ou tambores simples", "Toquem e explorem os sons criados"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["potes", "grãos", "elásticos"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "music", "requiresAdult": true, "tags": ["música"], "active": true },
+            { "id": "musical-exploration-02", "skillId": "musical-exploration", "title": "Sons fortes e fracos", "shortDescription": "Brincar de fazer sons bem fortes e bem fracos, alternando.", "objective": "Percepção de intensidade sonora", "instructions": ["Bata palmas bem forte, depois bem fraquinho", "Peça que a criança repita cada intensidade", "Alternem quem escolhe a intensidade"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "music", "requiresAdult": false, "tags": ["música", "sons"], "active": true },
+            { "id": "musical-exploration-03", "skillId": "musical-exploration", "title": "Sons longos e curtos", "shortDescription": "Explorar sons que duram muito e sons rápidos.", "objective": "Percepção de duração sonora", "instructions": ["Faça um som longo (assobio, \"aaaa\")", "Faça um som curto (\"a!\")", "Peça que a criança identifique e depois crie os dela"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "music", "requiresAdult": false, "tags": ["música", "sons"], "active": true },
+            { "id": "musical-exploration-04", "skillId": "musical-exploration", "title": "Descobrindo os sons da casa", "shortDescription": "Ir pela casa descobrindo e imitando sons diferentes.", "objective": "Escuta ativa do ambiente", "instructions": ["Caminhem pela casa parando para escutar sons (geladeira, torneira, passos)", "Imitem juntos cada som encontrado", "Façam uma lista dos sons descobertos"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "listening", "requiresAdult": true, "tags": ["música", "sons"], "active": true },
+            { "id": "musical-exploration-05", "skillId": "musical-exploration", "title": "Identificar sons de olhos fechados", "shortDescription": "Fechar os olhos e tentar adivinhar sons produzidos pelo adulto.", "objective": "Discriminação auditiva", "instructions": ["Peça que a criança feche os olhos", "Produza sons diferentes (bater palmas, amassar papel, chacoalhar chaves)", "Ela tenta adivinhar o que fez cada som"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objetos variados"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "listening", "requiresAdult": true, "tags": ["música", "sons"], "active": true },
+            { "id": "musical-exploration-06", "skillId": "musical-exploration", "title": "Sequência de palmas", "shortDescription": "Criar e repetir uma sequência simples de palmas.", "objective": "Ritmo e memória sonora", "instructions": ["Bata uma sequência curta de palmas (2-3 batidas)", "Peça que a criança repita", "Aumentem a sequência aos poucos"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "music", "requiresAdult": false, "tags": ["música", "ritmo"], "active": true },
+            { "id": "musical-exploration-07", "skillId": "musical-exploration", "title": "Música com objetos", "shortDescription": "Criar uma pequena música batendo em objetos diferentes da casa.", "objective": "Criação musical livre", "instructions": ["Junte potes, colheres e caixas", "Deixe a criança experimentar sons diferentes batendo neles", "Criem juntos uma \"música\" curta"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["objetos de casa"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "music", "requiresAdult": true, "tags": ["música"], "active": true },
+            { "id": "musical-exploration-08", "skillId": "musical-exploration", "title": "Cantiga de roda", "shortDescription": "Cantar e brincar com uma cantiga de roda tradicional.", "objective": "Acompanhamento de melodia e ritmo em grupo", "instructions": ["Escolham uma cantiga de roda conhecida", "Cantem e façam os gestos juntos", "Repitam algumas vezes até a criança acompanhar"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "music", "requiresAdult": true, "tags": ["música"], "active": true }
+          ]
+        },
+        {
+          "id": "artistic-expression",
+          "slug": "expressao-artistica",
+          "name": "Expressão artística",
+          "description": "Expressar-se por desenho, pintura, colagem, dobradura e escultura, explorando cores e texturas.",
+          "keywords": ["arte", "desenho", "pintura", "cores"],
+          "matchTexts": [
+            "expressar se por desenho pintura colagem dobradura e escultura",
+            "demonstrar interesse por lapis giz pinceis tintas argila e massa",
+            "demonstrar preferencias por cores e texturas"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Traços, sons, cores e formas", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "A expressão artística permite que a criança comunique sentimentos e ideias sem depender das palavras, além de desenvolver a criatividade.",
+            "howToHelp": ["Deixar materiais de arte acessíveis e disponíveis", "Valorizar o processo criativo, não a técnica", "Perguntar sobre a criação sem exigir explicações"],
+            "generalRecommendations": ["Evitar corrigir ou \"melhorar\" o desenho da criança", "Expor as criações em casa para valorizar o esforço"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 15,
+            "estimatedMinutesMax": 20
+          },
+          "activityOptions": [
+            { "id": "artistic-expression-01", "skillId": "artistic-expression", "title": "Pintura livre", "shortDescription": "Um momento de pintura livre, sem tema definido.", "objective": "Exploração livre de cores e materiais", "instructions": ["Ofereça tinta guache e papel", "Deixe a criança pintar livremente", "Exponha a pintura em um lugar especial de casa"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 20, "materials": ["tinta", "papel", "pincel"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "art", "requiresAdult": true, "tags": ["arte", "pintura"], "active": true },
+            { "id": "artistic-expression-02", "skillId": "artistic-expression", "title": "Explorando texturas", "shortDescription": "Explorar diferentes texturas com as mãos (algodão, lixa, tecido) e depois desenhar sobre isso.", "objective": "Percepção sensorial e associação com a arte", "instructions": ["Junte materiais de texturas diferentes", "Deixe a criança tocar e descrever cada um", "Depois, peça que desenhe algo \"macio\" ou \"áspero\""], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["materiais de texturas variadas"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "sensory", "requiresAdult": true, "tags": ["arte", "textura"], "active": true },
+            { "id": "artistic-expression-03", "skillId": "artistic-expression", "title": "Escultura com massinha ou argila", "shortDescription": "Criar uma pequena escultura livre com massinha ou argila.", "objective": "Expressão tridimensional", "instructions": ["Ofereça massinha ou argila", "Deixe a criança criar livremente", "Pergunte sobre a criação sem exigir uma explicação"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["massinha ou argila"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "art", "requiresAdult": false, "tags": ["arte", "escultura"], "active": true },
+            { "id": "artistic-expression-04", "skillId": "artistic-expression", "title": "Dobradura simples", "shortDescription": "Fazer uma dobradura fácil (barquinho, chapéu) com papel.", "objective": "Coordenação e expressão através da dobradura", "instructions": ["Escolha uma dobradura simples e busque o passo a passo", "Façam juntos, passo a passo", "Brinquem com o resultado"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "art", "requiresAdult": true, "tags": ["arte", "dobradura"], "active": true },
+            { "id": "artistic-expression-05", "skillId": "artistic-expression", "title": "Pintar ouvindo música", "shortDescription": "Pintar livremente enquanto escuta uma música.", "objective": "Associação entre expressão sonora e visual", "instructions": ["Escolha uma música tranquila ou animada", "Deixe a criança pintar enquanto escuta", "Converse sobre como a música influenciou o desenho"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["tinta ou giz de cera", "papel"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "art", "requiresAdult": false, "tags": ["arte", "música"], "active": true },
+            { "id": "artistic-expression-06", "skillId": "artistic-expression", "title": "Escolhendo cores para sentimentos", "shortDescription": "Pintar usando uma cor escolhida para representar um sentimento.", "objective": "Expressão emocional através da cor", "instructions": ["Pergunte que cor representa um sentimento (feliz, calmo)", "Deixe a criança pintar livremente usando essa cor como base", "Conversem sobre a escolha"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["tinta ou lápis de cor", "papel"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "art", "requiresAdult": true, "tags": ["arte", "sentimentos"], "active": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "escuta_fala_pensamento_imaginacao",
+      "slug": "escuta-fala-pensamento-e-imaginacao",
+      "name": "Escuta, fala, pensamento e imaginação",
+      "description": "Linguagem oral e escrita, contato com livros, reconto e criação de histórias, e primeiras hipóteses sobre a escrita.",
+      "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "official-framework" },
+      "skills": [
+        {
+          "id": "oral-expression",
+          "slug": "expressao-oral",
+          "name": "Expressão oral",
+          "description": "Expressar ideias, desejos e sentimentos falando espontaneamente com clareza.",
+          "keywords": ["fala", "expressão oral"],
+          "matchTexts": [
+            "expressar ideias desejos e sentimentos",
+            "falar espontaneamente com clareza"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Falar com clareza sobre o que pensa e sente é a base da comunicação e da futura alfabetização.",
+            "howToHelp": ["Fazer perguntas abertas (\"o que você achou?\") em vez de perguntas de sim/não", "Dar tempo para a criança formular a resposta", "Repetir a fala da criança de forma completa, sem corrigir diretamente"],
+            "generalRecommendations": ["Evitar completar as frases da criança por impaciência"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "oral-expression-01", "skillId": "oral-expression", "title": "O melhor momento do dia", "shortDescription": "Perguntar qual foi o melhor momento do dia e por quê.", "objective": "Organização da fala sobre uma experiência", "instructions": ["No fim do dia, pergunte qual foi o melhor momento", "Peça que explique o porquê", "Ouça com atenção, sem apressar"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["fala"], "active": true },
+            { "id": "oral-expression-02", "skillId": "oral-expression", "title": "Descrevendo objetos misteriosos", "shortDescription": "Descrever um objeto escondido em uma sacola só pelo toque.", "objective": "Ampliação de vocabulário descritivo", "instructions": ["Coloque um objeto em uma sacola sem a criança ver", "Peça que ela toque e descreva o que sente", "Tentem adivinhar juntos o que é"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["sacola", "objetos variados"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "language", "requiresAdult": true, "tags": ["fala", "vocabulário"], "active": true },
+            { "id": "oral-expression-03", "skillId": "oral-expression", "title": "Microfone de brincadeira", "shortDescription": "Usar um objeto como \"microfone\" para a criança falar sobre um tema.", "objective": "Confiança na fala espontânea", "instructions": ["Use uma colher ou brinquedo como microfone", "Peça que a criança \"apresente\" algo (seu brinquedo favorito, por exemplo)", "Aplauda ao final"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "language", "requiresAdult": true, "tags": ["fala"], "active": true },
+            { "id": "oral-expression-04", "skillId": "oral-expression", "title": "Termômetro de sentimentos", "shortDescription": "Perguntar como a criança está se sentindo e pedir para explicar por quê.", "objective": "Expressão verbal de sentimentos", "instructions": ["Pergunte \"como você está se sentindo agora?\"", "Peça para explicar o motivo", "Valide o sentimento, mesmo que não entenda completamente"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "emotional-literacy", "requiresAdult": true, "tags": ["fala", "sentimentos"], "active": true },
+            { "id": "oral-expression-05", "skillId": "oral-expression", "title": "Contando uma novidade", "shortDescription": "A criança conta uma novidade para outra pessoa da família.", "objective": "Iniciativa e clareza na fala", "instructions": ["Escolha algo que aconteceu recentemente", "Peça que a criança conte para outra pessoa da casa", "Incentive sem interromper"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["fala"], "active": true }
+          ]
+        },
+        {
+          "id": "spontaneous-writing",
+          "slug": "escrita-espontanea",
+          "name": "Escrita espontânea",
+          "description": "Registrar palavras e textos por tentativa própria, sem cobrança de ortografia correta — o início do interesse pela escrita.",
+          "keywords": ["escrita", "escrita espontânea", "letras"],
+          "matchTexts": [
+            "escrita espontanea",
+            "formular hipoteses sobre linguagem escrita",
+            "registrar palavras e textos por escrita espontanea"
+          ],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "A escrita espontânea é a fase em que a criança tenta representar sons e palavras à sua maneira — é um passo natural e importante antes da alfabetização formal, não um teste de ortografia.",
+            "howToHelp": [
+              "Permitir tentativas de escrita sem cobrança de ortografia perfeita",
+              "Pedir que a criança explique o que escreveu",
+              "Registrar a fala da criança ao lado da escrita espontânea",
+              "Comparar de maneira lúdica diferentes formas de registrar uma palavra",
+              "Incentivar escrever o próprio nome",
+              "Criar listas simples junto com a criança"
+            ],
+            "generalRecommendations": ["Nunca corrigir cada erro — o objetivo é estimular o interesse pela escrita, não antecipar formalmente o Ensino Fundamental."],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "spontaneous-writing-01", "skillId": "spontaneous-writing", "title": "Escrevendo o próprio nome", "shortDescription": "Tentar escrever o próprio nome do seu jeito.", "objective": "Primeiras tentativas de escrita significativa", "instructions": ["Mostre o nome da criança escrito em algum lugar", "Peça que ela tente copiar ou escrever do seu jeito", "Elogie a tentativa, sem corrigir letra por letra"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita"], "active": true },
+            { "id": "spontaneous-writing-02", "skillId": "spontaneous-writing", "title": "Lista de compras", "shortDescription": "Criar juntos uma lista de compras, com a criança \"escrevendo\" os itens.", "objective": "Escrita funcional e significativa", "instructions": ["Escolham 3-4 itens para comprar", "Peça que a criança tente escrever cada item do seu jeito", "Levem a lista até o mercado, se possível"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita"], "active": true },
+            { "id": "spontaneous-writing-03", "skillId": "spontaneous-writing", "title": "Nomes dos brinquedos", "shortDescription": "Fazer etiquetas com os nomes dos brinquedos favoritos.", "objective": "Escrita espontânea associada a objetos conhecidos", "instructions": ["Escolham 2-3 brinquedos favoritos", "Peça que a criança tente escrever o nome de cada um em um papel", "Colem as etiquetas nos brinquedos"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis", "fita adesiva"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita"], "active": true },
+            { "id": "spontaneous-writing-04", "skillId": "spontaneous-writing", "title": "Bilhete para alguém especial", "shortDescription": "Escrever um pequeno bilhete de carinho para alguém da família.", "objective": "Escrita com propósito afetivo", "instructions": ["Escolham para quem será o bilhete", "A criança \"escreve\" à sua maneira", "Entreguem juntos o bilhete"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita"], "active": true },
+            { "id": "spontaneous-writing-05", "skillId": "spontaneous-writing", "title": "Cardápio de brincadeira", "shortDescription": "Criar um cardápio de restaurante de faz de conta.", "objective": "Escrita funcional dentro do brincar simbólico", "instructions": ["Brinquem de restaurante", "Peça que a criança \"escreva\" o cardápio com os pratos", "Brinquem de pedir e servir usando o cardápio"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": false, "tags": ["escrita", "brincadeira"], "active": true },
+            { "id": "spontaneous-writing-06", "skillId": "spontaneous-writing", "title": "Convite para uma brincadeira", "shortDescription": "Criar um convite escrito para uma brincadeira em família.", "objective": "Escrita com finalidade social", "instructions": ["Combinem uma brincadeira ou piquenique em família", "A criança \"escreve\" um convite para os participantes", "Entreguem os convites"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita"], "active": true },
+            { "id": "spontaneous-writing-07", "skillId": "spontaneous-writing", "title": "Etiqueta para o desenho", "shortDescription": "Depois de desenhar, criar uma etiqueta com o \"título\" da obra.", "objective": "Associação entre desenho e escrita", "instructions": ["Depois de um desenho livre, pergunte qual é o título", "Peça que a criança escreva o título do seu jeito", "Exponham o desenho com a etiqueta"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["escrita", "desenho"], "active": true },
+            { "id": "spontaneous-writing-08", "skillId": "spontaneous-writing", "title": "Caça-palavras conhecidas", "shortDescription": "Procurar palavras que a criança já reconhece em embalagens ou livros.", "objective": "Reconhecimento de palavras familiares", "instructions": ["Escolham embalagens ou livros com palavras simples", "Peça que a criança aponte palavras que ela reconhece", "Conversem sobre o que cada palavra significa"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["embalagens ou livros"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["escrita", "leitura"], "active": true }
+          ]
+        },
+        {
+          "id": "rhymes-sound-awareness",
+          "slug": "rimas-e-consciencia-sonora",
+          "name": "Rimas e consciência sonora",
+          "description": "Inventar brincadeiras cantadas, rimas e canções, percebendo os sons das palavras.",
+          "keywords": ["rima", "consciência sonora", "canções"],
+          "matchTexts": ["inventar brincadeiras cantadas rimas e cancoes"],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Brincar com os sons das palavras (rimas, sílabas) desenvolve a consciência fonológica, uma base importante para a futura alfabetização.",
+            "howToHelp": ["Encontrar palavras parecidas e que rimam", "Completar rimas em músicas e poemas conhecidos", "Bater palmas para as partes (sílabas) das palavras"],
+            "generalRecommendations": ["Manter o clima de brincadeira, sem cobrar acerto"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "rhymes-sound-awareness-01", "skillId": "rhymes-sound-awareness", "title": "Encontrando palavras que rimam", "shortDescription": "Dizer uma palavra e procurar juntos outras que rimam com ela.", "objective": "Percepção de rimas", "instructions": ["Diga uma palavra simples (\"gato\")", "Procurem juntos palavras que rimam (\"rato\", \"pato\")", "Repitam com outras palavras"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "language", "requiresAdult": true, "tags": ["rima"], "active": true },
+            { "id": "rhymes-sound-awareness-02", "skillId": "rhymes-sound-awareness", "title": "Completando versos", "shortDescription": "Cantar uma música conhecida parando antes da palavra que rima.", "objective": "Antecipação de rimas em contexto musical", "instructions": ["Escolha uma música ou parlenda conhecida", "Parem antes da última palavra de um verso", "Deixe a criança completar"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "music", "requiresAdult": true, "tags": ["rima", "música"], "active": true },
+            { "id": "rhymes-sound-awareness-03", "skillId": "rhymes-sound-awareness", "title": "Bater palmas nas sílabas", "shortDescription": "Bater uma palma para cada parte (sílaba) do nome de objetos.", "objective": "Consciência silábica", "instructions": ["Escolham um objeto (\"ba-na-na\")", "Batam uma palma para cada parte falada", "Contem juntos quantas palmas bateram"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "language", "requiresAdult": true, "tags": ["consciência sonora"], "active": true },
+            { "id": "rhymes-sound-awareness-04", "skillId": "rhymes-sound-awareness", "title": "Rimas engraçadas", "shortDescription": "Inventar rimas sem sentido só pela graça do som.", "objective": "Brincadeira livre com sons e rimas", "instructions": ["Comecem com uma palavra qualquer", "Inventem palavras (mesmo que não existam) que rimem", "Riam juntos das combinações mais engraçadas"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "language", "requiresAdult": false, "tags": ["rima"], "active": true },
+            { "id": "rhymes-sound-awareness-05", "skillId": "rhymes-sound-awareness", "title": "Qual combina com a rima?", "shortDescription": "Escolher entre duas palavras qual rima com uma palavra dada.", "objective": "Discriminação de rimas", "instructions": ["Diga uma palavra (\"pão\")", "Ofereça duas opções (\"mão\" ou \"gato\")", "Peça que a criança escolha qual rima"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "language", "requiresAdult": true, "tags": ["rima"], "active": true },
+            { "id": "rhymes-sound-awareness-06", "skillId": "rhymes-sound-awareness", "title": "Inventando uma musiquinha", "shortDescription": "Criar juntos uma pequena música ou parlenda sobre o dia a dia.", "objective": "Criação musical com rimas simples", "instructions": ["Escolham um tema (hora do banho, hora de dormir)", "Inventem versos curtos que rimem sobre o tema", "Cantem a música criada juntos"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "music", "requiresAdult": true, "tags": ["rima", "música"], "active": true },
+            { "id": "rhymes-sound-awareness-07", "skillId": "rhymes-sound-awareness", "title": "Sons que começam igual", "shortDescription": "Encontrar palavras que começam com o mesmo som.", "objective": "Consciência do som inicial das palavras", "instructions": ["Diga uma palavra e destaque o primeiro som (\"bola\" começa com \"b\")", "Procurem juntos outras palavras que comecem com o mesmo som", "Façam uma pequena lista ou desenho"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "language", "requiresAdult": true, "tags": ["consciência sonora"], "active": true },
+            { "id": "rhymes-sound-awareness-08", "skillId": "rhymes-sound-awareness", "title": "Parlenda com gestos", "shortDescription": "Aprender uma parlenda tradicional com gestos.", "objective": "Ritmo, rima e memória através da tradição oral", "instructions": ["Escolham uma parlenda conhecida (\"Hoje é domingo\", etc.)", "Aprendam junto com os gestos correspondentes", "Repitam algumas vezes até a criança acompanhar"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "music", "requiresAdult": true, "tags": ["rima", "tradição"], "active": true },
+            { "id": "rhymes-sound-awareness-09", "skillId": "rhymes-sound-awareness", "title": "Livro de rimas", "shortDescription": "Ler um livro de poemas ou rimas infantis e destacar as palavras que rimam.", "objective": "Contato com rimas através da literatura", "instructions": ["Escolha um livro de poemas ou parlendas", "Leiam juntos, destacando as palavras que rimam", "Peça que a criança antecipe a próxima rima"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro de poemas"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["rima", "leitura"], "active": true }
+          ]
+        },
+        {
+          "id": "book-choice-reading",
+          "slug": "livros-e-leitura-compartilhada",
+          "name": "Livros e leitura compartilhada",
+          "description": "Escolher e folhear livros, selecionar textos para leitura, explorando ilustrações e histórias.",
+          "keywords": ["livros", "leitura", "biblioteca"],
+          "matchTexts": [
+            "escolher e folhear livros",
+            "selecionar textos para leitura"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Escolher e explorar livros por conta própria desperta o gosto pela leitura muito antes de a criança conseguir ler sozinha.",
+            "howToHelp": [
+              "Deixar a criança escolher o livro",
+              "Observar capa e ilustrações antes de começar",
+              "Perguntar o que ela acha que vai acontecer",
+              "Conversar sobre os personagens",
+              "Procurar detalhes nas ilustrações",
+              "Relacionar a história com acontecimentos do dia",
+              "Permitir que a criança \"leia\" pelas imagens",
+              "Organizar um pequeno espaço de leitura em casa"
+            ],
+            "generalRecommendations": ["Ler com prazer, sem transformar em obrigação diária rígida"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "book-choice-reading-01", "skillId": "book-choice-reading", "title": "Você escolhe o livro de hoje", "shortDescription": "Deixar a criança escolher livremente qual livro ler.", "objective": "Autonomia na escolha de leitura", "instructions": ["Ofereça 2-3 livros para escolher", "Deixe a criança decidir qual ler", "Leiam juntos, respeitando o ritmo dela"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["livros"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-02", "skillId": "book-choice-reading", "title": "O que vai acontecer?", "shortDescription": "Antes de ler, observar a capa e imaginar do que a história trata.", "objective": "Antecipação e hipóteses sobre a leitura", "instructions": ["Mostre só a capa do livro", "Pergunte do que a criança acha que a história trata", "Leiam e comparem com o que ela imaginou"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-03", "skillId": "book-choice-reading", "title": "Detetive de ilustrações", "shortDescription": "Procurar detalhes escondidos nas ilustrações do livro.", "objective": "Observação atenta das imagens", "instructions": ["Escolham uma página com bastante ilustração", "Peça que a criança encontre detalhes específicos", "Conversem sobre o que cada detalhe pode significar"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["livro"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-04", "skillId": "book-choice-reading", "title": "Ler só pelas imagens", "shortDescription": "A criança \"lê\" a história observando apenas as ilustrações.", "objective": "Construção de narrativa a partir de imagens", "instructions": ["Escolham um livro com boas ilustrações", "Peça que a criança conte a história olhando só as imagens", "Depois leiam o texto real e comparem"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros", "imaginação"], "active": true },
+            { "id": "book-choice-reading-05", "skillId": "book-choice-reading", "title": "Cantinho da leitura", "shortDescription": "Organizar um pequeno espaço aconchegante para ler em casa.", "objective": "Criar um ambiente convidativo para a leitura", "instructions": ["Escolham um cantinho tranquilo da casa", "Organizem almofadas e alguns livros ali", "Usem o espaço para ler juntos regularmente"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 15, "materials": ["almofadas", "livros"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-06", "skillId": "book-choice-reading", "title": "A história parece com o nosso dia?", "shortDescription": "Relacionar o que acontece na história com algo vivido pela criança.", "objective": "Conexão entre leitura e experiência pessoal", "instructions": ["Depois de ler, pergunte se algo parecido já aconteceu com ela", "Deixe-a contar a experiência", "Compare gentilmente as duas situações"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-07", "skillId": "book-choice-reading", "title": "Visitando a biblioteca (ou biblioteca digital)", "shortDescription": "Escolher livros novos em uma biblioteca física ou digital apropriada para a idade.", "objective": "Ampliação do repertório de leitura", "instructions": ["Visitem uma biblioteca ou app de livros digitais apropriado", "Deixe a criança escolher 1-2 títulos novos", "Leiam juntos ao chegar em casa"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "outdoor", "activityType": "reading", "requiresAdult": true, "tags": ["livros"], "active": true },
+            { "id": "book-choice-reading-08", "skillId": "book-choice-reading", "title": "Reconto pelas figuras do livro favorito", "shortDescription": "Escolher o livro favorito e recontar a história olhando as figuras.", "objective": "Familiaridade e apropriação de um livro conhecido", "instructions": ["Escolham o livro favorito da criança", "Peça que ela conte a história com suas palavras, olhando as figuras", "Celebre a versão dela da história"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": false, "tags": ["livros"], "active": true }
+          ]
+        },
+        {
+          "id": "story-retelling",
+          "slug": "reconto-de-historias",
+          "name": "Reconto de histórias",
+          "description": "Recontar, com as próprias palavras, uma história ouvida ou vivida.",
+          "keywords": ["reconto", "história", "narrativa"],
+          "matchTexts": ["recontar historias"],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Recontar uma história com as próprias palavras ajuda a criança a organizar o pensamento, ampliar o vocabulário e compreender a sequência de eventos (início, meio e fim).",
+            "howToHelp": [
+              "Ler a história e pedir que a criança conte novamente com suas palavras",
+              "Usar figuras como apoio para o reconto",
+              "Organizar imagens em sequência antes de recontar",
+              "Fazer perguntas sobre o começo, o meio e o fim",
+              "Deixar contar apenas a parte favorita, se preferir",
+              "Recontar uma situação vivida durante o dia, não só histórias de livro"
+            ],
+            "generalRecommendations": ["Não interromper para corrigir detalhes — o objetivo é a fluência e a organização da fala, não a exatidão"],
+            "recommendedFrequencyPerWeek": 3,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "story-retelling-01", "skillId": "story-retelling", "title": "Agora conta você", "shortDescription": "O adulto lê uma história curta e a criança conta novamente com suas próprias palavras.", "objective": "Reconto livre de uma história ouvida", "instructions": ["Leia uma história curta", "Pergunte: \"Agora você consegue me contar essa história do seu jeito?\"", "Escute sem interromper, usando perguntas simples só se for preciso"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-02", "skillId": "story-retelling", "title": "Reconto com figuras de apoio", "shortDescription": "Usar imagens da própria história como apoio visual para o reconto.", "objective": "Reconto apoiado em pistas visuais", "instructions": ["Escolha um livro com boas ilustrações", "Aponte as imagens enquanto a criança reconta", "Deixe-a usar as figuras como lembrete da sequência"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-03", "skillId": "story-retelling", "title": "Organizando as cenas em sequência", "shortDescription": "Recortar ou desenhar cenas da história e organizá-las na ordem certa.", "objective": "Compreensão da sequência narrativa", "instructions": ["Desenhem 3-4 cenas principais da história", "Embaralhe os desenhos", "Peça que a criança organize na ordem certa e conte a história"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto", "sequência"], "active": true },
+            { "id": "story-retelling-04", "skillId": "story-retelling", "title": "Contando para um brinquedo", "shortDescription": "A criança conta a história para um boneco ou brinquedo favorito.", "objective": "Reconto num contexto lúdico e sem pressão", "instructions": ["Escolha um boneco ou bicho de pelúcia \"ouvinte\"", "Peça que a criança conte a história para ele", "Elogie o esforço, sem cobrar exatidão"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["boneco ou pelúcia"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": false, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-05", "skillId": "story-retelling", "title": "Representando a história com bonecos", "shortDescription": "Encenar a história com bonecos enquanto reconta.", "objective": "Reconto apoiado em dramatização", "instructions": ["Escolham bonecos que possam representar os personagens", "A criança encena e reconta a história ao mesmo tempo", "Participe encenando um dos personagens, se quiser"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["bonecos"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "roleplay", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-06", "skillId": "story-retelling", "title": "Desenhando e explicando a cena favorita", "shortDescription": "Desenhar a parte favorita da história e depois explicar o desenho.", "objective": "Reconto de um trecho específico, apoiado pelo desenho", "instructions": ["Pergunte qual foi a parte favorita da história", "Peça que ela desenhe essa cena", "Peça que explique o desenho com suas palavras"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto", "desenho"], "active": true },
+            { "id": "story-retelling-07", "skillId": "story-retelling", "title": "Começo, meio e fim", "shortDescription": "Perguntar especificamente sobre o começo, o meio e o fim da história.", "objective": "Estrutura narrativa básica", "instructions": ["Depois de ler, pergunte: \"O que aconteceu no começo?\"", "Depois: \"E no meio?\" e \"Como terminou?\"", "Ajude a organizar as respostas em ordem, se necessário"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["livro"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-08", "skillId": "story-retelling", "title": "Só a parte favorita", "shortDescription": "Recontar apenas o trecho preferido da história, sem precisar da história inteira.", "objective": "Reconto parcial, reduzindo a exigência para estimular a fala espontânea", "instructions": ["Pergunte qual foi a parte que ela mais gostou", "Peça que conte só essa parte", "Valorize o quanto ela conseguir contar"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-09", "skillId": "story-retelling", "title": "Recontando o dia como uma história", "shortDescription": "Transformar um acontecimento real do dia em um pequeno \"reconto\".", "objective": "Transferência da habilidade de reconto para experiências reais", "instructions": ["Escolha algo que aconteceu no dia (um passeio, uma brincadeira)", "Peça que a criança conte como se fosse uma história, com começo, meio e fim", "Escute com atenção e interesse genuíno"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "storytelling", "requiresAdult": true, "tags": ["reconto"], "active": true },
+            { "id": "story-retelling-10", "skillId": "story-retelling", "title": "Fantoches de dedo", "shortDescription": "Usar fantoches simples de dedo (de papel) para recontar a história.", "objective": "Reconto apoiado em manipulação de personagens", "instructions": ["Façam fantoches simples de papel para os personagens principais", "A criança manipula os fantoches enquanto reconta a história", "Divirtam-se com as vozes dos personagens"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "lápis", "tesoura sem ponta"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "roleplay", "requiresAdult": true, "tags": ["reconto"], "active": true }
+          ]
+        },
+        {
+          "id": "story-creation",
+          "slug": "criacao-de-historias",
+          "name": "Criação de histórias",
+          "description": "Criar histórias oralmente, inventando personagens, situações e desfechos.",
+          "keywords": ["imaginação", "criação de histórias", "narrativa"],
+          "matchTexts": ["criar historias oralmente"],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Inventar histórias estimula a imaginação, a organização do pensamento e a capacidade de se expressar de forma criativa.",
+            "howToHelp": [
+              "Selecionar três imagens ou objetos e pedir que a criança invente uma história envolvendo os três",
+              "Ajudar a criar um personagem e imaginar onde ele mora",
+              "Escolher um problema e uma solução para a história",
+              "Continuar uma história iniciada pelo adulto",
+              "Criar uma história a partir de um desenho",
+              "Criar histórias em conjunto, cada pessoa contando uma parte"
+            ],
+            "generalRecommendations": ["Aceitar histórias sem lógica perfeita — a criatividade é o objetivo, não a coerência"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "story-creation-01", "skillId": "story-creation", "title": "Três objetos, uma história", "shortDescription": "Escolher três objetos aleatórios e inventar uma história com eles.", "objective": "Criação narrativa a partir de estímulos aleatórios", "instructions": ["Escolham três objetos ou brinquedos aleatórios", "Peça que a criança invente uma história envolvendo os três", "Escute com entusiasmo, sem corrigir a lógica"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["3 objetos ou brinquedos"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-02", "skillId": "story-creation", "title": "Criando um personagem", "shortDescription": "Inventar um personagem novo: nome, onde mora, do que gosta.", "objective": "Construção imaginativa de personagem", "instructions": ["Pergunte o nome do personagem inventado", "Pergunte onde ele mora e do que ele gosta", "Desenhem o personagem juntos, se quiser"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis (opcional)"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-03", "skillId": "story-creation", "title": "Problema e solução", "shortDescription": "Inventar uma história com um problema simples e pensar numa solução.", "objective": "Estrutura narrativa com conflito e resolução", "instructions": ["Ajude a criança a escolher um \"problema\" para a história (personagem perdido, com fome)", "Peça que invente uma solução", "Contem a história completa juntos"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-04", "skillId": "story-creation", "title": "Continuando a história", "shortDescription": "O adulto começa uma história e a criança continua.", "objective": "Continuidade e coerência narrativa", "instructions": ["Comece uma história com 2-3 frases", "Peça que a criança continue de onde parou", "Alternem quem continua a história"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "either", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-05", "skillId": "story-creation", "title": "História a partir de um desenho", "shortDescription": "A criança desenha livremente e depois cria uma história sobre o desenho.", "objective": "Narrativa a partir de expressão visual própria", "instructions": ["Deixe a criança desenhar livremente", "Depois, pergunte: \"o que está acontecendo aqui?\"", "Deixe que ela construa uma história sobre o próprio desenho"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação", "desenho"], "active": true },
+            { "id": "story-creation-06", "skillId": "story-creation", "title": "Dado de imagens", "shortDescription": "Criar (ou usar) um dado com imagens e inventar uma história seguindo o que sair.", "objective": "Criação narrativa guiada por estímulo aleatório", "instructions": ["Façam um cubo de papel com 6 imagens diferentes coladas", "Jogue o dado e inclua a imagem sorteada na história", "Continuem jogando e adicionando novos elementos"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "imagens recortadas"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-07", "skillId": "story-creation", "title": "Aventura com os brinquedos", "shortDescription": "Inventar uma pequena aventura usando os brinquedos da criança como personagens.", "objective": "Narrativa através do brincar simbólico", "instructions": ["Escolham 2-3 brinquedos para serem os personagens", "Inventem juntos uma pequena aventura para eles", "Encenem a aventura enquanto contam"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["brinquedos"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "storytelling", "requiresAdult": false, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-08", "skillId": "story-creation", "title": "Uma história, várias vozes", "shortDescription": "Criar uma história em família, cada pessoa contribuindo com uma parte.", "objective": "Narrativa colaborativa", "instructions": ["Sentem-se em roda", "Uma pessoa começa a história com uma frase", "Cada pessoa acrescenta a próxima parte, na ordem"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-09", "skillId": "story-creation", "title": "E se...?", "shortDescription": "Propor uma pergunta \"e se...?\" divertida e imaginar juntos o que aconteceria.", "objective": "Estímulo à imaginação especulativa", "instructions": ["Proponha uma pergunta divertida (\"e se os animais falassem?\")", "Imaginem juntos o que aconteceria", "Transformem em uma pequena história, se quiserem"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true },
+            { "id": "story-creation-10", "skillId": "story-creation", "title": "Outro final para a história", "shortDescription": "Depois de ler uma história conhecida, inventar um final diferente.", "objective": "Criatividade narrativa a partir de uma base conhecida", "instructions": ["Leiam uma história curta e conhecida", "Pergunte: \"Como você acha que essa história poderia terminar de outro jeito?\"", "Deixe a criança inventar o novo final"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "storytelling", "requiresAdult": true, "tags": ["imaginação"], "active": true }
+          ]
+        },
+        {
+          "id": "text-genres",
+          "slug": "generos-textuais",
+          "name": "Contato lúdico com gêneros textuais",
+          "description": "Perceber, de maneira lúdica, que os textos têm diferentes formatos e usos (receitas, convites, listas, bilhetes, cardápios, entre outros) — sem exigir domínio formal dos gêneros.",
+          "keywords": ["gêneros textuais", "textos"],
+          "matchTexts": [
+            "formular hipoteses sobre generos textuais",
+            "selecionar textos para leitura"
+          ],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Escuta, fala, pensamento e imaginação", "reference": null, "sourceType": "pedagogical-interpretation" },
+          "familyGuidance": {
+            "importance": "Perceber que existem textos diferentes para finalidades diferentes (uma receita, uma lista, um convite) ajuda a criança a entender para que serve a escrita no mundo real — sem exigir que ela domine formalmente os gêneros.",
+            "howToHelp": ["Apresentar receitas, convites, placas, cardápios e listas do dia a dia", "Explorar embalagens e calendários com curiosidade", "Deixar a criança \"escrever\" seus próprios exemplos de cada tipo de texto"],
+            "generalRecommendations": ["O objetivo é despertar curiosidade sobre os diferentes usos da escrita, não ensinar formalmente cada gênero"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "text-genres-01", "skillId": "text-genres", "title": "Nossa receita especial", "shortDescription": "Fazer uma receita simples em família e criar juntos a \"receita escrita\".", "objective": "Contato com o gênero receita", "instructions": ["Escolham uma receita simples e segura para fazer", "Depois, \"escrevam\" juntos os passos, com desenhos e tentativas de escrita", "Guardem a receita criada"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["gêneros textuais"], "active": true },
+            { "id": "text-genres-02", "skillId": "text-genres", "title": "Convite para o lanche", "shortDescription": "Criar um convite para um lanche ou brincadeira em família.", "objective": "Contato com o gênero convite", "instructions": ["Combinem um pequeno evento em casa (lanche especial)", "A criança cria um convite ilustrado", "Entreguem os convites para a família"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["gêneros textuais"], "active": true },
+            { "id": "text-genres-03", "skillId": "text-genres", "title": "Placas da nossa casa", "shortDescription": "Criar placas simples para os cômodos ou objetos da casa.", "objective": "Contato com o gênero placa/aviso", "instructions": ["Escolham 2-3 lugares da casa (quarto, cozinha)", "Façam placas simples com desenho e tentativa de escrita", "Colem as placas nos lugares"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis", "fita adesiva"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["gêneros textuais"], "active": true },
+            { "id": "text-genres-04", "skillId": "text-genres", "title": "Calendário da semana", "shortDescription": "Criar um calendário simples marcando os dias e algo especial de cada um.", "objective": "Contato com o gênero calendário", "instructions": ["Desenhem uma semana simples em uma folha", "Marquem juntos algo especial em cada dia", "Consultem o calendário ao longo da semana"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["gêneros textuais", "tempo"], "active": true },
+            { "id": "text-genres-05", "skillId": "text-genres", "title": "Explorando embalagens", "shortDescription": "Observar embalagens de produtos e conversar sobre as informações nelas.", "objective": "Percepção de texto em contextos do cotidiano", "instructions": ["Escolham 2-3 embalagens de produtos conhecidos", "Observem juntos as letras, números e imagens", "Conversem sobre para que servem essas informações"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["embalagens"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "reading", "requiresAdult": true, "tags": ["gêneros textuais"], "active": true },
+            { "id": "text-genres-06", "skillId": "text-genres", "title": "Regras da nossa brincadeira", "shortDescription": "Escrever (ou desenhar) as regras de uma brincadeira inventada pela criança.", "objective": "Contato com o gênero regras/instruções", "instructions": ["Inventem uma brincadeira nova em família", "Registrem juntos as regras com desenhos e tentativas de escrita", "Sigam as regras registradas ao brincar"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "writing", "requiresAdult": true, "tags": ["gêneros textuais"], "active": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "espacos_tempos_quantidades_relacoes",
+      "slug": "espacos-tempos-quantidades-relacoes-e-transformacoes",
+      "name": "Espaços, tempos, quantidades, relações e transformações",
+      "description": "Investigação do mundo físico e social, noções de tempo, quantidade, medida e classificação.",
+      "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "official-framework" },
+      "skills": [
+        {
+          "id": "classification-comparison",
+          "slug": "classificacao-e-comparacao",
+          "name": "Classificação e comparação",
+          "description": "Comparar peso, tamanho, forma e cor, e classificar objetos segundo critérios.",
+          "keywords": ["classificação", "comparação", "tamanho", "cor"],
+          "matchTexts": [
+            "comparar peso tamanho forma e cor",
+            "classificar objetos",
+            "maior menor e igual",
+            "dentro e fora",
+            "comprido curto grosso e fino"
+          ],
+          "ageGroups": ["3-4", "4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Comparar e classificar objetos por características ajuda a criança a organizar o pensamento lógico, base para o raciocínio matemático futuro.",
+            "howToHelp": ["Separar objetos por tamanho, cor ou forma no dia a dia", "Comparar objetos usando palavras como maior/menor", "Aproveitar momentos naturais, como guardar brinquedos, para classificar"],
+            "generalRecommendations": ["Usar objetos reais e do interesse da criança"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "classification-comparison-01", "skillId": "classification-comparison", "title": "Separando brinquedos por tamanho", "shortDescription": "Organizar brinquedos do menor para o maior.", "objective": "Classificação e ordenação por tamanho", "instructions": ["Junte alguns brinquedos de tamanhos diferentes", "Peça que a criança os organize do menor para o maior", "Conversem sobre qual é o maior e qual é o menor"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["brinquedos"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["classificação"], "active": true },
+            { "id": "classification-comparison-02", "skillId": "classification-comparison", "title": "Separando por cor", "shortDescription": "Agrupar objetos de acordo com a cor.", "objective": "Classificação por atributo visual", "instructions": ["Junte objetos de cores variadas", "Peça que a criança separe em grupos por cor", "Contem juntos quantos itens tem cada grupo"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["objetos coloridos"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": false, "tags": ["classificação", "cores"], "active": true },
+            { "id": "classification-comparison-03", "skillId": "classification-comparison", "title": "Separando por formato", "shortDescription": "Agrupar objetos redondos, quadrados e triangulares.", "objective": "Classificação por forma geométrica", "instructions": ["Junte objetos com formatos diferentes", "Peça que a criança separe por formato", "Nomeiem juntos cada formato"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objetos variados"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["classificação", "formas"], "active": true },
+            { "id": "classification-comparison-04", "skillId": "classification-comparison", "title": "Comparando alturas", "shortDescription": "Comparar a altura de brinquedos, plantas ou pessoas da família.", "objective": "Comparação de grandezas (altura)", "instructions": ["Escolham objetos ou pessoas para comparar", "Perguntem quem/o que é mais alto e mais baixo", "Usem palavras como \"mais alto\", \"mais baixo\", \"do mesmo tamanho\""], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["classificação", "medida"], "active": true },
+            { "id": "classification-comparison-05", "skillId": "classification-comparison", "title": "Dentro ou fora?", "shortDescription": "Brincar de colocar objetos dentro e fora de uma caixa, nomeando a posição.", "objective": "Compreensão de dentro/fora", "instructions": ["Ofereça uma caixa e vários objetos pequenos", "Peça para colocar alguns \"dentro\" e outros \"fora\"", "Pergunte onde está cada objeto"], "ageGroups": ["3-4", "4-5"], "durationMinutes": 10, "materials": ["caixa", "objetos pequenos"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["classificação", "espaço"], "active": true },
+            { "id": "classification-comparison-06", "skillId": "classification-comparison", "title": "Comprido ou curto?", "shortDescription": "Comparar barbantes, lápis ou fitas de tamanhos diferentes.", "objective": "Comparação de comprimento", "instructions": ["Junte objetos compridos e curtos (barbantes, lápis)", "Peça que a criança compare e organize", "Usem as palavras comprido, curto, grosso e fino"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["barbantes ou lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["classificação", "medida"], "active": true }
+          ]
+        },
+        {
+          "id": "scientific-investigation",
+          "slug": "investigacao-cientifica",
+          "name": "Investigação e pesquisa",
+          "description": "Observar mudanças em materiais e fenômenos naturais, buscar informações e registrar experimentos e observações.",
+          "keywords": ["pesquisa", "experimento", "observação", "ciências"],
+          "matchTexts": [
+            "observar mudancas em materiais e fenomenos naturais",
+            "buscar informacoes e realizar pesquisas",
+            "registrar experimentos e observacoes"
+          ],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Observar, investigar e registrar o mundo ao redor desperta a curiosidade científica e ensina a criança a buscar respostas por conta própria.",
+            "howToHelp": [
+              "Acompanhar o crescimento de uma planta juntos",
+              "Observar o gelo derretendo",
+              "Misturar água e materiais seguros para observar reações",
+              "Registrar observações através de desenhos",
+              "Perguntar o que a criança acredita que vai acontecer antes de uma experiência",
+              "Comparar o resultado com a hipótese inicial",
+              "Buscar uma resposta em livro ou material apropriado quando surgir uma dúvida"
+            ],
+            "generalRecommendations": ["Priorizar a curiosidade e a experiência, não a resposta \"certa\""],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "scientific-investigation-01", "skillId": "scientific-investigation", "title": "Observando o gelo derreter", "shortDescription": "Colocar um cubo de gelo em um pratinho e observar o que acontece ao longo do tempo.", "objective": "Observação de transformação de estado físico", "instructions": ["Coloque um cubo de gelo em um pratinho", "Pergunte o que a criança acha que vai acontecer", "Observem juntos ao longo de alguns minutos e comparem com a hipótese"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["gelo", "prato"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "science", "requiresAdult": true, "tags": ["ciências"], "active": true },
+            { "id": "scientific-investigation-02", "skillId": "scientific-investigation", "title": "Acompanhando uma planta", "shortDescription": "Plantar uma semente e observar seu crescimento ao longo dos dias.", "objective": "Observação de um processo ao longo do tempo", "instructions": ["Plantem uma semente em um copo ou vaso", "Reguem e observem juntos a cada dia", "Registrem com desenhos como a planta está mudando"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["semente", "terra", "copo ou vaso"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "science", "requiresAdult": true, "tags": ["ciências"], "active": true },
+            { "id": "scientific-investigation-03", "skillId": "scientific-investigation", "title": "Misturas seguras", "shortDescription": "Misturar água com corante, óleo ou sal e observar o que acontece.", "objective": "Investigação de reações e misturas simples", "instructions": ["Escolham materiais seguros para misturar (água, corante alimentício, sal)", "Pergunte o que a criança acha que vai acontecer", "Observem e conversem sobre o resultado"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["água", "corante ou sal"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "science", "requiresAdult": true, "tags": ["ciências"], "active": true },
+            { "id": "scientific-investigation-04", "skillId": "scientific-investigation", "title": "Registrando o clima do dia", "shortDescription": "Observar o céu todo dia e registrar se está com sol, nublado ou chovendo.", "objective": "Observação sistemática e registro ao longo do tempo", "instructions": ["Olhem juntos para o céu pela manhã", "Desenhem ou marquem um símbolo para o clima do dia", "Revejam os registros da semana ao final"], "ageGroups": ["4-5"], "durationMinutes": 5, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "outdoor", "activityType": "science", "requiresAdult": true, "tags": ["ciências", "tempo"], "active": true },
+            { "id": "scientific-investigation-05", "skillId": "scientific-investigation", "title": "Pequenos pesquisadores", "shortDescription": "Buscar juntos a resposta para uma dúvida da criança em um livro ou material apropriado.", "objective": "Iniciativa de busca de informação", "instructions": ["Aproveitem uma pergunta que a criança fizer (\"por que o céu é azul?\")", "Busquem juntos a resposta em um livro ou material confiável", "Conversem sobre o que descobriram"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["livro ou material de pesquisa"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "research", "requiresAdult": true, "tags": ["pesquisa"], "active": true },
+            { "id": "scientific-investigation-06", "skillId": "scientific-investigation", "title": "O que vai acontecer se...?", "shortDescription": "Propor uma pequena experiência e pedir uma hipótese antes de realizá-la.", "objective": "Formulação de hipóteses e comparação com o resultado", "instructions": ["Proponha uma experiência simples (o que boia e o que afunda)", "Pergunte o que a criança acha que vai acontecer", "Realizem juntos e comparem com a hipótese inicial"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["objetos variados", "recipiente com água"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "science", "requiresAdult": true, "tags": ["ciências", "hipótese"], "active": true },
+            { "id": "scientific-investigation-07", "skillId": "scientific-investigation", "title": "Caderno de descobertas", "shortDescription": "Criar um pequeno caderno para desenhar descobertas e observações da semana.", "objective": "Registro contínuo de observações", "instructions": ["Separem um caderno simples para as descobertas", "Depois de cada observação, desenhem o que viram", "Revejam o caderno de tempos em tempos"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["caderno", "lápis"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "science", "requiresAdult": true, "tags": ["ciências", "registro"], "active": true },
+            { "id": "scientific-investigation-08", "skillId": "scientific-investigation", "title": "Explorando a natureza no quintal ou praça", "shortDescription": "Sair para observar plantas, insetos e outros elementos da natureza.", "objective": "Observação direta do mundo natural", "instructions": ["Vão a um quintal, parque ou praça", "Observem juntos plantas, insetos, pedras", "Ao voltar, desenhem ou contem o que descobriram"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "outdoor", "activityType": "science", "requiresAdult": true, "tags": ["ciências"], "active": true }
+          ]
+        },
+        {
+          "id": "quantities-numbers",
+          "slug": "quantidades-numeros-e-medidas",
+          "name": "Quantidades, números e medidas",
+          "description": "Relacionar números às quantidades, medir objetos e construir gráficos básicos.",
+          "keywords": ["quantidade", "número", "medida", "gráfico"],
+          "matchTexts": [
+            "relacionar numeros as quantidades",
+            "medidas e graficos basicos"
+          ],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Contar, comparar quantidades e medir objetos de forma concreta prepara a criança para o raciocínio matemático de forma natural e sem pressão.",
+            "howToHelp": [
+              "Contar brinquedos e frutas no dia a dia",
+              "Comparar quantidades usando mais/menos",
+              "Medir objetos com um barbante como unidade de medida",
+              "Registrar observações através de desenhos e pequenos gráficos com adesivos",
+              "Organizar objetos do menor para o maior"
+            ],
+            "generalRecommendations": ["Usar sempre situações reais e concretas, evitando exercícios abstratos de papel"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "quantities-numbers-01", "skillId": "quantities-numbers", "title": "Contando frutas", "shortDescription": "Contar frutas ou outros alimentos durante uma refeição ou compra.", "objective": "Contagem em contexto real", "instructions": ["Escolham um momento natural (preparando uma fruta, guardando compras)", "Contem juntos em voz alta", "Pergunte quantas tem no total"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["frutas ou objetos"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["quantidade"], "active": true },
+            { "id": "quantities-numbers-02", "skillId": "quantities-numbers", "title": "Qual grupo tem mais?", "shortDescription": "Formar dois grupos de objetos e comparar qual tem mais e qual tem menos.", "objective": "Comparação de quantidades", "instructions": ["Separe objetos em dois grupos de quantidades diferentes", "Pergunte qual grupo tem mais e qual tem menos", "Contem juntos para confirmar"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objetos pequenos"], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["quantidade"], "active": true },
+            { "id": "quantities-numbers-03", "skillId": "quantities-numbers", "title": "Medindo com barbante", "shortDescription": "Usar um pedaço de barbante para medir e comparar objetos.", "objective": "Noção prática de medida", "instructions": ["Corte um pedaço de barbante", "Use-o para medir diferentes objetos da casa", "Comparem quais objetos são maiores ou menores que o barbante"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["barbante"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["medida"], "active": true },
+            { "id": "quantities-numbers-04", "skillId": "quantities-numbers", "title": "Gráfico de adesivos", "shortDescription": "Montar um gráfico simples com adesivos representando uma pequena pesquisa (cor favorita, por exemplo).", "objective": "Construção de um gráfico básico", "instructions": ["Escolham uma pergunta simples (\"qual sua cor favorita?\")", "Perguntem à família e marquem com adesivos em colunas", "Observem juntos qual coluna ficou maior"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "adesivos"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["gráfico"], "active": true },
+            { "id": "quantities-numbers-05", "skillId": "quantities-numbers", "title": "Organizando do menor para o maior", "shortDescription": "Organizar uma coleção de objetos em ordem crescente de tamanho ou quantidade.", "objective": "Seriação e ordenação numérica", "instructions": ["Junte 4-5 objetos de tamanhos diferentes", "Peça que a criança organize do menor para o maior", "Nomeiem a posição de cada um (primeiro, segundo...)"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objetos variados"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["quantidade", "medida"], "active": true },
+            { "id": "quantities-numbers-06", "skillId": "quantities-numbers", "title": "Números pela casa", "shortDescription": "Procurar números escritos em diferentes lugares da casa ou da rua.", "objective": "Reconhecimento de números no ambiente", "instructions": ["Caminhem procurando números (relógio, calendário, embalagens)", "Aponte e nomeie cada número encontrado", "Peça que a criança tente identificar alguns sozinha"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "either", "activityType": "math", "requiresAdult": true, "tags": ["número"], "active": true },
+            { "id": "quantities-numbers-07", "skillId": "quantities-numbers", "title": "Contando os passos", "shortDescription": "Contar quantos passos são necessários para ir de um lugar a outro da casa.", "objective": "Contagem associada a medida de distância", "instructions": ["Escolham dois pontos da casa", "Contem em voz alta os passos entre eles", "Comparem com a distância entre outros dois pontos"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "math", "requiresAdult": false, "tags": ["quantidade", "medida"], "active": true }
+          ]
+        },
+        {
+          "id": "time-sequence",
+          "slug": "nocoes-de-tempo",
+          "name": "Noções de tempo",
+          "description": "Compreender antes, depois, entre, ontem, hoje e amanhã.",
+          "keywords": ["tempo", "sequência", "rotina"],
+          "matchTexts": [
+            "identificar antes depois e entre",
+            "compreender ontem hoje e amanha"
+          ],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Compreender o tempo (ontem, hoje, amanhã, antes e depois) ajuda a criança a organizar a própria rotina e a entender melhor histórias e explicações.",
+            "howToHelp": ["Conversar sobre ontem, hoje e amanhã diariamente", "Usar um calendário visual simples", "Descrever a rotina do dia em ordem, usando \"antes\" e \"depois\""],
+            "generalRecommendations": ["Aproveitar momentos naturais do dia a dia, sem precisar de exercícios formais"],
+            "recommendedFrequencyPerWeek": 2,
+            "estimatedMinutesMin": 5,
+            "estimatedMinutesMax": 10
+          },
+          "activityOptions": [
+            { "id": "time-sequence-01", "skillId": "time-sequence", "title": "O que fizemos ontem?", "shortDescription": "Conversar sobre o que aconteceu ontem e o que vai acontecer amanhã.", "objective": "Uso funcional das noções de tempo", "instructions": ["Pergunte o que a criança lembra de ontem", "Converse sobre o que está planejado para amanhã", "Use as palavras ontem, hoje e amanhã na conversa"], "ageGroups": ["4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["tempo"], "active": true },
+            { "id": "time-sequence-02", "skillId": "time-sequence", "title": "Calendário da semana", "shortDescription": "Marcar juntos os dias no calendário e destacar hoje.", "objective": "Localização temporal com apoio visual", "instructions": ["Olhem juntos um calendário simples", "Marquem o dia de hoje", "Conversem sobre o que aconteceu ontem e o que vem amanhã"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["calendário"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["tempo"], "active": true },
+            { "id": "time-sequence-03", "skillId": "time-sequence", "title": "Antes e depois do banho", "shortDescription": "Descrever a rotina do dia usando \"antes\" e \"depois\".", "objective": "Compreensão de sequência temporal na rotina", "instructions": ["Escolham um momento da rotina (banho, refeição)", "Perguntem o que acontece antes e o que acontece depois", "Usem essas palavras ao longo do dia"], "ageGroups": ["4-5"], "durationMinutes": 5, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["tempo"], "active": true },
+            { "id": "time-sequence-04", "skillId": "time-sequence", "title": "Sequência de figuras do dia", "shortDescription": "Organizar figuras representando momentos do dia em ordem.", "objective": "Ordenação temporal com apoio visual", "instructions": ["Desenhem ou recortem 3-4 momentos do dia (acordar, comer, brincar, dormir)", "Embaralhe as figuras", "Peça que a criança organize na ordem correta"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "routine", "requiresAdult": true, "tags": ["tempo", "sequência"], "active": true },
+            { "id": "time-sequence-05", "skillId": "time-sequence", "title": "O que vem entre?", "shortDescription": "Brincar de identificar o que está \"entre\" dois pontos ou momentos.", "objective": "Compreensão da noção de \"entre\"", "instructions": ["Coloquem três objetos em fila", "Pergunte o que está \"entre\" o primeiro e o terceiro", "Repitam com outras combinações"], "ageGroups": ["4-5"], "durationMinutes": 10, "materials": ["objetos"], "materialLevel": "none", "difficulty": "medium", "environment": "home", "activityType": "math", "requiresAdult": true, "tags": ["tempo", "espaço"], "active": true }
+          ]
+        },
+        {
+          "id": "family-community-facts",
+          "slug": "fatos-da-familia-e-comunidade",
+          "name": "Fatos da família e comunidade",
+          "description": "Relatar fatos sobre nascimento, família e comunidade.",
+          "keywords": ["família", "comunidade", "história pessoal"],
+          "matchTexts": ["relatar fatos sobre nascimento familia e comunidade"],
+          "ageGroups": ["4-5"],
+          "bnccReference": null,
+          "source": { "institution": "MEC", "framework": "BNCC", "document": "Base Nacional Comum Curricular", "experienceField": "Espaços, tempos, quantidades, relações e transformações", "reference": null, "sourceType": "school-indicator" },
+          "familyGuidance": {
+            "importance": "Conhecer a própria história e a da família fortalece a identidade e o senso de pertencimento da criança.",
+            "howToHelp": ["Contar histórias sobre quando a criança nasceu", "Mostrar fotos antigas da família", "Conversar sobre pessoas e lugares importantes da comunidade"],
+            "generalRecommendations": ["Adaptar o conteúdo à realidade e composição de cada família, sem impor um modelo único"],
+            "recommendedFrequencyPerWeek": 1,
+            "estimatedMinutesMin": 10,
+            "estimatedMinutesMax": 15
+          },
+          "activityOptions": [
+            { "id": "family-community-facts-01", "skillId": "family-community-facts", "title": "Álbum de fotos em família", "shortDescription": "Ver fotos antigas e contar histórias sobre elas.", "objective": "Conexão com a própria história familiar", "instructions": ["Separem algumas fotos antigas da família", "Contem juntos a história de cada uma", "Deixe a criança fazer perguntas"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": ["fotos"], "materialLevel": "basic", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["família"], "active": true },
+            { "id": "family-community-facts-02", "skillId": "family-community-facts", "title": "A história de quando você nasceu", "shortDescription": "Contar para a criança como foi o dia em que ela nasceu.", "objective": "Construção da identidade e história pessoal", "instructions": ["Escolham um momento tranquilo para conversar", "Contem a história de forma simples e afetuosa", "Deixe a criança fazer perguntas sobre o assunto"], "ageGroups": ["4-5"], "durationMinutes": 15, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "home", "activityType": "conversation", "requiresAdult": true, "tags": ["família"], "active": true },
+            { "id": "family-community-facts-03", "skillId": "family-community-facts", "title": "Conhecendo o bairro", "shortDescription": "Passear e conversar sobre lugares importantes da comunidade.", "objective": "Percepção do entorno comunitário", "instructions": ["Façam um pequeno passeio pelo bairro", "Aponte lugares importantes (padaria, praça, escola)", "Conversem sobre para que serve cada lugar"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": [], "materialLevel": "none", "difficulty": "easy", "environment": "outdoor", "activityType": "exploration", "requiresAdult": true, "tags": ["comunidade"], "active": true },
+            { "id": "family-community-facts-04", "skillId": "family-community-facts", "title": "Árvore da família", "shortDescription": "Desenhar uma árvore genealógica simples com os membros próximos da família.", "objective": "Compreensão das relações familiares", "instructions": ["Desenhem juntos uma árvore simples", "Coloquem fotos ou nomes dos familiares próximos", "Conversem sobre cada pessoa"], "ageGroups": ["4-5"], "durationMinutes": 20, "materials": ["papel", "lápis"], "materialLevel": "basic", "difficulty": "medium", "environment": "home", "activityType": "drawing", "requiresAdult": true, "tags": ["família"], "active": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

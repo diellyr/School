@@ -28,7 +28,9 @@ export function CheckInOutPage() {
 
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
-  const canEdit = usePermission('check_in_out', 'edit') || usePermission('check_in_out', 'create');
+  const canEditPermission = usePermission('check_in_out', 'edit');
+  const canCreate = usePermission('check_in_out', 'create');
+  const canEdit = canEditPermission || canCreate;
 
   const schools = useLiveQuery<School[]>(() => db.schools.filter((s) => s.status === 'active').toArray(), []);
   const classes = useLiveQuery<Class[]>(() => db.classes.filter((c) => c.status === 'active').toArray(), []);
