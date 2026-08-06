@@ -129,6 +129,16 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   testa as 4 rotações possíveis da imagem e usa a de maior confiança.
 - Número da versão visível na tela de login e na barra lateral (`src/app/version.ts`).
 
+## v0.8.1 — Aviso de atualização disponível
+
+- Investigado relato de importação "sem OCR e sem opção de vários arquivos": o app em si já
+  tinha essas funcionalidades (v0.8.0), mas o navegador do usuário estava com uma aba antiga
+  aberta havia dias, rodando a versão anterior sem nenhuma dessas melhorias — problema comum em
+  navegadores de celular, que mantêm abas na memória sem recarregar.
+- **Aviso de nova versão**: o app agora verifica periodicamente (a cada 10 minutos e ao voltar
+  para a aba) se já existe uma versão mais nova publicada e mostra uma barra fixa oferecendo
+  atualizar com um clique, em vez do usuário continuar sem saber que está numa versão antiga.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
