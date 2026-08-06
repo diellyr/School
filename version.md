@@ -185,6 +185,25 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   criadas em tentativas anteriores — para essas, edite a ficha do aluno (em Alunos) e corrija a
   escola/turma manualmente.
 
+## v0.9.0 — Leitura experimental de R/B/O do boletim BNCC (sempre em rascunho)
+
+- A pedido explícito do usuário, mesmo após medir e mostrar que a leitura célula a célula tem baixa
+  confiabilidade (ver v0.8.0): implementada uma tentativa de leitura automática do nível R/B/O de
+  cada habilidade do boletim, usando a posição de cada palavra reconhecida na página para
+  reconstruir a tabela (habilidade → coluna de semestre) — não depende mais só da leitura célula a
+  célula recortada, mas de nenhuma forma resolve a causa raiz: fotos com inclinação/desfoque
+  continuam produzindo texto pouco confiável.
+- **Nunca publica automaticamente**: toda avaliação lida vira um rascunho (`publicationStatus:
+  'draft'`) associado a uma Atividade criada para aquela habilidade, com a confiança da leitura
+  registrada. Nada fica visível às famílias sem revisão.
+- **Tela de revisão no resultado da importação**: lista cada avaliação lida (descrição, semestre,
+  confiança, nível ajustável), com botão "Aprovar" individual e "Aprovar todas" em lote — só depois
+  de aprovada a avaliação é publicada.
+- **Testado contra foto real e documentado o resultado**: nessa foto específica, de ~30-40
+  habilidades só 2 tiveram nível reconhecido com confiança minimamente utilizável (15-16%), e a
+  descrição da habilidade associada a cada uma frequentemente sai ilegível — a tela de revisão
+  deixa isso visível (confiança baixa, texto estranho) em vez de esconder a limitação.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

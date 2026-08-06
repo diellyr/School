@@ -15,6 +15,7 @@ import { buildPreview, type PreviewRow } from './validateRows';
 import { readFileAsDataUrl, sha256OfFile } from '../../lib/files';
 import { sha256Hex } from '../../lib/hash';
 import { newId } from '../../domain/common';
+import { RBO_LABELS } from '../../domain';
 import type {
   Activity,
   AppUser,
@@ -129,6 +130,25 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     failed: { fileName: string; message: string }[];
   } | null>(null);
   const boletimFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Avaliações lidas automaticamente do boletim (nível R/B/O por habilidade) — sempre criadas como
+  // rascunho; só ficam visíveis às famílias depois que o usuário revisa e aprova aqui, uma a uma ou
+  // todas de uma vez. Nunca publicadas sem esse passo (ver comentário em parseBoletim.ts).
+  const [pendingSkillAssessments, setPendingSkillAssessments] = useState<
+    {
+      assessmentId: string;
+      studentId: string;
+      studentName: string;
+      description: string;
+      semesterLabel: string;
+      level: RboLevel;
+      confidence: number;
+      published: boolean;
+    }[]
+  >([]);
+  const [skillAssessmentEdits, setSkillAssessmentEdits] = useState<Record<string, RboLevel>>({});
+  const [skillApprovalBusy, setSkillApprovalBusy] = useState<string | null>(null);
+  const [skillApprovalAllBusy, setSkillApprovalAllBusy] = useState(false);
 
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
@@ -256,6 +276,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
     let createdStudentsCount = 0;
     const attachedDocuments: { studentId: string; studentName: string; fileName: string }[] = [];
     const failed: { fileName: string; message: string }[] = [];
+    const newPendingAssessments: typeof pendingSkillAssessments = [];
 
     try {
       const operationRef = newId();
@@ -263,11 +284,13 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       const allClasses = await db.classes.filter((c) => c.status === 'active').toArray();
       const allStudents = await db.students.filter((s) => s.status === 'active').toArray();
       const allAcademicYears = await db.academicYears.filter((y) => y.status === 'active').toArray();
+      const allActivities = await db.activities.filter((a) => a.status === 'active').toArray();
 
       const schoolCache = new Map<string, School>();
       const classCache = new Map<string, Class>();
       const studentCache = new Map<string, Student>();
       const academicYearCache = new Map<string, string>();
+      const activityCache = new Map<string, Activity>();
 
       async function ensureSchool(name: string): Promise<School> {
         const key = normalizeHeader(name);
@@ -341,6 +364,34 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         return created;
       }
 
+      /** Uma habilidade do boletim vira uma Atividade (sem categoria — a extração automática não
+       *  identifica de qual campo de experiência é cada linha), reaproveitada entre os semestres. */
+      async function ensureSkillActivity(schoolIdArg: string, classIdArg: string, academicYearId: string, title: string): Promise<Activity> {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `${classIdArg}::${normalizeHeader(title)}`;
+        const cached = activityCache.get(key);
+        if (cached) return cached;
+        const existing = allActivities.find((a) => a.classId === classIdArg && normalizeHeader(a.title) === normalizeHeader(title));
+        if (existing) { activityCache.set(key, existing); return existing; }
+        const created = await repositories.activities.create(
+          {
+            schoolId: schoolIdArg,
+            classId: classIdArg,
+            academicYearId,
+            stage: 'early_childhood',
+            title: title.slice(0, 300).trim(),
+            type: 'atividade',
+            date: today,
+            period,
+            createdByTeacherId: actor.userId,
+          },
+          actor,
+        );
+        allActivities.push(created);
+        activityCache.set(key, created);
+        return created;
+      }
+
       for (const entry of boletimEntries) {
         const h = entry.header;
         if (!h.schoolName.trim() || !h.studentName.trim()) continue;
@@ -372,6 +423,43 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
             actor,
           );
           attachedDocuments.push({ studentId: student.id, studentName: student.fullName, fileName: entry.file.name });
+
+          // Avaliações lidas automaticamente célula a célula — sempre como rascunho (nunca
+          // publicadas aqui). Exige turma definida, já que Atividade precisa de uma turma.
+          if (klass) {
+            const academicYearId = await ensureAcademicYear(school.id);
+            const skillRows = entry.result?.skillRows ?? [];
+            for (const row of skillRows) {
+              const activity = await ensureSkillActivity(school.id, klass.id, academicYearId, row.description);
+              for (const [level, semesterLabel] of [
+                [row.semester1, '1º semestre'],
+                [row.semester2, '2º semestre'],
+              ] as const) {
+                if (!level) continue;
+                const assessment = await repositories.assessments.create(
+                  {
+                    activityId: activity.id,
+                    studentId: student.id,
+                    stage: 'early_childhood',
+                    rboLevel: level,
+                    publicationStatus: 'draft',
+                    comments: `Lido automaticamente do boletim anexado (confiança ${Math.round(row.confidence * 100)}%) — revise antes de publicar.`,
+                  },
+                  actor,
+                );
+                newPendingAssessments.push({
+                  assessmentId: assessment.id,
+                  studentId: student.id,
+                  studentName: student.fullName,
+                  description: row.description,
+                  semesterLabel,
+                  level,
+                  confidence: row.confidence,
+                  published: false,
+                });
+              }
+            }
+          }
 
           const batch = await repositories.imports.create(
             {
@@ -409,7 +497,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               },
               confidence: entry.result?.confidence,
               validation: 'warning',
-              validationNotes: 'Cabeçalho lido automaticamente e conferido pelo usuário. As avaliações individuais (R/B/O) não foram preenchidas automaticamente — lance-as manualmente em Avaliações.',
+              validationNotes: 'Cabeçalho lido automaticamente e conferido pelo usuário. Avaliações R/B/O lidas célula a célula ficam como rascunho, pendentes de revisão — ver Resultado desta importação.',
               linkedStudentId: student.id,
             },
             actor,
@@ -421,9 +509,37 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
       }
 
       setBoletimResult({ createdSchools, createdClasses, createdStudents: createdStudentsCount, attachedDocuments, failed });
+      setPendingSkillAssessments(newPendingAssessments);
       setStep(6);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function approveSkillAssessment(assessmentId: string) {
+    if (!session) return;
+    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    const level = skillAssessmentEdits[assessmentId] ?? pendingSkillAssessments.find((a) => a.assessmentId === assessmentId)?.level;
+    if (!level) return;
+    setSkillApprovalBusy(assessmentId);
+    try {
+      await repositories.assessments.update(assessmentId, { rboLevel: level, publicationStatus: 'published', publishedAt: new Date().toISOString() }, actor);
+      setPendingSkillAssessments((prev) => prev.map((a) => (a.assessmentId === assessmentId ? { ...a, level, published: true } : a)));
+    } finally {
+      setSkillApprovalBusy(null);
+    }
+  }
+
+  async function approveAllSkillAssessments() {
+    if (!session) return;
+    setSkillApprovalAllBusy(true);
+    try {
+      for (const a of pendingSkillAssessments) {
+        if (a.published) continue;
+        await approveSkillAssessment(a.assessmentId);
+      }
+    } finally {
+      setSkillApprovalAllBusy(false);
     }
   }
 
@@ -1346,11 +1462,70 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
             <Stat label="Turmas cadastradas" value={boletimResult.createdClasses} />
             <Stat label="Alunos cadastrados" value={boletimResult.createdStudents} />
           </div>
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
-            As avaliações R/B/O de cada habilidade não foram preenchidas automaticamente. Abra{' '}
-            <strong>Avaliações</strong> para lançá-las manualmente, usando o boletim anexado a cada aluno
-            (em Documentos) como referência.
-          </div>
+          {pendingSkillAssessments.length === 0 ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+              Não foi possível ler nenhuma avaliação R/B/O automaticamente neste lote (ou nenhum arquivo tinha
+              turma definida). Abra <strong>Avaliações</strong> para lançá-las manualmente, usando o boletim
+              anexado a cada aluno (em Documentos) como referência.
+            </div>
+          ) : (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 p-3 dark:border-amber-900/50">
+                <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    {pendingSkillAssessments.length} avaliação(ões) lida(s) automaticamente do boletim — a
+                    leitura célula a célula não é confiável, confira cada uma contra a foto original (em
+                    Documentos) antes de aprovar. Nada é publicado para as famílias sem aprovação.
+                  </span>
+                </div>
+                <Button
+                  onClick={approveAllSkillAssessments}
+                  loading={skillApprovalAllBusy}
+                  disabled={pendingSkillAssessments.every((a) => a.published)}
+                >
+                  Aprovar todas
+                </Button>
+              </div>
+              <ul className="divide-y divide-amber-200 dark:divide-amber-900/50">
+                {pendingSkillAssessments.map((a) => (
+                  <li key={a.assessmentId} className="flex flex-wrap items-center gap-2 p-3 text-xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-slate-800 dark:text-slate-100" title={a.description}>
+                        {a.description || '(descrição não identificada)'}
+                      </p>
+                      <p className="text-slate-500">
+                        {a.studentName} · {a.semesterLabel} · confiança {Math.round(a.confidence * 100)}%
+                      </p>
+                    </div>
+                    <Select
+                      value={skillAssessmentEdits[a.assessmentId] ?? a.level}
+                      onChange={(e) => setSkillAssessmentEdits((prev) => ({ ...prev, [a.assessmentId]: e.target.value as RboLevel }))}
+                      disabled={a.published}
+                      className="w-auto"
+                    >
+                      {(['R', 'B', 'O'] as const).map((l) => (
+                        <option key={l} value={l}>{l} — {RBO_LABELS[l]}</option>
+                      ))}
+                    </Select>
+                    {a.published ? (
+                      <Badge tone="success">
+                        <Check className="h-3 w-3" /> Aprovada
+                      </Badge>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={() => approveSkillAssessment(a.assessmentId)}
+                        loading={skillApprovalBusy === a.assessmentId}
+                      >
+                        Aprovar
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-sm dark:divide-slate-800 dark:border-slate-800">
             {boletimResult.attachedDocuments.map((d, i) => (
               <li key={`${d.studentId}-${i}`} className="flex items-center justify-between px-3 py-2">
