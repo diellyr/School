@@ -59,6 +59,8 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Parsing real | CSV (Papa Parse) e XLSX (SheetJS) |
 | Criação automática de registros | **Cadastro de aluno** e **Frequência** criam/atualizam registros reais, com detecção de duplicidade (nome/aluno+data) |
 | Relatórios EI/EF (cadastro completo) | Leem escola, turma, aluno, professor e atividade/disciplina diretamente do arquivo e **cadastram automaticamente o que ainda não existir** (escola, turma, ano letivo, aluno, categoria/atividade), em vez de exigir tudo pré-cadastrado. Professores criados por essa via ficam com o login bloqueado até um Owner/Admin definir uma senha real em Professores. Avaliações (R/B/O) e notas entram como rascunho, para revisão antes da publicação às famílias. |
+| Boletim por habilidades BNCC (interpretador dedicado) | Tipo próprio para boletins impressos no formato "uma habilidade BNCC por linha × colunas de semestre" (foto ou PDF) — layout muito diferente de uma lista tabular simples, então usa um interpretador dedicado (`parseBoletim.ts`) em vez do pipeline genérico de tabela/coluna. **Não exige nenhum pré-cadastro**: escola, turma, aluno e data de nascimento são lidos do cabeçalho da própria folha e cadastrados automaticamente; os campos ficam editáveis antes de confirmar. Detecta quais categorias BNCC aparecem no documento. Testado contra fotos reais de boletim: a leitura do cabeçalho é razoavelmente confiável, mas a leitura individual de cada nível R/B/O célula a célula não é (testamos e a confiança fica baixa demais) — por isso o arquivo original fica anexado ao aluno (Documentos, categoria "Boletim") para lançamento manual das avaliações em Avaliações, em vez de arriscar preencher uma avaliação errada. |
+| OCR sem depender de CDN externo | O motor de reconhecimento (Tesseract.js), seu núcleo WebAssembly e os dados de idioma (português) ficam hospedados no próprio app (`public/tessdata/`, ~8 MB, carregados sob demanda só quando uma imagem é importada) em vez do CDN público padrão — funciona mesmo em ambientes com saída de rede restrita. Antes de reconhecer o texto, o app testa as 4 rotações possíveis da foto e usa a de maior confiança (fotos de celular nem sempre têm a orientação correta aplicada) — melhoria que vale para toda importação por OCR, não só para o boletim BNCC. |
 | Demais tipos | Eventos, observações, alertas e portfólio passam pelo pipeline completo (upload, mapeamento, log), mas ainda não criam os registros automaticamente — ficam no log de importação para revisão manual |
 | Log de importação | Tela própria com histórico, contagens de encontrados/importados/rejeitados/duplicados e local de armazenamento |
 
@@ -99,8 +101,7 @@ partir de um único registro).
 | Banco de dados em nuvem (Supabase) | Código completo e compilando (repositórios, schema SQL, RLS, funções privilegiadas — ver Fase 6 acima), mas **nenhuma migração foi executada contra um projeto real** e nenhuma variável `VITE_SUPABASE_*` está configurada — decisão explícita de ativar fica para quando houver um projeto Supabase real autorizado |
 | Autenticação real (Supabase Auth) | `authStore.loginWithPassword()` isola o ponto de troca; hoje compara hash local |
 | Row Level Security | Políticas SQL reais em `supabase/migrations/0002_rls_policies.sql`, nunca aplicadas contra um banco real; localmente a restrição de escopo é feita na camada de aplicação (hooks de permissão) |
-| OCR em ambiente com rede restrita | O reconhecimento em si depende de um download de dados de idioma (Tesseract.js); em ambientes com bloqueio de saída para CDNs esse download falha — a extração de PDF e todo o resto do fluxo (progresso, confiança, revisão obrigatória) funcionam normalmente |
-| OCR de boletins em formato de checklist (foto de tabela com uma linha por habilidade BNCC × colunas de semestre) | O upload/anexo desse tipo de arquivo é aceito normalmente (sem erro, sem travar) e o texto é extraído quando o ambiente tem acesso à internet, mas a reconstrução automática de colunas (heurística por espaçamento) não foi desenhada para esse layout específico — diferente de uma lista simples de alunos, aqui não há uma coluna "aluno"/"escola" por linha, e sim um cabeçalho único no topo da folha com dezenas de linhas de habilidades por baixo. Nesse caso a pré-visualização mostra o texto extraído para revisão manual, mas o cadastro automático linha a linha (Fase 7) não interpreta esse formato — fica para uma iteração futura dedicada a boletins em checklist. |
+| Leitura célula a célula do boletim BNCC | O interpretador dedicado (ver Fase 3 acima) lê o cabeçalho da folha (escola/aluno/turma/data), mas não preenche automaticamente o nível R/B/O de cada habilidade — testamos o recorte + OCR de cada célula individual contra fotos reais e a confiança fica baixa demais para lançar uma avaliação de criança sem revisão. O arquivo fica anexado ao aluno para lançamento manual em Avaliações. |
 
 ## Como verificar
 
@@ -113,16 +114,22 @@ npm run dev     # app completo, use "Carregar dados de demonstração" na tela d
 Testado manualmente (Playwright) o fluxo completo de cada módulo com dados de demonstração: login por
 perfil, dashboards, lançamento de atividades/avaliações/notas/frequência, alertas, eventos, portfólio,
 documentos e importação de CSV e PDF — incluindo a criação real de um aluno via importação, a detecção
-de duplicidade, o bloqueio de confirmação sem revisão manual em importações de PDF/OCR, e o tratamento
-de erro (sem crash) quando o download dos dados de idioma do OCR falha por restrição de rede do
-ambiente de teste. Testado também, a partir de uma conta nova sem nenhum dado prévio: criação de conta →
-importação de um relatório de Educação Infantil e de um relatório do Ensino Fundamental, cada um
-citando escola/turma/aluno/professor/atividade ainda inexistentes — confirmando que o cadastro
-automático cria exatamente os registros que faltam (sem duplicar entidades já criadas por uma
-importação anterior na mesma sessão) e que os dados aparecem corretamente nas telas de Escolas, Turmas,
-Alunos e Professores. Testado também o limite de 10 arquivos por importação (seleção de 11 é recusada
-com aviso, seleção de 10 funciona, tentar adicionar um 11º com 10 já selecionados também é recusado),
-a remoção individual de arquivos antes de confirmar, o resultado agregado + detalhado por arquivo em
-um lote de várias planilhas, e o anexo de fotos reais de boletim impresso (fotos de celular, ~4000×3000
-pixels) — confirmando que o upload aceita o arquivo e degrada de forma segura (mensagem de erro por
-arquivo, sem travar a tela) quando a extração de texto não está disponível.
+de duplicidade, e o bloqueio de confirmação sem revisão manual em importações de PDF/OCR. Testado
+também, a partir de uma conta nova sem nenhum dado prévio: criação de conta → importação de um
+relatório de Educação Infantil e de um relatório do Ensino Fundamental, cada um citando
+escola/turma/aluno/professor/atividade ainda inexistentes — confirmando que o cadastro automático cria
+exatamente os registros que faltam (sem duplicar entidades já criadas por uma importação anterior na
+mesma sessão) e que os dados aparecem corretamente nas telas de Escolas, Turmas, Alunos e Professores.
+Testado também o limite de 10 arquivos por importação (seleção de 11 é recusada com aviso, seleção de
+10 funciona, tentar adicionar um 11º com 10 já selecionados também é recusado) e a remoção individual
+de arquivos antes de confirmar.
+
+O interpretador de boletim BNCC foi testado de ponta a ponta com duas fotos reais de boletim impresso
+(fotos de celular, ~4000×3000 pixels, tiradas em orientações diferentes): o app corrigiu a rotação
+automaticamente, leu o cabeçalho (escola, aluno, data de nascimento — a categoria BNCC de cada seção
+também foi detectada corretamente), permitiu corrigir os campos extraídos, cadastrou a escola e o aluno
+sem nenhum pré-cadastro, anexou o arquivo original ao aluno em Documentos (categoria "Boletim") e
+mostrou o aviso de que as avaliações R/B/O individuais precisam ser lançadas manualmente. O
+reconhecimento de texto (Tesseract.js, núcleo WASM e dados de idioma) roda inteiramente a partir de
+arquivos hospedados no próprio app — testado inclusive num ambiente com saída de rede restrita (sem
+acesso ao CDN público) para confirmar que não há mais essa dependência externa.

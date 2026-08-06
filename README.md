@@ -19,7 +19,11 @@ React Hook Form + Zod · Recharts · dexie-react-hooks · Vitest
 A importação de CSV (Papa Parse), XLSX (SheetJS), PDF (PDF.js) e imagens com OCR (Tesseract.js) está
 funcionando no assistente de importação (Fases 3 e 7) — importações vindas de PDF ou OCR exigem revisão
 humana explícita antes de confirmar. É possível anexar até **10 arquivos de uma vez** numa mesma
-importação (combinando formatos), com resultado agregado e detalhado por arquivo.
+importação (combinando formatos), com resultado agregado e detalhado por arquivo. Há também um
+interpretador dedicado para boletins impressos no formato "uma habilidade BNCC por linha × colunas de
+semestre" (foto ou PDF) — o único tipo de importação que não exige nenhum pré-cadastro, já que lê
+escola/aluno/turma direto do cabeçalho da folha. O reconhecimento de texto roda inteiramente a partir de
+arquivos hospedados no próprio app (`public/tessdata/`), sem depender de nenhum CDN externo.
 
 ## Como executar
 
@@ -125,12 +129,15 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
   Fundamental (com gráficos reais), lançamento manual de atividades/avaliações/notas/frequência/
   observações, motor de alertas educacionais (testado), eventos com confirmação de presença, portfólio
   com upload de arquivo, central de documentos, recomendações, o assistente completo de importação de
-  CSV/XLSX/PDF/OCR (com criação real de alunos e frequência a partir do arquivo, confiança por linha e
-  revisão humana obrigatória para PDF/OCR) — **incluindo os relatórios de Educação Infantil e Ensino
-  Fundamental, que leem escola/turma/aluno/professor/atividade direto do arquivo e cadastram
-  automaticamente o que ainda não existir**, a fila de sincronização simulada com resolução de
-  conflitos, as políticas de retenção de dados, e a prontidão de código para Supabase (repositórios,
-  schema SQL, RLS, funções privilegiadas — nunca aplicados a um projeto real sem decisão explícita).
+  CSV/XLSX/PDF/OCR (com criação real de alunos e frequência a partir do arquivo, confiança por linha,
+  até 10 arquivos por vez e revisão humana obrigatória para PDF/OCR) — **incluindo os relatórios de
+  Educação Infantil e Ensino Fundamental, que leem escola/turma/aluno/professor/atividade direto do
+  arquivo e cadastram automaticamente o que ainda não existir**, e o interpretador dedicado de boletim
+  por habilidades BNCC (o único tipo que não exige nenhum pré-cadastro — cadastra escola/aluno/turma a
+  partir do cabeçalho do próprio arquivo e anexa o boletim ao aluno para lançamento manual das
+  avaliações), a fila de sincronização simulada com resolução de conflitos, as políticas de retenção de
+  dados, e a prontidão de código para Supabase (repositórios, schema SQL, RLS, funções privilegiadas —
+  nunca aplicados a um projeto real sem decisão explícita).
 - **Simulado nesta fase:** relatórios/exportações formais em PDF/XLSX, banco de dados em nuvem
   (Supabase — código pronto, mas nenhum projeto real provisionado) e a criação automática de registros
   para os demais tipos de importação (eventos, observações, alertas, portfólio importados)

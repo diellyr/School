@@ -8,10 +8,11 @@ import { Badge } from '../../components/Badge';
 import { FormField, Input, Select } from '../../components/form/Field';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
-import { DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, SELF_CONTAINED_TYPES, TARGET_FIELDS } from './importTypes';
+import { BNCC_CHECKLIST_TYPE, DOCUMENT_TYPE_LABELS, FILE_FORMAT_FROM_NAME, PERIODICITY_LABELS, SELF_CONTAINED_TYPES, TARGET_FIELDS } from './importTypes';
 import { parseTabularFile, type ParsedTable } from './parseFile';
+import { parseBoletimChecklist, type BoletimHeaderFields, type BoletimParseResult } from './parseBoletim';
 import { buildPreview, type PreviewRow } from './validateRows';
-import { sha256OfFile } from '../../lib/files';
+import { readFileAsDataUrl, sha256OfFile } from '../../lib/files';
 import { sha256Hex } from '../../lib/hash';
 import { newId } from '../../domain/common';
 import type {
@@ -31,6 +32,7 @@ import type {
 } from '../../domain';
 
 const STEPS = ['Tipo de documento', 'Escopo e período', 'Armazenamento', 'Arquivos', 'Mapeamento', 'Pré-visualização', 'Resultado'];
+const BNCC_STEPS = ['Tipo de documento', 'Período', 'Armazenamento', 'Arquivos', 'Conferir dados lidos', 'Resumo', 'Resultado'];
 
 /** Máximo de arquivos que podem ser selecionados de uma vez para uma mesma importação. */
 export const MAX_IMPORT_FILES = 10;
@@ -77,6 +79,14 @@ interface FilePreview {
 
 type RowOutcome = 'imported' | 'rejected' | 'duplicate' | 'skipped';
 
+interface BoletimEntry {
+  file: File;
+  result: BoletimParseResult | null;
+  error: string | null;
+  /** Cópia editável do cabeçalho lido — o usuário confirma/corrige antes de cadastrar. */
+  header: BoletimHeaderFields;
+}
+
 export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [step, setStep] = useState(0);
   const [documentType, setDocumentType] = useState<ImportDocumentType>('student_registration');
@@ -106,6 +116,19 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   const [reviewedManually, setReviewedManually] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [boletimEntries, setBoletimEntries] = useState<BoletimEntry[]>([]);
+  const [boletimFilesLoading, setBoletimFilesLoading] = useState(false);
+  const [boletimSelectError, setBoletimSelectError] = useState<string | null>(null);
+  const [boletimOcrProgress, setBoletimOcrProgress] = useState<{ fileName: string; progress: number } | null>(null);
+  const [boletimReviewed, setBoletimReviewed] = useState(false);
+  const [boletimResult, setBoletimResult] = useState<{
+    createdSchools: number;
+    createdClasses: number;
+    createdStudents: number;
+    attachedDocuments: { studentId: string; studentName: string; fileName: string }[];
+  } | null>(null);
+  const boletimFileInputRef = useRef<HTMLInputElement>(null);
+
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
   const schools = useLiveQuery<School[]>(() => db.schools.filter((s) => s.status === 'active').toArray(), []);
@@ -115,7 +138,8 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   );
 
   const targetFields = TARGET_FIELDS[documentType];
-  const isAutomated = targetFields.length > 0;
+  const isBncc = documentType === BNCC_CHECKLIST_TYPE;
+  const isAutomated = targetFields.length > 0 || isBncc;
   const isSelfContained = SELF_CONTAINED_TYPES.includes(documentType);
   const parsedFiles = fileEntries.filter((e) => e.table);
   const hasNonStructuredSource = parsedFiles.some((e) => e.table?.source !== 'structured');
@@ -178,6 +202,215 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   function removeFile(index: number) {
     setFileEntries((prev) => prev.filter((_, i) => i !== index));
     setFileSelectError(null);
+  }
+
+  async function handleBoletimFilesSelected(selected: FileList) {
+    const incoming = Array.from(selected);
+    setBoletimSelectError(null);
+    if (boletimEntries.length + incoming.length > MAX_IMPORT_FILES) {
+      setBoletimSelectError(
+        `Máximo de ${MAX_IMPORT_FILES} arquivos por importação — você já tem ${boletimEntries.length} selecionado(s) e tentou adicionar mais ${incoming.length}.`,
+      );
+      return;
+    }
+    setBoletimReviewed(false);
+    setBoletimFilesLoading(true);
+    const newEntries: BoletimEntry[] = [];
+    try {
+      for (const f of incoming) {
+        try {
+          const result = await parseBoletimChecklist(f, (p) => setBoletimOcrProgress({ fileName: f.name, progress: p }));
+          newEntries.push({ file: f, result, error: null, header: { ...result.header } });
+        } catch (err) {
+          newEntries.push({
+            file: f,
+            result: null,
+            error: err instanceof Error ? err.message : 'Não foi possível ler este arquivo.',
+            header: { schoolName: '', studentName: '', className: '', birthDate: '', academicYear: String(new Date().getFullYear()) },
+          });
+        }
+      }
+    } finally {
+      setBoletimOcrProgress(null);
+      setBoletimFilesLoading(false);
+    }
+    setBoletimEntries((prev) => [...prev, ...newEntries]);
+  }
+
+  function removeBoletimFile(index: number) {
+    setBoletimEntries((prev) => prev.filter((_, i) => i !== index));
+    setBoletimSelectError(null);
+  }
+
+  function updateBoletimHeader(index: number, patch: Partial<BoletimHeaderFields>) {
+    setBoletimEntries((prev) => prev.map((e, i) => (i === index ? { ...e, header: { ...e.header, ...patch } } : e)));
+  }
+
+  async function confirmBoletimImport() {
+    if (!session) return;
+    setLoading(true);
+    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    let createdSchools = 0;
+    let createdClasses = 0;
+    let createdStudentsCount = 0;
+    const attachedDocuments: { studentId: string; studentName: string; fileName: string }[] = [];
+
+    try {
+      const operationRef = newId();
+      const allSchools = await db.schools.filter((s) => s.status === 'active').toArray();
+      const allClasses = await db.classes.filter((c) => c.status === 'active').toArray();
+      const allStudents = await db.students.filter((s) => s.status === 'active').toArray();
+      const allAcademicYears = await db.academicYears.filter((y) => y.status === 'active').toArray();
+
+      const schoolCache = new Map<string, School>();
+      const classCache = new Map<string, Class>();
+      const studentCache = new Map<string, Student>();
+      const academicYearCache = new Map<string, string>();
+
+      async function ensureSchool(name: string): Promise<School> {
+        const key = name.trim().toLowerCase();
+        const cached = schoolCache.get(key);
+        if (cached) return cached;
+        const existing = allSchools.find((s) => s.name.toLowerCase() === key);
+        if (existing) { schoolCache.set(key, existing); return existing; }
+        const created = await repositories.schools.create({ name: name.trim() }, actor);
+        allSchools.push(created);
+        schoolCache.set(key, created);
+        createdSchools++;
+        return created;
+      }
+
+      async function ensureAcademicYear(schoolIdArg: string): Promise<string> {
+        const cached = academicYearCache.get(schoolIdArg);
+        if (cached) return cached;
+        const existing = allAcademicYears.find((y) => y.schoolId === schoolIdArg && y.isCurrent);
+        if (existing) { academicYearCache.set(schoolIdArg, existing.id); return existing.id; }
+        const year = new Date().getFullYear();
+        const created = await repositories.academicYears.create(
+          { schoolId: schoolIdArg, year, startDate: `${year}-02-01`, endDate: `${year}-12-15`, isCurrent: true },
+          actor,
+        );
+        allAcademicYears.push(created);
+        academicYearCache.set(schoolIdArg, created.id);
+        return created.id;
+      }
+
+      async function ensureClass(schoolIdArg: string, name: string): Promise<Class> {
+        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const cached = classCache.get(key);
+        if (cached) return cached;
+        const existing = allClasses.find((c) => c.schoolId === schoolIdArg && c.name.toLowerCase() === name.trim().toLowerCase());
+        if (existing) { classCache.set(key, existing); return existing; }
+        const academicYearId = await ensureAcademicYear(schoolIdArg);
+        const created = await repositories.classes.create(
+          { schoolId: schoolIdArg, academicYearId, name: name.trim(), stage: 'early_childhood', grade: name.trim(), shift: 'morning' },
+          actor,
+        );
+        allClasses.push(created);
+        classCache.set(key, created);
+        createdClasses++;
+        return created;
+      }
+
+      async function ensureStudent(schoolIdArg: string, classIdArg: string | undefined, name: string, birthDate: string): Promise<Student> {
+        const key = `${schoolIdArg}::${name.trim().toLowerCase()}`;
+        const cached = studentCache.get(key);
+        if (cached) return cached;
+        const existing = allStudents.find((s) => s.schoolId === schoolIdArg && s.fullName.toLowerCase() === name.trim().toLowerCase());
+        if (existing) { studentCache.set(key, existing); return existing; }
+        const created = await repositories.students.create(
+          {
+            fullName: name.trim(),
+            birthDate: birthDate || '2020-01-01',
+            schoolId: schoolIdArg,
+            classId: classIdArg,
+            matriculationStatus: 'active',
+            enrollmentDate: new Date().toISOString().slice(0, 10),
+          },
+          actor,
+        );
+        allStudents.push(created);
+        studentCache.set(key, created);
+        createdStudentsCount++;
+        return created;
+      }
+
+      for (const entry of boletimEntries) {
+        const h = entry.header;
+        if (!h.schoolName.trim() || !h.studentName.trim()) continue;
+
+        const school = await ensureSchool(h.schoolName);
+        const klass = h.className.trim() ? await ensureClass(school.id, h.className) : undefined;
+        const student = await ensureStudent(school.id, klass?.id, h.studentName, h.birthDate);
+
+        const [dataUrl, hash] = await Promise.all([readFileAsDataUrl(entry.file), sha256OfFile(entry.file)]);
+        await repositories.documents.create(
+          {
+            studentId: student.id,
+            schoolId: school.id,
+            classId: klass?.id,
+            category: 'boletim',
+            fileName: entry.file.name,
+            mimeType: entry.file.type || 'application/octet-stream',
+            sizeBytes: entry.file.size,
+            hash,
+            tags: ['boletim-bncc'],
+            storageLocation: 'local',
+            blobRef: dataUrl,
+          },
+          actor,
+        );
+        attachedDocuments.push({ studentId: student.id, studentName: student.fullName, fileName: entry.file.name });
+
+        const batch = await repositories.imports.create(
+          {
+            documentType: BNCC_CHECKLIST_TYPE,
+            fileFormat: FILE_FORMAT_FROM_NAME(entry.file.name) ?? 'jpeg',
+            fileName: entry.file.name,
+            fileSizeBytes: entry.file.size,
+            fileHash: hash,
+            schoolId: school.id,
+            classId: klass?.id,
+            studentId: student.id,
+            periodicity,
+            periodLabel: period,
+            storageDestination,
+            importStatus: 'completed',
+            totalRowsFound: 1,
+            totalImported: 1,
+            totalRejected: 0,
+            totalDuplicates: 0,
+            operationRef,
+          },
+          actor,
+        );
+        await repositories.importRows.create(
+          {
+            importId: batch.id,
+            rowIndex: 0,
+            rawValue: { texto: entry.result?.rawText.slice(0, 2000) ?? '' },
+            interpretedValue: {
+              escola: h.schoolName,
+              aluno: h.studentName,
+              turma: h.className,
+              dataNascimento: h.birthDate,
+              categoriasDetectadas: (entry.result?.categoriesFound ?? []).map((c) => c.label).join('; '),
+            },
+            confidence: entry.result?.confidence,
+            validation: 'warning',
+            validationNotes: 'Cabeçalho lido automaticamente e conferido pelo usuário. As avaliações individuais (R/B/O) não foram preenchidas automaticamente — lance-as manualmente em Avaliações.',
+            linkedStudentId: student.id,
+          },
+          actor,
+        );
+        await repositories.audit.record({ ...actor, role: session.role }, { action: 'import', module: 'imports', entityId: batch.id });
+      }
+
+      setBoletimResult({ createdSchools, createdClasses, createdStudents: createdStudentsCount, attachedDocuments });
+      setStep(6);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function runPreview() {
@@ -598,7 +831,7 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
   return (
     <div className="space-y-6">
       <ol className="flex flex-wrap gap-2 text-xs">
-        {STEPS.map((label, i) => (
+        {(isBncc ? BNCC_STEPS : STEPS).map((label, i) => (
           <li key={label} className={`rounded-full px-3 py-1 ${i === step ? 'bg-sky-600 text-white' : i < step ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'}`}>
             {i + 1}. {label}
           </li>
@@ -612,7 +845,18 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
               {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </Select>
           </FormField>
-          {!isAutomated && (
+          {isBncc && (
+            <p className="flex items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              Para boletins impressos no formato "uma habilidade BNCC por linha × colunas de
+              semestre" (foto ou PDF). Não exige nenhum cadastro prévio — escola, turma, aluno e
+              data de nascimento são lidos do cabeçalho da própria folha. As avaliações R/B/O de
+              cada habilidade não são preenchidas automaticamente (testamos contra fotos reais e a
+              leitura célula a célula não é confiável o suficiente) — o arquivo fica anexado ao
+              aluno para você lançá-las manualmente em Avaliações.
+            </p>
+          )}
+          {!isAutomated && !isBncc && (
             <p className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               Este tipo ainda não cria registros automaticamente nesta versão — os dados extraídos ficam registrados
@@ -622,7 +866,24 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         </CardContent></Card>
       )}
 
-      {step === 1 && (
+      {step === 1 && isBncc && (
+        <Card><CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <p className="col-span-full flex items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300 sm:col-span-2">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            Nenhuma escola, turma ou aluno precisa ser selecionado aqui — tudo é lido do(s) arquivo(s) no próximo passo.
+          </p>
+          <FormField label="Período" htmlFor="period" required hint="Ex.: 2026-B1. Usado só como rótulo do lote de importação.">
+            <Input id="period" value={period} onChange={(e) => setPeriod(e.target.value)} placeholder="2026-B1" />
+          </FormField>
+          <FormField label="Periodicidade" htmlFor="periodicity" required>
+            <Select id="periodicity" value={periodicity} onChange={(e) => setPeriodicity(e.target.value as ImportPeriodicity)}>
+              {Object.entries(PERIODICITY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </Select>
+          </FormField>
+        </CardContent></Card>
+      )}
+
+      {step === 1 && !isBncc && (
         <Card><CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {isSelfContained && (
             <p className="col-span-full flex items-start gap-2 rounded-lg border border-sky-200 bg-sky-50 p-3 text-xs text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300 sm:col-span-2">
@@ -685,7 +946,86 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         </CardContent></Card>
       )}
 
-      {step === 3 && (
+      {step === 3 && isBncc && (
+        <Card><CardContent className="space-y-4">
+          <input
+            ref={boletimFileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.jpeg,.jpg,.png"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) handleBoletimFilesSelected(e.target.files);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => boletimFileInputRef.current?.click()}
+            disabled={boletimFilesLoading || boletimEntries.length >= MAX_IMPORT_FILES}
+            className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 p-10 text-center hover:border-sky-400 disabled:opacity-60 dark:border-slate-700"
+          >
+            <Upload className="h-8 w-8 text-slate-400" />
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              {boletimEntries.length > 0
+                ? `Adicionar mais boletins (${boletimEntries.length}/${MAX_IMPORT_FILES} selecionados)`
+                : `Clique para selecionar até ${MAX_IMPORT_FILES} boletins — foto (JPEG/PNG) ou PDF`}
+            </span>
+          </button>
+          <p className="text-xs text-slate-500">
+            Um arquivo por aluno (a foto do boletim impresso dele). Cada arquivo é lido individualmente —
+            escola, aluno, turma e data de nascimento são extraídos automaticamente e ficam editáveis no
+            próximo passo antes de confirmar.
+          </p>
+          {boletimOcrProgress !== null && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-sky-700 dark:text-sky-400">
+                <ScanEye className="h-4 w-4 animate-pulse" />
+                Lendo "{boletimOcrProgress.fileName}"… {Math.round(boletimOcrProgress.progress * 100)}%
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${Math.round(boletimOcrProgress.progress * 100)}%` }} />
+              </div>
+            </div>
+          )}
+          {boletimSelectError && (
+            <p className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              {boletimSelectError}
+            </p>
+          )}
+          {boletimEntries.length > 0 && (
+            <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+              {boletimEntries.map((entry, i) => (
+                <li key={`${entry.file.name}-${i}`} className="flex items-start justify-between gap-3 px-3 py-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm text-slate-700 dark:text-slate-200">{entry.file.name}</p>
+                    {entry.result ? (
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                        {entry.header.studentName ? `Aluno: ${entry.header.studentName}` : 'Cabeçalho lido — confira no próximo passo'}
+                      </p>
+                    ) : (
+                      <p className="flex items-center gap-1 text-xs text-rose-700 dark:text-rose-400">
+                        <FileWarning className="h-3 w-3 shrink-0" /> {entry.error}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeBoletimFile(i)}
+                    className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-rose-600 dark:hover:bg-slate-800"
+                    aria-label={`Remover ${entry.file.name}`}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent></Card>
+      )}
+
+      {step === 3 && !isBncc && (
         <Card><CardContent className="space-y-4">
           <input
             ref={fileInputRef}
@@ -716,7 +1056,8 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
             escaneados). JPEG/PNG passam por reconhecimento óptico de caracteres (OCR) — inclusive fotos de relatórios
             impressos. Nesses dois últimos casos, a revisão humana da pré-visualização é obrigatória antes de
             confirmar a importação. Você pode selecionar vários arquivos de uma vez (até {MAX_IMPORT_FILES}), por
-            exemplo um relatório por aluno.
+            exemplo um relatório por aluno. Para boletins no formato "uma habilidade por linha × colunas de
+            semestre", use o tipo de documento "{DOCUMENT_TYPE_LABELS[BNCC_CHECKLIST_TYPE]}".
           </p>
           {ocrProgress !== null && (
             <div className="space-y-1">
@@ -769,7 +1110,57 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         </CardContent></Card>
       )}
 
-      {step === 4 && (
+      {step === 4 && isBncc && (
+        <Card><CardContent className="space-y-4">
+          <p className="text-sm text-slate-500">
+            Confira e corrija os dados lidos de cada arquivo antes de continuar. A leitura automática pode
+            errar — especialmente em fotos tortas ou com pouca luz.
+          </p>
+          {boletimEntries.length === 0 && <p className="text-sm text-rose-600 dark:text-rose-400">Nenhum arquivo válido selecionado.</p>}
+          {boletimEntries.map((entry, i) => (
+            <div key={`${entry.file.name}-${i}`} className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">{entry.file.name}</p>
+                {entry.result && (
+                  <Badge tone={entry.result.confidence >= 0.7 ? 'success' : 'warning'}>
+                    confiança {Math.round(entry.result.confidence * 100)}%
+                  </Badge>
+                )}
+              </div>
+              {!entry.result ? (
+                <p className="flex items-center gap-1 text-xs text-rose-700 dark:text-rose-400">
+                  <FileWarning className="h-3 w-3 shrink-0" /> {entry.error}
+                </p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <FormField label="Escola" htmlFor={`bncc-school-${i}`} required>
+                      <Input id={`bncc-school-${i}`} value={entry.header.schoolName} onChange={(e) => updateBoletimHeader(i, { schoolName: e.target.value })} />
+                    </FormField>
+                    <FormField label="Aluno" htmlFor={`bncc-student-${i}`} required>
+                      <Input id={`bncc-student-${i}`} value={entry.header.studentName} onChange={(e) => updateBoletimHeader(i, { studentName: e.target.value })} />
+                    </FormField>
+                    <FormField label="Turma (opcional)" htmlFor={`bncc-class-${i}`}>
+                      <Input id={`bncc-class-${i}`} value={entry.header.className} onChange={(e) => updateBoletimHeader(i, { className: e.target.value })} />
+                    </FormField>
+                    <FormField label="Data de nascimento" htmlFor={`bncc-birth-${i}`} hint="AAAA-MM-DD">
+                      <Input id={`bncc-birth-${i}`} value={entry.header.birthDate} onChange={(e) => updateBoletimHeader(i, { birthDate: e.target.value })} placeholder="2020-01-01" />
+                    </FormField>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-500">
+                    Categorias BNCC detectadas no arquivo:{' '}
+                    {entry.result.categoriesFound.length > 0
+                      ? entry.result.categoriesFound.map((c) => c.label).join(', ')
+                      : 'nenhuma identificada — confira se é mesmo um boletim nesse formato.'}
+                  </p>
+                </>
+              )}
+            </div>
+          ))}
+        </CardContent></Card>
+      )}
+
+      {step === 4 && !isBncc && (
         <Card><CardContent className="space-y-4">
           {!isAutomated ? (
             <p className="text-sm text-slate-500">
@@ -801,7 +1192,55 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         </CardContent></Card>
       )}
 
-      {step === 5 && (
+      {step === 5 && isBncc && (
+        <Card><CardContent className="space-y-4">
+          <p className="text-sm text-slate-500">
+            Ao confirmar: para cada arquivo, a escola/turma/aluno acima serão cadastrados (se ainda não
+            existirem) e o arquivo original ficará anexado ao aluno, em Documentos, categoria "Boletim" —
+            pronto para você lançar as avaliações R/B/O manualmente em Avaliações.
+          </p>
+          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-sm dark:divide-slate-800 dark:border-slate-800">
+            {boletimEntries.filter((e) => e.result).map((entry, i) => (
+              <li key={`${entry.file.name}-${i}`} className="px-3 py-2">
+                <p className="font-medium text-slate-800 dark:text-slate-100">{entry.header.studentName || '(nome não preenchido)'}</p>
+                <p className="text-xs text-slate-500">
+                  {entry.header.schoolName || '(escola não preenchida)'} · {entry.header.className || 'sem turma'} · {entry.file.name}
+                </p>
+              </li>
+            ))}
+          </ul>
+          {boletimEntries.some((e) => e.result && (!e.header.schoolName.trim() || !e.header.studentName.trim())) && (
+            <p className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-300">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              Escola e aluno são obrigatórios — volte ao passo anterior e preencha os campos vazios, ou remova o arquivo.
+            </p>
+          )}
+          <label className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <input
+              type="checkbox"
+              checked={boletimReviewed}
+              onChange={(e) => setBoletimReviewed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300"
+            />
+            Revisei os dados acima (escola, aluno, turma, data de nascimento) e confirmo que estão corretos.
+          </label>
+          <div className="flex justify-end">
+            <Button
+              onClick={confirmBoletimImport}
+              loading={loading}
+              disabled={
+                !boletimReviewed ||
+                boletimEntries.filter((e) => e.result).length === 0 ||
+                boletimEntries.some((e) => e.result && (!e.header.schoolName.trim() || !e.header.studentName.trim()))
+              }
+            >
+              Confirmar importação
+            </Button>
+          </div>
+        </CardContent></Card>
+      )}
+
+      {step === 5 && !isBncc && (
         <PreviewStep
           filePreviews={filePreviews}
           hasNonStructuredSource={hasNonStructuredSource}
@@ -876,6 +1315,39 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
         </CardContent></Card>
       )}
 
+      {step === 6 && boletimResult && (
+        <Card><CardContent className="space-y-3">
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
+            <Check className="h-5 w-5" />
+            <p className="font-medium">
+              {boletimResult.attachedDocuments.length} boletim(ns) anexado(s) com sucesso.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-sm">
+            <Stat label="Escolas cadastradas" value={boletimResult.createdSchools} />
+            <Stat label="Turmas cadastradas" value={boletimResult.createdClasses} />
+            <Stat label="Alunos cadastrados" value={boletimResult.createdStudents} />
+          </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+            As avaliações R/B/O de cada habilidade não foram preenchidas automaticamente. Abra{' '}
+            <strong>Avaliações</strong> para lançá-las manualmente, usando o boletim anexado a cada aluno
+            (em Documentos) como referência.
+          </div>
+          <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 text-sm dark:divide-slate-800 dark:border-slate-800">
+            {boletimResult.attachedDocuments.map((d, i) => (
+              <li key={`${d.studentId}-${i}`} className="flex items-center justify-between px-3 py-2">
+                <span className="text-slate-700 dark:text-slate-200">{d.studentName}</span>
+                <span className="truncate text-xs text-slate-400">{d.fileName}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs text-slate-500">
+            {storageDestination === 'local' ? 'Armazenado somente neste navegador.' : 'Armazenado no banco de dados e sincronizado.'}
+          </p>
+          <Button onClick={onFinished}>Ver histórico de importações</Button>
+        </CardContent></Card>
+      )}
+
       {step < 6 && (
         <div className="flex justify-between">
           <Button variant="outline" onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>
@@ -884,14 +1356,21 @@ export function ImportWizard({ onFinished }: { onFinished: () => void }) {
           {step === 5 ? null : (
             <Button
               onClick={async () => {
+                if (isBncc) {
+                  if (step === 3 && boletimEntries.filter((e) => e.result).length === 0) return;
+                  setStep((s) => s + 1);
+                  return;
+                }
                 if (step === 3 && parsedFiles.length === 0) return;
                 if (step === 4) await runPreview();
                 setStep((s) => s + 1);
               }}
               disabled={
                 (step === 0 && !documentType) ||
-                (step === 1 && ((!schoolId && !isSelfContained) || !period)) ||
-                (step === 3 && (parsedFiles.length === 0 || filesLoading))
+                (step === 1 && !isBncc && ((!schoolId && !isSelfContained) || !period)) ||
+                (step === 1 && isBncc && !period) ||
+                (step === 3 && !isBncc && (parsedFiles.length === 0 || filesLoading)) ||
+                (step === 3 && isBncc && (boletimEntries.filter((e) => e.result).length === 0 || boletimFilesLoading))
               }
             >
               Avançar <ArrowRight className="h-4 w-4" />

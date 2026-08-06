@@ -4,6 +4,7 @@ export type ImportDocumentType =
   | 'student_registration'
   | 'early_childhood_report'
   | 'elementary_report'
+  | 'bncc_checklist_report'
   | 'attendance'
   | 'events'
   | 'observations'

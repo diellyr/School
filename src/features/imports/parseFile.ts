@@ -4,6 +4,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 // eslint-disable-next-line import/no-unresolved
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { createWorker } from 'tesseract.js';
+import { pickBestOrientation } from './imageOrientation';
+import { TESSERACT_LOCAL_OPTIONS } from './tesseractAssets';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
@@ -79,7 +81,7 @@ function linesToTable(lines: string[], source: ImportSource, lineConfidences?: n
  * nesse caso). Confiança fixa em 0.75: o texto extraído é exato, mas a reconstrução
  * de colunas é heurística.
  */
-export async function parsePdfFile(file: File): Promise<ParsedTable> {
+export async function extractPdfLines(file: File): Promise<string[]> {
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
 
@@ -102,7 +104,11 @@ export async function parsePdfFile(file: File): Promise<ParsedTable> {
       .map(([, parts]) => parts.sort((a, b) => a.x - b.x).map((p) => p.str).join(' '));
     lines.push(...pageLines);
   }
+  return lines;
+}
 
+export async function parsePdfFile(file: File): Promise<ParsedTable> {
+  const lines = await extractPdfLines(file);
   if (lines.length === 0) {
     throw new Error('Nenhum texto encontrado neste PDF. Se for um documento escaneado (imagem), use a importação por foto/OCR.');
   }
@@ -110,19 +116,25 @@ export async function parsePdfFile(file: File): Promise<ParsedTable> {
 }
 
 /**
- * OCR de imagem (JPEG/PNG) via Tesseract.js. A confiança por linha vem diretamente do
- * motor de reconhecimento (0–100, normalizada para 0–1 aqui) — nunca inventada. O
- * chamador (ImportWizard) exige revisão humana explícita antes de confirmar qualquer
- * linha vinda de OCR, por mais alta que seja a confiança.
+ * OCR de imagem (JPEG/PNG) via Tesseract.js. Antes do reconhecimento, testa as 4 rotações
+ * possíveis (fotos de celular nem sempre têm a orientação correta aplicada) e usa a versão de
+ * maior confiança — ver `imageOrientation.ts`. A confiança por linha vem diretamente do motor de
+ * reconhecimento (0–100, normalizada para 0–1 aqui) — nunca inventada. O chamador (ImportWizard)
+ * exige revisão humana explícita antes de confirmar qualquer linha vinda de OCR, por mais alta
+ * que seja a confiança.
  */
 export async function parseImageFile(file: File, onProgress?: (progress: number) => void): Promise<ParsedTable> {
+  let reportProgress = false;
   const worker = await createWorker('por', undefined, {
+    ...TESSERACT_LOCAL_OPTIONS,
     logger: (m) => {
-      if (m.status === 'recognizing text' && onProgress) onProgress(m.progress);
+      if (reportProgress && m.status === 'recognizing text' && onProgress) onProgress(m.progress);
     },
   });
   try {
-    const { data } = await worker.recognize(file, {}, { blocks: true, text: true });
+    const { blob } = await pickBestOrientation(worker, file);
+    reportProgress = true;
+    const { data } = await worker.recognize(blob, {}, { blocks: true, text: true });
     const ocrLines = (data.blocks ?? []).flatMap((b) => b.paragraphs.flatMap((p) => p.lines));
     const texts = ocrLines.map((l) => l.text);
     const confidences = ocrLines.map((l) => l.confidence / 100);

@@ -4,6 +4,7 @@ export const DOCUMENT_TYPE_LABELS: Record<ImportDocumentType, string> = {
   student_registration: 'Cadastro de aluno',
   early_childhood_report: 'Relatório de Educação Infantil',
   elementary_report: 'Relatório do Ensino Fundamental',
+  bncc_checklist_report: 'Boletim por habilidades BNCC (foto/PDF impresso) — sem pré-cadastro',
   attendance: 'Frequência',
   events: 'Eventos',
   observations: 'Observações',
@@ -18,6 +19,7 @@ export const AUTOMATED_TYPES: ImportDocumentType[] = [
   'attendance',
   'early_childhood_report',
   'elementary_report',
+  'bncc_checklist_report',
 ];
 
 /**
@@ -27,6 +29,14 @@ export const AUTOMATED_TYPES: ImportDocumentType[] = [
  * e `confirmImport` (funções `ensureSchool`/`ensureClass`/`ensureStudent`/`ensureTeacher`).
  */
 export const SELF_CONTAINED_TYPES: ImportDocumentType[] = ['early_childhood_report', 'elementary_report'];
+
+/**
+ * "Boletim por habilidades BNCC" — o único tipo que não pede NENHUM pré-cadastro nem seleção de
+ * escopo: escola, turma, aluno e data de nascimento são lidos do próprio arquivo (cabeçalho da
+ * folha). Usa `src/features/imports/parseBoletim.ts` (interpretador dedicado a esse layout) em vez
+ * do pipeline genérico de tabela/coluna — ver `ImportWizard.tsx`.
+ */
+export const BNCC_CHECKLIST_TYPE: ImportDocumentType = 'bncc_checklist_report';
 
 export const PERIODICITY_LABELS: Record<ImportPeriodicity, string> = {
   monthly: 'Mensal',
@@ -87,6 +97,7 @@ export const TARGET_FIELDS: Record<ImportDocumentType, TargetField[]> = {
     { key: 'subject', label: 'Disciplina', required: true, synonyms: ['disciplina', 'materia', 'matéria', 'componente curricular'] },
     { key: 'numericScore', label: 'Nota (0 a 10)', required: true, synonyms: ['nota', 'pontuacao', 'pontuação', 'nota numerica', 'nota numérica'] },
   ],
+  bncc_checklist_report: [],
   events: [],
   observations: [],
   alerts: [],
