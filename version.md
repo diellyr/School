@@ -319,6 +319,16 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
 - O card "Acesso rápido" na ficha do aluno ficou faltando o novo módulo Entrada e saída lançado na
   v0.10.0. Agora aparece ao lado de Frequência.
 
+## v0.10.2 — Documentação para usuários
+
+- **Manual do usuário** ([`docs/manual-usuario.md`](docs/manual-usuario.md)): explica, em
+  linguagem simples, o que cada tela do sistema faz e como usar — separado da documentação técnica
+  do `README.md`.
+- A tela **Ajuda e privacidade**, dentro do próprio app, ganhou a seção "Guia de uso" com o mesmo
+  conteúdo, organizada pelos mesmos grupos do menu lateral (Dashboards, Cadastros, Registros,
+  Comunicação, Administração) — para quem usa o sistema não precisar sair do app para aprender a
+  usá-lo.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

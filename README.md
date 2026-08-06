@@ -11,6 +11,10 @@ e compila, mas nenhum projeto Supabase real foi provisionado (ver
 
 > Este é um ambiente de demonstração/desenvolvimento. Não insira dados reais de crianças.
 
+> Este README é técnico (para quem desenvolve/mantém o projeto). Para aprender a **usar** o
+> sistema — o que cada tela faz e como — veja o [Manual do usuário](docs/manual-usuario.md), também
+> disponível dentro do app em **Ajuda e privacidade**.
+
 ## Stack
 
 React 19 · TypeScript · Vite · Tailwind CSS v4 · React Router · Dexie.js (IndexedDB) · Zustand ·
