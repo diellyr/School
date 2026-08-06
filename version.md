@@ -139,6 +139,18 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   para a aba) se já existe uma versão mais nova publicada e mostra uma barra fixa oferecendo
   atualizar com um clique, em vez do usuário continuar sem saber que está numa versão antiga.
 
+## v0.8.2 — Progresso visível durante toda a leitura de OCR
+
+- Investigado novo relato de importação "trava e não carrega nem 1 arquivo": desta vez era real —
+  ao ler uma foto de boletim, o app testa o motor de OCR em 4 rotações da imagem antes do
+  reconhecimento final (ver v0.8.0), e essa etapa toda acontecia sem nenhum indicador de progresso
+  na tela. Numa foto grande e num aparelho mais lento isso pode levar dezenas de segundos, tempo
+  em que a tela realmente parecia travada, mesmo com o processamento avançando normalmente.
+- **Barra de progresso agora aparece assim que o arquivo é selecionado** (0%) e acompanha todas as
+  etapas — carregar o motor de OCR, testar as 4 rotações e o reconhecimento final — em vez de ficar
+  muda até a última etapa. Vale tanto para a importação de boletim BNCC quanto para a importação
+  genérica por foto/OCR.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

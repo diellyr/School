@@ -32,14 +32,21 @@ async function rotateBitmap(bitmap: ImageBitmap, degrees: 0 | 90 | 180 | 270, ma
  * final em resolução completa — validado contra fotos reais de boletins impressos, onde a foto sem
  * correção de rotação cai para menos da metade da confiança da orientação correta.
  */
-export async function pickBestOrientation(worker: Worker, file: File): Promise<{ blob: Blob; rotationDeg: 0 | 90 | 180 | 270 }> {
+export async function pickBestOrientation(
+  worker: Worker,
+  file: File,
+  onProbeProgress?: (fraction: number) => void,
+): Promise<{ blob: Blob; rotationDeg: 0 | 90 | 180 | 270 }> {
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
   try {
     let best: { deg: 0 | 90 | 180 | 270; conf: number } = { deg: 0, conf: -1 };
-    for (const deg of [0, 90, 180, 270] as const) {
+    const rotations = [0, 90, 180, 270] as const;
+    for (let i = 0; i < rotations.length; i++) {
+      const deg = rotations[i];
       const probeBlob = await rotateBitmap(bitmap, deg, 900);
       const { data } = await worker.recognize(probeBlob, {}, { text: true });
       if (data.confidence > best.conf) best = { deg, conf: data.confidence };
+      onProbeProgress?.((i + 1) / rotations.length);
     }
     const fullBlob = await rotateBitmap(bitmap, best.deg);
     return { blob: fullBlob, rotationDeg: best.deg };

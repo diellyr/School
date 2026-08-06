@@ -124,15 +124,19 @@ export async function parsePdfFile(file: File): Promise<ParsedTable> {
  * que seja a confiança.
  */
 export async function parseImageFile(file: File, onProgress?: (progress: number) => void): Promise<ParsedTable> {
+  // Reporta progresso desde o início (não só na etapa final de reconhecimento) — carregar o motor
+  // de OCR e testar as 4 rotações da imagem também demora, e sem retorno visual nesse trecho o app
+  // parece travado numa foto grande ou num celular mais lento.
+  onProgress?.(0);
   let reportProgress = false;
   const worker = await createWorker('por', undefined, {
     ...TESSERACT_LOCAL_OPTIONS,
     logger: (m) => {
-      if (reportProgress && m.status === 'recognizing text' && onProgress) onProgress(m.progress);
+      if (reportProgress && m.status === 'recognizing text' && onProgress) onProgress(0.5 + 0.5 * m.progress);
     },
   });
   try {
-    const { blob } = await pickBestOrientation(worker, file);
+    const { blob } = await pickBestOrientation(worker, file, (fraction) => onProgress?.(0.5 * fraction));
     reportProgress = true;
     const { data } = await worker.recognize(blob, {}, { blocks: true, text: true });
     const ocrLines = (data.blocks ?? []).flatMap((b) => b.paragraphs.flatMap((p) => p.lines));
