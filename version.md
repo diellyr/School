@@ -284,6 +284,15 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   Atividades remove imediatamente ela (e a avaliação lançada nela) de todos os gráficos do aluno,
   como já acontecia para o restante do sistema.
 
+## v0.9.7 — Mensagem do gráfico radar deixava de ser clara sobre "3 quê"
+
+- O aviso de dados insuficientes do gráfico radar ("Comparação entre categorias"/"...entre disciplinas")
+  dizia "são necessárias pelo menos 3 atividades avaliadas por categoria", o que dava a entender que
+  eram necessárias 3 **categorias** — na verdade é cada categoria/disciplina que precisa de pelo menos 3
+  avaliações/notas lançadas nela para entrar no gráfico. A mensagem agora deixa isso explícito e mostra
+  quantas avaliações cada categoria/disciplina já tem (ex.: "Autonomia: 2/3"), para ficar claro o que
+  falta lançar.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

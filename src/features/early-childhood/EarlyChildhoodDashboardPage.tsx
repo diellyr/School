@@ -245,10 +245,22 @@ export function EarlyChildhoodDashboardPage() {
               <CardHeader><CardTitle>Comparação entre categorias</CardTitle></CardHeader>
               <CardContent>
                 {!radarData.hasEnoughData ? (
-                  <p className="text-sm text-slate-500">
-                    Dados insuficientes para o gráfico radar — são necessárias pelo menos {MIN_RADAR_SAMPLES} atividades
-                    avaliadas por categoria.
-                  </p>
+                  <div className="text-sm text-slate-500">
+                    <p>
+                      Dados insuficientes para o gráfico radar — cada categoria precisa de pelo menos{' '}
+                      {MIN_RADAR_SAMPLES} avaliações lançadas para entrar no gráfico (não é sobre ter{' '}
+                      {MIN_RADAR_SAMPLES} categorias diferentes).
+                    </p>
+                    {radarData.points.length > 0 && (
+                      <ul className="mt-2 space-y-0.5 text-xs">
+                        {radarData.points.map((p) => (
+                          <li key={p.field}>
+                            {p.field}: {p.count}/{MIN_RADAR_SAMPLES}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={240}>
                     <RadarChart data={radarData.points.map((p) => ({ field: p.field, value: p.value ?? 0 }))}>

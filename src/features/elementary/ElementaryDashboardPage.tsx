@@ -221,10 +221,22 @@ export function ElementaryDashboardPage() {
               <CardHeader><CardTitle>Comparação entre disciplinas</CardTitle></CardHeader>
               <CardContent>
                 {!radarData.hasEnoughData ? (
-                  <p className="text-sm text-slate-500">
-                    Dados insuficientes para o gráfico radar — são necessárias pelo menos {MIN_RADAR_SAMPLES} notas por
-                    disciplina.
-                  </p>
+                  <div className="text-sm text-slate-500">
+                    <p>
+                      Dados insuficientes para o gráfico radar — cada disciplina precisa de pelo menos{' '}
+                      {MIN_RADAR_SAMPLES} notas lançadas para entrar no gráfico (não é sobre ter {MIN_RADAR_SAMPLES}{' '}
+                      disciplinas diferentes).
+                    </p>
+                    {radarData.points.length > 0 && (
+                      <ul className="mt-2 space-y-0.5 text-xs">
+                        {radarData.points.map((p) => (
+                          <li key={p.subject}>
+                            {p.subject}: {p.count}/{MIN_RADAR_SAMPLES}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 ) : (
                   <ResponsiveContainer width="100%" height={240}>
                     <RadarChart data={radarData.points.map((p) => ({ subject: p.subject, value: p.value ?? 0 }))}>
