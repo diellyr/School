@@ -314,6 +314,11 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   (como em Frequência), com edição de um horário já lançado no mesmo dia. Também disponível a
   partir de "Lançamento manual".
 
+## v0.10.1 — Entrada e saída no acesso rápido do aluno
+
+- O card "Acesso rápido" na ficha do aluno ficou faltando o novo módulo Entrada e saída lançado na
+  v0.10.0. Agora aparece ao lado de Frequência.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
