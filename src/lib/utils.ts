@@ -4,6 +4,17 @@ export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
 }
 
+/** Normaliza um nome para comparação: minúsculas, sem acentos, sem pontuação/espaços — usado para
+ *  decidir se dois nomes digitados (escola, turma, aluno, categoria, disciplina...) se referem à
+ *  mesma coisa, mesmo com diferença de acentuação, maiúsculas ou espaçamento. */
+export function normalizeForMatch(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
 export function formatDate(iso?: string): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('pt-BR');

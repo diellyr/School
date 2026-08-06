@@ -16,7 +16,7 @@ import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
 import { usePermission } from '../../auth/usePermission';
 import type { Activity, AssessmentCategory } from '../../domain';
-import { formatDate } from '../../lib/utils';
+import { formatDate, normalizeForMatch } from '../../lib/utils';
 
 export function ActivitiesPage() {
   const activities = useLiveQuery(async () => {
@@ -169,6 +169,7 @@ export function ActivitiesPage() {
         open={categoriesDialogOpen}
         onClose={() => setCategoriesDialogOpen(false)}
         categories={categories ?? []}
+        activities={activities ?? []}
       />
     </div>
   );
@@ -178,21 +179,26 @@ function CategoriesManagerDialog({
   open,
   onClose,
   categories,
+  activities,
 }: {
   open: boolean;
   onClose: () => void;
   categories: AssessmentCategory[];
+  activities: Activity[];
 }) {
   const repositories = useRepositories();
   const session = useAuthStore((s) => s.session);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
+  const [mergingId, setMergingId] = useState<string | null>(null);
+  const [mergeTargetId, setMergeTargetId] = useState('');
 
   function startEdit(c: AssessmentCategory) {
     setEditingId(c.id);
     setEditValue(c.name);
     setConfirmingDeleteId(null);
+    setMergingId(null);
   }
 
   async function saveEdit(c: AssessmentCategory) {
@@ -211,6 +217,29 @@ function CategoriesManagerDialog({
     setConfirmingDeleteId(null);
   }
 
+  function startMerge(c: AssessmentCategory) {
+    setMergingId(c.id);
+    setMergeTargetId('');
+    setEditingId(null);
+    setConfirmingDeleteId(null);
+  }
+
+  async function confirmMerge(source: AssessmentCategory) {
+    if (!session || !mergeTargetId || mergeTargetId === source.id) return;
+    const actor = { userId: session.user.id, organizationId: session.user.organizationId };
+    const linked = activities.filter((a) => a.categoryId === source.id);
+    for (const a of linked) {
+      await repositories.activities.update(a.id, { categoryId: mergeTargetId }, actor);
+    }
+    await repositories.assessmentCategories.softDelete(source.id, actor, `Mesclada em outra categoria (${linked.length} atividade(s) reatribuída(s))`);
+    await repositories.audit.record(
+      { ...actor, role: session.role },
+      { action: 'edit', module: 'activities', entityId: mergeTargetId },
+    );
+    setMergingId(null);
+    setMergeTargetId('');
+  }
+
   return (
     <Dialog
       open={open}
@@ -225,36 +254,55 @@ function CategoriesManagerDialog({
         </p>
       )}
       {categories.length > 0 && (
-        <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
-          {categories.map((c) => (
-            <li key={c.id} className="flex items-center gap-2 px-3 py-2">
-              {editingId === c.id ? (
-                <>
-                  <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="flex-1" autoFocus />
-                  <Button size="sm" onClick={() => saveEdit(c)}>Salvar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
-                </>
-              ) : confirmingDeleteId === c.id ? (
-                <>
-                  <span className="flex-1 text-sm text-rose-700 dark:text-rose-400">Excluir "{c.name}"?</span>
-                  <Button size="sm" variant="danger" onClick={() => confirmDelete(c)}>Confirmar</Button>
-                  <Button size="sm" variant="outline" onClick={() => setConfirmingDeleteId(null)}>Cancelar</Button>
-                </>
-              ) : (
-                <>
-                  <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.name}</span>
-                  <Badge>{c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge>
-                  <Button size="sm" variant="ghost" onClick={() => startEdit(c)} title="Renomear">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" className="text-rose-600" onClick={() => setConfirmingDeleteId(c.id)} title="Excluir">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+            Criou categorias repetidas por engano (ex.: "Convivência" e "convivencia")? Use "Mesclar" para juntar as
+            atividades de uma categoria duplicada em outra e remover a duplicada.
+          </p>
+          <ul className="max-h-80 divide-y divide-slate-100 overflow-y-auto rounded-lg border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
+            {categories.map((c) => (
+              <li key={c.id} className="flex flex-col gap-2 px-3 py-2">
+                {editingId === c.id ? (
+                  <div className="flex items-center gap-2">
+                    <Input value={editValue} onChange={(e) => setEditValue(e.target.value)} className="flex-1" autoFocus />
+                    <Button size="sm" onClick={() => saveEdit(c)}>Salvar</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
+                  </div>
+                ) : confirmingDeleteId === c.id ? (
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 text-sm text-rose-700 dark:text-rose-400">Excluir "{c.name}"?</span>
+                    <Button size="sm" variant="danger" onClick={() => confirmDelete(c)}>Confirmar</Button>
+                    <Button size="sm" variant="outline" onClick={() => setConfirmingDeleteId(null)}>Cancelar</Button>
+                  </div>
+                ) : mergingId === c.id ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-600 dark:text-slate-300">Mesclar "{c.name}" em:</span>
+                    <Select value={mergeTargetId} onChange={(e) => setMergeTargetId(e.target.value)} className="flex-1">
+                      <option value="">Selecione a categoria de destino</option>
+                      {categories.filter((other) => other.id !== c.id && other.stage === c.stage).map((other) => (
+                        <option key={other.id} value={other.id}>{other.name}</option>
+                      ))}
+                    </Select>
+                    <Button size="sm" disabled={!mergeTargetId} onClick={() => confirmMerge(c)}>Confirmar</Button>
+                    <Button size="sm" variant="outline" onClick={() => setMergingId(null)}>Cancelar</Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.name}</span>
+                    <Badge>{c.stage === 'early_childhood' ? 'Ed. Infantil' : 'Ens. Fundamental'}</Badge>
+                    <Button size="sm" variant="outline" onClick={() => startMerge(c)}>Mesclar</Button>
+                    <Button size="sm" variant="ghost" onClick={() => startEdit(c)} title="Renomear">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-rose-600" onClick={() => setConfirmingDeleteId(c.id)} title="Excluir">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
       <div className="mt-4 flex justify-end">
         <Button variant="outline" onClick={onClose}>Fechar</Button>
@@ -310,11 +358,17 @@ function ActivityFormDialog({
 
     let categoryId = values.categoryId || undefined;
     if (!categoryId && values.newCategoryName?.trim()) {
-      const created = await repositories.assessmentCategories.create(
-        { schoolId: selectedClass.schoolId, stage: selectedClass.stage, kind: 'custom', name: values.newCategoryName.trim() },
-        actor,
-      );
-      categoryId = created.id;
+      const newName = values.newCategoryName.trim();
+      const existing = availableCategories.find((c) => normalizeForMatch(c.name) === normalizeForMatch(newName));
+      if (existing) {
+        categoryId = existing.id;
+      } else {
+        const created = await repositories.assessmentCategories.create(
+          { schoolId: selectedClass.schoolId, stage: selectedClass.stage, kind: 'custom', name: newName },
+          actor,
+        );
+        categoryId = created.id;
+      }
     }
 
     if (editing) {

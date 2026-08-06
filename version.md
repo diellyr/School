@@ -242,6 +242,22 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   avaliações lançadas. Agora usa o nome de qualquer categoria/disciplina, mostrando em quais delas o
   aluno teve o melhor desempenho relativo.
 
+## v0.9.4 — Corrigida a duplicação de categorias e adicionada a mesclagem
+
+- **Causa raiz corrigida**: ao criar uma atividade e digitar um nome no campo "Ou criar nova
+  categoria", o sistema sempre criava uma categoria nova — mesmo se já existisse uma com o mesmo
+  nome (ou o mesmo nome com acentuação/maiúsculas/espaçamento diferentes). Digitar o nome mais de
+  uma vez em telas diferentes gerava categorias **duplicadas**, e renomear uma delas no gerenciador
+  de Categorias não corrigia as atividades que continuaram ligadas às outras duplicatas — por isso os
+  gráficos (principalmente o gráfico aranha) continuavam mostrando as categorias erradas mesmo depois
+  de renomear. Agora o sistema primeiro procura uma categoria já existente com nome equivalente antes
+  de criar uma nova.
+- **Mesclar categorias**: o gerenciador de Categorias (botão "Categorias" em Atividades) ganhou um
+  botão **"Mesclar"** em cada categoria, para corrigir duplicatas que já existem. Ao mesclar, todas as
+  atividades ligadas à categoria duplicada são reatribuídas para a categoria escolhida como destino, e
+  a duplicada é removida (exclusão lógica). Isso é o que resolve os dados já cadastrados incorretamente
+  — sem precisar recriar atividades.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
