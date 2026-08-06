@@ -39,15 +39,17 @@ const RBO_COLORS: Record<RboLevel, string> = { R: '#e11d48', B: '#f59e0b', O: '#
 const Y_LABELS = ['', 'R', 'B', 'O'];
 const GRANULARITIES: Granularity[] = ['year', 'semester', 'bimester'];
 
-// Anéis do gráfico radar: R (regular) no centro, B (bom) no meio, O (ótimo) na borda externa —
-// mesmas cores usadas em "Distribuição por categoria", para reforçar visualmente o mesmo código.
+// Anéis do gráfico radar, de fora para dentro: O (ótimo), B (bom), R (regular) e, no centro, o
+// ponto zero — mesmas cores usadas em "Distribuição por categoria", para reforçar visualmente o
+// mesmo código.
 function RadarRadiusTick(props: { x?: string | number; y?: string | number; payload?: { value: number } }) {
   const { x, y, payload } = props;
-  const label = Y_LABELS[payload?.value ?? 0] as RboLevel | '';
-  if (!label) return null;
+  const value = payload?.value ?? 0;
+  const label = Y_LABELS[value] as RboLevel | '';
+  const color = label ? RBO_COLORS[label] : '#94a3b8';
   return (
-    <text x={x} y={y} dy={4} textAnchor="middle" fontSize={10} fontWeight={600} fill={RBO_COLORS[label]}>
-      {label}
+    <text x={x} y={y} dy={4} textAnchor="middle" fontSize={10} fontWeight={600} fill={color}>
+      {label || '0'}
     </text>
   );
 }
@@ -281,22 +283,26 @@ export function EarlyChildhoodDashboardPage() {
                       <RadarChart data={radarData.points.map((p) => ({ field: p.field, value: p.value ?? 0 }))}>
                         <PolarGrid />
                         <PolarAngleAxis dataKey="field" tick={{ fontSize: 10 }} />
-                        <PolarRadiusAxis domain={[1, 3]} ticks={[1, 2, 3]} tick={RadarRadiusTick} axisLine={false} />
+                        <PolarRadiusAxis domain={[0, 3]} ticks={[0, 1, 2, 3]} tick={RadarRadiusTick} axisLine={false} />
                         <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
                       </RadarChart>
                     </ResponsiveContainer>
-                    <div className="mt-2 flex items-center justify-center gap-4 text-xs text-slate-600 dark:text-slate-300">
+                    <div className="mt-2 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600 dark:text-slate-300">
                       <span className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.O }} />
-                        Ótimo — borda externa
+                        Ótimo — 1º anel (borda externa)
                       </span>
                       <span className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.B }} />
-                        Bom — meio
+                        Bom — 2º anel
                       </span>
                       <span className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.R }} />
-                        Regular — centro
+                        Regular — 3º anel
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-slate-400" />
+                        0 — centro
                       </span>
                     </div>
                   </>

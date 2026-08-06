@@ -300,6 +300,12 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   na borda externa — mesmas cores usadas em "Distribuição por categoria" — com uma legenda abaixo
   do gráfico explicando cada anel.
 
+## v0.9.9 — Quarto anel (ponto zero) no gráfico radar
+
+- O gráfico radar de Educação Infantil ganhou um quarto anel, no centro, representando o ponto
+  zero — a ordem de fora para dentro agora é **Ótimo → Bom → Regular → 0**, com a legenda abaixo
+  do gráfico atualizada para mostrar os quatro anéis e suas cores.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
