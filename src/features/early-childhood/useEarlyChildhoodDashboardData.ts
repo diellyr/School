@@ -16,7 +16,9 @@ export function useEarlyChildhoodDashboardData(studentId: string) {
     const assessments = await db.assessments.filter((a) => a.studentId === studentId && a.status === 'active').toArray();
     const activityIds = [...new Set(assessments.map((a) => a.activityId))];
     const activities = await db.activities.bulkGet(activityIds);
-    const activityById = new Map(activities.filter((a): a is Activity => !!a).map((a) => [a.id, a]));
+    const activityById = new Map(
+      activities.filter((a): a is Activity => !!a && a.status === 'active').map((a) => [a.id, a]),
+    );
 
     const rows: EarlyChildhoodRow[] = assessments
       .filter((a) => a.rboLevel && activityById.has(a.activityId))

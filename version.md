@@ -273,6 +273,17 @@ alertas, eventos, portfólio, documentos, relatórios, sincronização com nuvem
   "Mesclar" essas atividades para uma categoria ativa — corrigindo diretamente os gráficos sem
   precisar recriar nada.
 
+## v0.9.6 — Atividade excluída agora some de verdade do dashboard do aluno
+
+- Encontrada a causa de "mesclei/excluí as categorias erradas e o gráfico continua igual" mesmo depois
+  da v0.9.5: se a **atividade** (não só a categoria) fosse excluída diretamente em Atividades, o
+  dashboard individual (Educação Infantil) continuava buscando essa atividade pelo ID sem checar se
+  ela tinha sido excluída — então a avaliação lançada nela, e a categoria (mesmo já excluída),
+  continuavam aparecendo nos gráficos como se nada tivesse mudado.
+- Agora o dashboard ignora atividades excluídas ao montar os gráficos — excluir uma atividade em
+  Atividades remove imediatamente ela (e a avaliação lançada nela) de todos os gráficos do aluno,
+  como já acontecia para o restante do sistema.
+
 ## Próximas versões previstas
 
 | Versão | Escopo |
