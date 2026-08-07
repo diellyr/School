@@ -19,7 +19,7 @@ function moduleMap(actions: PermissionAction[]): Record<SystemModule, Permission
     'students', 'guardians', 'teachers', 'schools', 'classes', 'imports', 'manual_entry',
     'activities', 'assessments', 'grades', 'attendance', 'check_in_out', 'family_development', 'alerts', 'observations', 'events',
     'portfolio', 'documents', 'reports', 'users', 'permissions', 'audit', 'sync', 'backup',
-    'recommendations', 'settings',
+    'recommendations', 'settings', 'financial', 'scholarships', 'notifications',
   ];
   return Object.fromEntries(modules.map((m) => [m, actions])) as Record<SystemModule, PermissionAction[]>;
 }
@@ -63,6 +63,11 @@ const TEACHER_MATRIX: Record<SystemModule, PermissionAction[]> = {
   imports: ['view', 'create', 'import'],
   reports: ['view', 'export'],
   recommendations: ['view'],
+  notifications: ['view', 'edit'],
+  // Professor não tem acesso a valores financeiros por padrão (seção 7 do briefing
+  // financeiro) — só passa a ver se o Owner conceder uma UserPermission específica.
+  financial: NONE,
+  scholarships: NONE,
   teachers: NONE,
   schools: NONE,
   users: NONE,
@@ -91,6 +96,11 @@ const GUARDIAN_MATRIX: Record<SystemModule, PermissionAction[]> = {
   imports: ['view', 'create', 'import'],
   reports: ['view', 'export'],
   recommendations: ['view'],
+  // Responsável só enxerga os próprios filhos — o escopo por aluno é aplicado na
+  // consulta (studentGuardians), não pela ação de permissão em si (ver seção 7).
+  financial: ['view'],
+  scholarships: ['view'],
+  notifications: ['view', 'edit'],
   guardians: NONE,
   teachers: NONE,
   schools: NONE,
@@ -116,11 +126,36 @@ const STUDENT_MATRIX: Record<SystemModule, PermissionAction[]> = {
   portfolio: ['view'],
   documents: ['view'],
   recommendations: ['view'],
+  notifications: ['view'],
+};
+
+/**
+ * Diretor (seção 7 do módulo financeiro): gestão de parcelas e bolsas, leitura ampla
+ * dos demais módulos, sem acesso a administração de usuários/permissões/auditoria.
+ */
+const DIRECTOR_MATRIX: Record<SystemModule, PermissionAction[]> = {
+  ...moduleMap(['view']),
+  financial: ['view', 'create', 'edit', 'approve', 'export'],
+  scholarships: ['view', 'create', 'edit', 'approve', 'export'],
+  notifications: ['view', 'edit'],
+  reports: ['view', 'export'],
+  students: ['view'],
+  guardians: ['view'],
+  teachers: ['view'],
+  classes: ['view'],
+  schools: NONE,
+  users: NONE,
+  permissions: NONE,
+  audit: NONE,
+  sync: NONE,
+  backup: NONE,
+  settings: NONE,
 };
 
 const ROLE_MATRICES: Record<SystemRole, Record<SystemModule, PermissionAction[]>> = {
   owner: OWNER_MATRIX,
   admin: ADMIN_MATRIX,
+  director: DIRECTOR_MATRIX,
   teacher: TEACHER_MATRIX,
   guardian: GUARDIAN_MATRIX,
   student: STUDENT_MATRIX,

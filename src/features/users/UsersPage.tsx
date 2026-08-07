@@ -11,7 +11,7 @@ import { usePermission } from '../../auth/usePermission';
 import { ROLE_DEFINITIONS } from '../../domain';
 import { formatDateTime } from '../../lib/utils';
 
-const ROLE_TONE = { owner: 'purple', admin: 'info', teacher: 'success', guardian: 'warning', student: 'default' } as const;
+const ROLE_TONE = { owner: 'purple', admin: 'info', director: 'info', teacher: 'success', guardian: 'warning', student: 'default' } as const;
 
 export function UsersPage() {
   const users = useLiveQuery(() => db.users.filter((u) => u.status === 'active').toArray(), []);

@@ -90,12 +90,27 @@ ambiguidade, o que funciona de ponta a ponta hoje e o que ainda é placeholder n
 | Plano da semana | Gerado com 2 a 5 atividades, distribuídas pelos dias disponíveis da família, com ações reais (marcar realizada, feedback, substituir, remover) gravadas em `ActivityHistory`/`WeeklyPlan` (IndexedDB) |
 | Painel administrativo de revisão pedagógica | Não construído nesta versão (arquitetura já preparada — `PedagogicalRepository` é trocável) |
 
+### Financeiro — Parcelas, Bolsas e Central de Alertas
+
+| Área | Detalhe |
+|---|---|
+| Parcelas | CRUD completo em centavos, status calculado por data (nunca uma parcela paga aparece atrasada), baixa com confirmação, desfazer baixa, geração individual/em lote com prévia e bloqueio consciente de duplicidade. Ver [`docs/financial-module.md`](financial-module.md) |
+| Bolsas | Tipos de bolsa + concessão com desconto automático por competência, bloqueio de duas bolsas simultâneas (com substituição confirmada), alteração/renovação/cancelamento com prévia de impacto — nunca altera parcela já paga |
+| Central de Alertas | Sino no cabeçalho + página completa; gera alertas de vencimento de parcela e de bolsa automaticamente, sem duplicar; encerra o alerta assim que a parcela é paga/cancelada/isenta; mescla (só leitura) os alertas pedagógicos já existentes na mesma central |
+| Dashboard financeiro | Indicadores e gráficos (evolução mensal, status, descontos por bolsa) respeitando os filtros aplicados |
+| Perfil "Diretor" | Novo perfil RBAC com acesso ao financeiro sem administrar usuários/permissões |
+
 ### Testes automatizados
 
-RBAC (perfis e precedência de sobreposições), CRUD + exclusão lógica/restauração do repositório base,
-carregamento/remoção idempotente dos dados de demonstração, o motor de alertas (nunca conclui a
-partir de um único registro), e os services de recomendação pedagógica (casamento de habilidade,
-prioridade sem linguagem diagnóstica, anti-repetição, limite semanal, explicação sempre presente).
+RBAC (perfis e precedência de sobreposições, incluindo o financeiro), CRUD + exclusão
+lógica/restauração do repositório base, carregamento/remoção idempotente dos dados de
+demonstração, o motor de alertas pedagógico (nunca conclui a partir de um único registro), os
+services de recomendação pedagógica (casamento de habilidade, prioridade sem linguagem
+diagnóstica, anti-repetição, limite semanal, explicação sempre presente), e os services
+financeiros (cálculo de desconto/valor final em centavos, status de parcela e de bolsa por
+data, vigência de bolsa por competência, conflito de bolsas simultâneas, prévia de impacto de
+alteração, geração/dedup/encerramento de alertas de vencimento) — 25 cenários obrigatórios
+cobertos.
 
 ## 🚧 Navegável, mas simulado (chega em fase futura)
 

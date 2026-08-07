@@ -22,7 +22,7 @@ describe('Dados de demonstração (carregar/remover) — seção 29 do briefing'
     expect(await db.classes.count()).toBe(4);
     expect(await db.students.count()).toBe(4);
     expect(await db.guardians.count()).toBe(2);
-    expect(await db.users.count()).toBe(5); // owner, admin, professor, responsável, aluno
+    expect(await db.users.count()).toBe(6); // owner, admin, professor, responsável, aluno, diretor
 
     const allStudentsAreDemo = (await db.students.toArray()).every((s) => s.isDemo === true);
     expect(allStudentsAreDemo).toBe(true);

@@ -17,6 +17,7 @@ export const DEMO_CLASS_5ANO_ID = 'demo-class-5ano';
 
 export const DEMO_USER_OWNER_ID = 'demo-user-owner';
 export const DEMO_USER_ADMIN_ID = 'demo-user-admin';
+export const DEMO_USER_DIRECTOR_ID = 'demo-user-director';
 export const DEMO_USER_TEACHER_ID = 'demo-user-teacher';
 export const DEMO_USER_GUARDIAN_ID = 'demo-user-guardian';
 export const DEMO_USER_STUDENT_ID = 'demo-user-student';

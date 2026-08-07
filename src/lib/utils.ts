@@ -49,6 +49,38 @@ export function calculateAge(birthDateIso: string): number {
   return age;
 }
 
+/** Formata um valor em CENTAVOS como moeda brasileira ("R$ 1.234,56"). Valores monetários
+ *  nunca devem ser armazenados/calculados em ponto flutuante — sempre em centavos (inteiro). */
+export function formatCurrencyBRL(cents: number): string {
+  return (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/** Converte uma string digitada pelo usuário (ex.: "1.234,56" ou "1234.56") em centavos. */
+export function parseCurrencyToCents(value: string): number {
+  const cleaned = value.trim().replace(/[^\d,.-]/g, '');
+  if (!cleaned) return 0;
+  const normalized = cleaned.includes(',') ? cleaned.replace(/\./g, '').replace(',', '.') : cleaned;
+  const reais = Number.parseFloat(normalized);
+  if (Number.isNaN(reais)) return 0;
+  return Math.round(reais * 100);
+}
+
+/** Converte "AAAA-MM-DD" (ou datetime ISO) para "AAAA-MM" (competência). */
+export function toCompetence(dateIso: string): string {
+  return dateIso.slice(0, 7);
+}
+
+/** Formata competência "AAAA-MM" como "mês/AAAA" (ex.: "agosto de 2026"). */
+const MONTH_NAMES = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+export function formatCompetence(competence: string): string {
+  const [year, month] = competence.split('-').map(Number);
+  if (!year || !month || month < 1 || month > 12) return competence;
+  return `${MONTH_NAMES[month - 1]} de ${year}`;
+}
+
 export function initials(fullName: string): string {
   const parts = fullName.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? '';

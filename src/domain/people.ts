@@ -51,7 +51,7 @@ export interface StudentGuardian extends BaseEntity {
   financialResponsible: boolean;
 }
 
-export type SystemRole = 'owner' | 'admin' | 'teacher' | 'guardian' | 'student';
+export type SystemRole = 'owner' | 'admin' | 'director' | 'teacher' | 'guardian' | 'student';
 
 export interface AppUser extends BaseEntity {
   fullName: string;

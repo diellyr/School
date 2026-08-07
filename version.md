@@ -359,6 +359,45 @@ completa.
   apresentadas como "variação a observar", nunca como regressão grave, seguindo a mesma lógica
   já usada nos Alertas.
 
+## v0.12.0 — Novo conjunto: Parcelas, Bolsas e Central de Alertas
+
+Módulo financeiro completo para gestão de mensalidades, descontos de bolsa e uma central
+única de alertas para todo o sistema. Ver [`docs/financial-module.md`](docs/financial-module.md)
+para arquitetura, regras de cálculo, permissões e como testar cada cenário.
+
+- **Parcelas** (`/parcelas`): CRUD completo com valores em centavos (nunca ponto flutuante),
+  status calculado automaticamente pela data (pendente, vence em breve, vence hoje, atrasada,
+  paga, parcialmente paga, cancelada, isenta — uma parcela paga nunca aparece como atrasada),
+  baixa de pagamento com modal de confirmação (valida valor pago x valor final, registra
+  histórico, encerra alertas relacionados), desfazer baixa com confirmação, geração individual
+  ou em lote com prévia obrigatória e bloqueio consciente de duplicidade, exportação CSV.
+- **Bolsas** (`/bolsas`): tipos de bolsa (percentual 0–100%, vigência, duração, renovável) e
+  concessão a alunos com aplicação automática do desconto em cada competência gerada. Regra
+  única e documentada de vigência (competência da parcela dentro do intervalo da concessão).
+  Bloqueia duas bolsas percentuais simultâneas para o mesmo aluno/período, exigindo confirmação
+  explícita para substituir. Alteração/renovação/cancelamento sempre mostra prévia de impacto
+  (parcelas afetadas, valor total antes/depois) e nunca toca em parcelas já pagas.
+- **Central de Alertas**: sino no cabeçalho com contador de não lidos e destaque para urgentes,
+  painel rápido e página completa com busca/filtros/ordenação/paginação. Alertas de vencimento
+  de parcela (7/3/1 dias antes, no dia, 1 dia após e periodicamente enquanto atrasada) e de
+  bolsa (30/15/7 dias antes e no dia do término) gerados automaticamente, sem duplicar o mesmo
+  evento. Pagar, cancelar ou isentar uma parcela encerra os alertas relacionados na hora. Os
+  alertas pedagógicos existentes (`/alertas`) aparecem mesclados na mesma central, sem duplicar
+  armazenamento nem alterar o motor já existente.
+- **Dashboard financeiro** (`/dashboard-financeiro`): previsto, recebido, pendente, atrasado,
+  concedido em bolsas, taxa de inadimplência, evolução mensal, distribuição por status e
+  descontos por tipo de bolsa — tudo respeitando os filtros de aluno/turma/escola/competência.
+- **Perfil do aluno**: nova seção financeira (mensalidade base, bolsa atual, histórico de
+  bolsas, próximas parcelas, total pago/pendente, alertas) — só visível para quem tem permissão.
+- **RBAC**: novo perfil **Diretor** (concede/altera/cancela bolsas, visualiza financeiro) e
+  módulos `financial`/`scholarships`/`notifications`. Professor não vê valores financeiros por
+  padrão, salvo concessão explícita do Owner. Responsável só vê os próprios filhos.
+- 52 novos testes automatizados cobrindo os 25 cenários obrigatórios (cálculo com centavos,
+  bolsa de 100%, percentual acima de 100% rejeitado, pagamento antes/no/após o vencimento,
+  pagamento parcial, desfazer, cancelamento, isenção, renovação, duas bolsas simultâneas,
+  alteração com parcelas pagas x futuras, geração e encerramento de alertas, prevenção de
+  duplicidade, permissões).
+
 ## Próximas versões previstas
 
 | Versão | Escopo |

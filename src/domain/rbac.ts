@@ -38,7 +38,10 @@ export type SystemModule =
   | 'sync'
   | 'backup'
   | 'recommendations'
-  | 'settings';
+  | 'settings'
+  | 'financial'
+  | 'scholarships'
+  | 'notifications';
 
 export interface RoleDefinition {
   role: SystemRole;
@@ -68,6 +71,7 @@ export interface UserPermission extends BaseEntity {
 export const ROLE_DEFINITIONS: RoleDefinition[] = [
   { role: 'owner', label: 'Owner', description: 'Autoridade máxima da plataforma.' },
   { role: 'admin', label: 'Administrador', description: 'Gestão operacional da organização/escola.' },
+  { role: 'director', label: 'Diretor', description: 'Gestão financeira e de bolsas; acesso amplo de leitura aos demais módulos.' },
   { role: 'teacher', label: 'Professor', description: 'Lança dados pedagógicos das turmas autorizadas.' },
   { role: 'guardian', label: 'Responsável', description: 'Acompanha os filhos vinculados.' },
   { role: 'student', label: 'Aluno', description: 'Consulta somente os próprios dados.' },

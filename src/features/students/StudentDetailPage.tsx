@@ -10,6 +10,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { calculateAge, formatDate, initials } from '../../lib/utils';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 import { useAuthStore } from '../../auth/authStore';
+import { StudentFinancialSection } from './StudentFinancialSection';
 
 export function StudentDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -113,6 +114,8 @@ export function StudentDetailPage() {
         </Card>
       </div>
 
+      <StudentFinancialSection studentId={student.id} />
+
       <Card>
         <CardHeader><CardTitle>Histórico de matrícula</CardTitle></CardHeader>
         <CardContent>
@@ -144,6 +147,7 @@ export function StudentDetailPage() {
           )}
           <Link to="/portfolio"><Button variant="outline">Portfólio</Button></Link>
           <Link to="/documentos"><Button variant="outline">Documentos</Button></Link>
+          <Link to={`/parcelas?studentId=${student.id}`}><Button variant="outline">Financeiro</Button></Link>
         </CardContent>
       </Card>
     </div>

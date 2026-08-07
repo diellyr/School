@@ -43,6 +43,10 @@ import type {
   RecommendationHistory,
   WeeklyPlan,
   FamilyPreferences,
+  Installment,
+  Payment,
+  ScholarshipType,
+  StudentScholarship,
 } from '../domain';
 
 /**
@@ -104,6 +108,11 @@ export class SchoolTrackerDB extends Dexie {
   weeklyPlans!: EntityTable<WeeklyPlan, 'id'>;
   familyPreferences!: EntityTable<FamilyPreferences, 'id'>;
 
+  installments!: EntityTable<Installment, 'id'>;
+  payments!: EntityTable<Payment, 'id'>;
+  scholarshipTypes!: EntityTable<ScholarshipType, 'id'>;
+  studentScholarships!: EntityTable<StudentScholarship, 'id'>;
+
   constructor() {
     super('school-tracker-db');
 
@@ -152,13 +161,21 @@ export class SchoolTrackerDB extends Dexie {
       auditLogs: 'id, organizationId, userId, action, createdAt',
       consents: 'id, organizationId, studentId, guardianId, status',
       recommendations: 'id, organizationId, ageRange, published, status',
-      notifications: 'id, organizationId, userId, read',
+      // Central de Alertas (unificada) — ver domain/misc.ts. A tabela `notifications`
+      // nunca foi usada por nenhuma tela antes desta versão, então redefinir seu
+      // formato dentro da mesma version(1) é seguro (nenhum dado real dependia dela).
+      notifications: 'id, organizationId, category, priority, studentId, notificationStatus, scheduledFor, deduplicationKey, status',
       dataRetentionRules: 'id, organizationId, entityType, status',
 
       activityHistory: 'id, organizationId, studentId, skillId, activityId, weeklyPlanId, status',
       recommendationHistory: 'id, organizationId, studentId, skillId, weeklyPlanId, status',
       weeklyPlans: 'id, organizationId, studentId, weekStart, status',
       familyPreferences: 'id, organizationId, studentId, status',
+
+      installments: 'id, organizationId, studentId, schoolId, classId, competence, chargeType, installmentStatus, dueDate, status',
+      payments: 'id, organizationId, installmentId, studentId, status',
+      scholarshipTypes: 'id, organizationId, active, status',
+      studentScholarships: 'id, organizationId, studentId, scholarshipTypeId, scholarshipStatus, status',
     });
   }
 }

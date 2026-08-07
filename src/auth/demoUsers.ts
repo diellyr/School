@@ -3,6 +3,7 @@ import {
   DEMO_GUARDIAN_ID,
   DEMO_STUDENT_EF_ID,
   DEMO_USER_ADMIN_ID,
+  DEMO_USER_DIRECTOR_ID,
   DEMO_USER_GUARDIAN_ID,
   DEMO_USER_OWNER_ID,
   DEMO_USER_STUDENT_ID,
@@ -70,5 +71,14 @@ export const DEMO_CREDENTIALS: DemoCredential[] = [
     email: 'aluno@demo.escola.app',
     password: 'aluno123',
     studentId: DEMO_STUDENT_EF_ID,
+  },
+  {
+    // Mantido por último para não deslocar os índices usados pelo seed (DEMO_CREDENTIALS[2] = professor).
+    id: DEMO_USER_DIRECTOR_ID,
+    role: 'director',
+    label: 'Diretor(a)',
+    fullName: 'Débora Nakamura (Diretora)',
+    email: 'diretor@demo.escola.app',
+    password: 'diretor123',
   },
 ];

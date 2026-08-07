@@ -47,6 +47,13 @@ import { LocalImportBatchRepository, LocalImportRowRepository } from './local/im
 import { LocalRecommendationRepository } from './local/recommendationRepository';
 import { LocalSyncQueueRepository } from './local/syncQueueRepository';
 import { LocalDataRetentionRuleRepository } from './local/retentionRepository';
+import {
+  LocalInstallmentRepository,
+  LocalPaymentRepository,
+  LocalScholarshipTypeRepository,
+  LocalStudentScholarshipRepository,
+} from './local/financialRepository';
+import { LocalNotificationRepository } from './local/notificationRepository';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
 import { SupabaseClassRepository, SupabaseOrganizationRepository, SupabaseSchoolRepository } from './supabase/schoolRepository';
 import {
@@ -112,6 +119,12 @@ export interface Repositories {
   recommendations: LocalRecommendationRepository;
   syncQueue: LocalSyncQueueRepository;
   dataRetentionRules: LocalDataRetentionRuleRepository;
+
+  installments: LocalInstallmentRepository;
+  payments: LocalPaymentRepository;
+  scholarshipTypes: LocalScholarshipTypeRepository;
+  studentScholarships: LocalStudentScholarshipRepository;
+  notifications: LocalNotificationRepository;
 }
 
 function createLocalRepositories(): Repositories {
@@ -165,6 +178,12 @@ function createLocalRepositories(): Repositories {
     recommendations: new LocalRecommendationRepository(),
     syncQueue: new LocalSyncQueueRepository(),
     dataRetentionRules: new LocalDataRetentionRuleRepository(),
+
+    installments: new LocalInstallmentRepository(),
+    payments: new LocalPaymentRepository(),
+    scholarshipTypes: new LocalScholarshipTypeRepository(),
+    studentScholarships: new LocalStudentScholarshipRepository(),
+    notifications: new LocalNotificationRepository(),
   };
 }
 

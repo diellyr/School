@@ -1,9 +1,10 @@
-import { Menu, Moon, Sun, Bell } from 'lucide-react';
+import { Menu, Moon, Sun } from 'lucide-react';
 import { Breadcrumbs } from './Breadcrumbs';
 import { GlobalSearch } from './GlobalSearch';
 import { UserMenu } from './UserMenu';
 import { applyThemeClass, useThemeStore } from '../app/themeStore';
 import { useEffect } from 'react';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 
 export function Header({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
   const theme = useThemeStore((s) => s.theme);
@@ -36,9 +37,7 @@ export function Header({ onOpenMobileNav }: { onOpenMobileNav: () => void }) {
         >
           {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
-        <button className="relative rounded-lg p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Notificações">
-          <Bell className="h-5 w-5" />
-        </button>
+        <NotificationBell />
         <UserMenu />
       </div>
     </header>

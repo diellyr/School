@@ -82,3 +82,40 @@ describe('RBAC — regras críticas de perfis (seção 5 do briefing)', () => {
     expect(can({ role: 'admin', module: 'students', action: 'delete', overrides: [expired] })).toBe(false);
   });
 });
+
+describe('RBAC — módulo financeiro (cenário 21: acesso negado sem permissão)', () => {
+  it('professor não visualiza dados financeiros por padrão', () => {
+    expect(can({ role: 'teacher', module: 'financial', action: 'view' })).toBe(false);
+    expect(can({ role: 'teacher', module: 'scholarships', action: 'view' })).toBe(false);
+  });
+
+  it('professor passa a ver o financeiro só com concessão explícita do Owner', () => {
+    const grant = override({ role: undefined, userId: 'teacher-1', module: 'financial', actions: ['view'] });
+    expect(can({ role: 'teacher', module: 'financial', action: 'view', overrides: [grant] })).toBe(true);
+  });
+
+  it('responsável só enxerga (nunca edita) parcelas e bolsas', () => {
+    expect(can({ role: 'guardian', module: 'financial', action: 'view' })).toBe(true);
+    expect(can({ role: 'guardian', module: 'financial', action: 'edit' })).toBe(false);
+    expect(can({ role: 'guardian', module: 'scholarships', action: 'create' })).toBe(false);
+  });
+
+  it('aluno não tem qualquer acesso financeiro', () => {
+    expect(can({ role: 'student', module: 'financial', action: 'view' })).toBe(false);
+    expect(can({ role: 'student', module: 'scholarships', action: 'view' })).toBe(false);
+  });
+
+  it('diretor concede/altera/cancela bolsas e dá baixa em pagamentos, mas não administra usuários', () => {
+    expect(can({ role: 'director', module: 'scholarships', action: 'create' })).toBe(true);
+    expect(can({ role: 'director', module: 'scholarships', action: 'approve' })).toBe(true);
+    expect(can({ role: 'director', module: 'financial', action: 'edit' })).toBe(true);
+    expect(can({ role: 'director', module: 'users', action: 'view' })).toBe(false);
+  });
+
+  it('administrador tem acesso completo ao financeiro e às bolsas', () => {
+    for (const action of ['view', 'create', 'edit', 'export', 'approve'] as const) {
+      expect(can({ role: 'admin', module: 'financial', action })).toBe(true);
+      expect(can({ role: 'admin', module: 'scholarships', action })).toBe(true);
+    }
+  });
+});

@@ -3,9 +3,11 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { DemoBanner } from './DemoBanner';
+import { useNotificationReconciliation } from '../features/notifications/useNotificationReconciliation';
 
 export function AppShell() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  useNotificationReconciliation();
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">

@@ -2,8 +2,10 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   AlertTriangle,
+  Award,
   Baby,
   BarChart3,
+  Bell,
   BookOpen,
   CalendarDays,
   ClipboardCheck,
@@ -27,6 +29,7 @@ import {
   UserCog,
   Users,
   Users2,
+  Wallet,
 } from 'lucide-react';
 import type { SystemModule } from '../domain';
 
@@ -57,6 +60,11 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/frequencia', label: 'Frequência', icon: Activity, module: 'attendance', group: 'Registros' },
   { path: '/entrada-saida', label: 'Entrada e saída', icon: DoorOpen, module: 'check_in_out', group: 'Registros' },
 
+  { path: '/parcelas', label: 'Parcelas', icon: Wallet, module: 'financial', group: 'Financeiro' },
+  { path: '/bolsas', label: 'Bolsas', icon: Award, module: 'scholarships', group: 'Financeiro' },
+  { path: '/dashboard-financeiro', label: 'Dashboard financeiro', icon: BarChart3, module: 'financial', group: 'Financeiro' },
+
+  { path: '/central-de-alertas', label: 'Central de Alertas', icon: Bell, module: 'notifications', group: 'Comunicação' },
   { path: '/alertas', label: 'Alertas', icon: AlertTriangle, module: 'alerts', group: 'Comunicação' },
   { path: '/observacoes', label: 'Observações', icon: MessageSquare, module: 'observations', group: 'Comunicação' },
   { path: '/eventos', label: 'Eventos', icon: CalendarDays, module: 'events', group: 'Comunicação' },
@@ -75,4 +83,4 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/ajuda', label: 'Ajuda e privacidade', icon: HelpCircle, module: 'reports', group: 'Administração' },
 ];
 
-export const NAV_GROUPS = ['Geral', 'Dashboards', 'Cadastros', 'Registros', 'Comunicação', 'Administração'];
+export const NAV_GROUPS = ['Geral', 'Dashboards', 'Cadastros', 'Registros', 'Financeiro', 'Comunicação', 'Administração'];

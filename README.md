@@ -59,9 +59,11 @@ Há duas formas de começar, e elas não se excluem:
 - **Carregar dados de demonstração:** na tela de login ou em **Configurações** (depois de já estar
   logado, inclusive com uma conta real), clique em **"Carregar dados de demonstração"** (pede
   confirmação antes de criar os registros). Isso cria duas escolas, quatro turmas, alunos de
-  Educação Infantil e Ensino Fundamental, responsáveis, professores, um administrador e um Owner de
-  demonstração, além de atividades, notas, frequência, um alerta, um evento e uma recomendação de
-  exemplo — todos claramente marcados e removíveis a qualquer momento sem afetar dados reais.
+  Educação Infantil e Ensino Fundamental, responsáveis, professores, um administrador, um Owner e
+  um Diretor de demonstração, além de atividades, notas, frequência, um alerta, um evento, uma
+  recomendação, um tipo de bolsa com uma concessão ativa e parcelas em diferentes situações
+  (paga, atrasada, parcialmente paga) — todos claramente marcados e removíveis a qualquer momento
+  sem afetar dados reais.
 
 ### Acessos de demonstração
 
@@ -69,6 +71,7 @@ Há duas formas de começar, e elas não se excluem:
 |---|---|---|
 | Owner | `owner@demo.escola.app` | `owner123` |
 | Administrador | `admin@demo.escola.app` | `admin123` |
+| Diretor(a) | `diretor@demo.escola.app` | `diretor123` |
 | Professor(a) | `professor@demo.escola.app` | `prof123` |
 | Responsável | `responsavel@demo.escola.app` | `resp123` |
 | Aluno(a) | `aluno@demo.escola.app` | `aluno123` |
@@ -94,13 +97,15 @@ src/
   features/       telas por módulo: alunos, responsáveis, escolas, turmas, auditoria, backup,
                   early-childhood (atividades/dashboard EI), elementary (notas/dashboard EF),
                   assessments, attendance, check-in-out, pedagogical (Desenvolvimento — recomendações
-                  em família por Campo de Experiência da BNCC), alerts (+ motor de regras), events,
-                  observations, portfolio, documents, imports (assistente CSV/XLSX/PDF/OCR), sync
-                  (fila de sincronização), recommendations…
+                  em família por Campo de Experiência da BNCC), financial (Parcelas + dashboard
+                  financeiro), scholarships (Bolsas), notifications (Central de Alertas), alerts
+                  (+ motor de regras), events, observations, portfolio, documents, imports
+                  (assistente CSV/XLSX/PDF/OCR), sync (fila de sincronização), recommendations…
   test/           setup do Vitest (fake-indexeddb, jest-dom)
 docs/
   data-model.md                    entidades, campos e relacionamentos
   pedagogical-recommendations.md   arquitetura do módulo Desenvolvimento (recomendações em família)
+  financial-module.md              arquitetura de Parcelas, Bolsas e Central de Alertas
   supabase-migration.md            plano de migração, schema SQL e políticas RLS
   status.md                        o que é real e o que está simulado, por módulo
 supabase/
@@ -119,10 +124,12 @@ variável `VITE_SUPABASE_*` está definida.
 
 ## Perfis e permissões
 
-RBAC com cinco perfis (Owner, Administrador, Professor, Responsável, Aluno) definido em
+RBAC com seis perfis (Owner, Administrador, Diretor, Professor, Responsável, Aluno) definido em
 `src/auth/permissions.ts`, com uma matriz padrão por perfil/módulo/ação e sobreposições granulares
 por usuário/escola/turma/aluno (`user_permissions`, com data de início/expiração) que têm prioridade
-sobre o padrão — ver a tela **Permissões do Owner** no app.
+sobre o padrão — ver a tela **Permissões do Owner** no app. O perfil Diretor foi adicionado para a
+gestão financeira (concede/altera/cancela bolsas, dá baixa em pagamentos) sem acesso a
+administração de usuários/permissões/auditoria.
 
 ## O que está implementado nesta fase vs. o que está simulado
 
@@ -144,7 +151,12 @@ Veja o detalhamento completo em [`docs/status.md`](docs/status.md). Resumo:
   partir do cabeçalho do próprio arquivo e anexa o boletim ao aluno para lançamento manual das
   avaliações), a fila de sincronização simulada com resolução de conflitos, as políticas de retenção de
   dados, e a prontidão de código para Supabase (repositórios, schema SQL, RLS, funções privilegiadas —
-  nunca aplicados a um projeto real sem decisão explícita).
+  nunca aplicados a um projeto real sem decisão explícita) — **e também** o módulo financeiro completo:
+  Parcelas (baixa, desfazer baixa, geração individual/em lote com prévia e bloqueio de duplicidade),
+  Bolsas (tipos, concessão com desconto automático por competência, bloqueio de bolsa simultânea,
+  alteração/renovação/cancelamento com prévia de impacto), a Central de Alertas unificada (sino no
+  cabeçalho + página completa, com geração automática de alertas de vencimento de parcela e de bolsa)
+  e o dashboard financeiro com gráficos.
 - **Simulado nesta fase:** relatórios/exportações formais em PDF/XLSX, banco de dados em nuvem
   (Supabase — código pronto, mas nenhum projeto real provisionado) e a criação automática de registros
   para os demais tipos de importação (eventos, observações, alertas, portfólio importados)

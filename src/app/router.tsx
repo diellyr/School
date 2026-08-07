@@ -34,6 +34,10 @@ import { ImportsPage } from '../features/imports/ImportsPage';
 import { ManualEntryHubPage } from '../features/manual-entry/ManualEntryHubPage';
 import { RecommendationsPage } from '../features/recommendations/RecommendationsPage';
 import { SyncPage } from '../features/sync/SyncPage';
+import { InstallmentsPage } from '../features/financial/InstallmentsPage';
+import { FinancialDashboardPage } from '../features/financial/FinancialDashboardPage';
+import { ScholarshipsPage } from '../features/scholarships/ScholarshipsPage';
+import { NotificationsPage } from '../features/notifications/NotificationsPage';
 
 const comingSoon = (title: string, phase: string) => <ComingSoon title={title} phase={phase} />;
 
@@ -66,6 +70,11 @@ export const router = createHashRouter([
       { path: 'frequencia', element: <AttendancePage /> },
       { path: 'entrada-saida', element: <CheckInOutPage /> },
       { path: 'desenvolvimento', element: <DevelopmentPage /> },
+
+      { path: 'parcelas', element: <InstallmentsPage /> },
+      { path: 'bolsas', element: <ScholarshipsPage /> },
+      { path: 'dashboard-financeiro', element: <FinancialDashboardPage /> },
+      { path: 'central-de-alertas', element: <NotificationsPage /> },
 
       { path: 'alertas', element: <AlertsPage /> },
       { path: 'observacoes', element: <ObservationsPage /> },

@@ -30,12 +30,16 @@ import type {
   Enrollment,
   Grade,
   Guardian,
+  Installment,
   Organization,
+  Payment,
   RboLevel,
   School,
   SchoolEvent,
+  ScholarshipType,
   Student,
   StudentGuardian,
+  StudentScholarship,
   TeacherAssignment,
   TeacherObservation,
 } from '../domain';
@@ -48,7 +52,7 @@ const DEMO_TABLES = [
   db.students, db.guardians, db.studentGuardians, db.users, db.teacherAssignments,
   db.assessmentScales, db.assessmentCategories, db.activities, db.assessments, db.grades,
   db.attendance, db.checkInOuts, db.teacherObservations, db.alerts, db.schoolEvents, db.eventConfirmations,
-  db.recommendations,
+  db.recommendations, db.scholarshipTypes, db.studentScholarships, db.installments, db.payments,
 ];
 
 function base(overrides: Partial<{ organizationId: string; createdBy: string }> = {}) {
@@ -292,6 +296,79 @@ export async function loadDemoData(): Promise<void> {
       ageRange: '3-5', bnccField: 'eu_outro_nos', environment: 'both', source: 'Equipe pedagógica — orientações gerais BNCC Educação Infantil',
       sourceValidated: true, reviewedAt: nowIso(), published: true,
     });
+
+    // --- Financeiro: tipo de bolsa, concessão, parcelas (com e sem bolsa) e pagamentos ---
+    const scholarshipType: ScholarshipType = {
+      ...base(), id: newId(), name: 'Bolsa Parcial', description: 'Desconto parcial por convênio institucional.',
+      defaultPercentage: 50, defaultDurationMonths: 6, validFrom: '2026-01-01', renewable: true, active: true,
+    };
+    await db.scholarshipTypes.add(scholarshipType);
+
+    const miguelScholarship: StudentScholarship = {
+      ...base(), id: newId(), studentId: miguel.id, scholarshipTypeId: scholarshipType.id, percentage: 50,
+      startDate: '2026-08-01', endDate: '2026-12-31', scholarshipStatus: 'active', reason: 'Convênio empresa parceira',
+      approvedBy: DEMO_CREDENTIALS[1].id, applyImmediately: true, applyToExistingPendingInstallments: true,
+    };
+    await db.studentScholarships.add(miguelScholarship);
+
+    const installments: Installment[] = [
+      // Miguel — julho já pago (sem bolsa, período anterior à concessão)
+      {
+        ...base(), id: newId(), studentId: miguel.id, schoolId: schoolA.id, classId: classInfantil.id,
+        competence: '2026-07', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 6, totalInstallments: 11,
+        originalAmountCents: 120_000, scholarshipDiscountCents: 0, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 120_000, paidAmountCents: 120_000, dueDate: '2026-07-10', paymentDate: '2026-07-08',
+        installmentStatus: 'paid', paymentMethod: 'pix',
+      },
+      // Miguel — agosto, já com o desconto da bolsa ativa
+      {
+        ...base(), id: newId(), studentId: miguel.id, schoolId: schoolA.id, classId: classInfantil.id,
+        competence: '2026-08', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 7, totalInstallments: 11,
+        originalAmountCents: 120_000, scholarshipDiscountCents: 60_000, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 60_000, paidAmountCents: 0, dueDate: '2026-08-10',
+        installmentStatus: 'pending', appliedScholarshipAssignmentId: miguelScholarship.id, appliedScholarshipPercentage: 50,
+      },
+      // Miguel — setembro, futura, também com bolsa
+      {
+        ...base(), id: newId(), studentId: miguel.id, schoolId: schoolA.id, classId: classInfantil.id,
+        competence: '2026-09', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 8, totalInstallments: 11,
+        originalAmountCents: 120_000, scholarshipDiscountCents: 60_000, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 60_000, paidAmountCents: 0, dueDate: '2026-09-10',
+        installmentStatus: 'pending', appliedScholarshipAssignmentId: miguelScholarship.id, appliedScholarshipPercentage: 50,
+      },
+      // Laura — julho já pago, sem bolsa
+      {
+        ...base(), id: newId(), studentId: laura.id, schoolId: schoolA.id, classId: class1ano.id,
+        competence: '2026-07', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 6, totalInstallments: 11,
+        originalAmountCents: 80_000, scholarshipDiscountCents: 0, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 80_000, paidAmountCents: 80_000, dueDate: '2026-07-10', paymentDate: '2026-07-09',
+        installmentStatus: 'paid', paymentMethod: 'boleto',
+      },
+      // Laura — atrasada (vencida antes de hoje, sem pagamento)
+      {
+        ...base(), id: newId(), studentId: laura.id, schoolId: schoolA.id, classId: class1ano.id,
+        competence: '2026-08', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 7, totalInstallments: 11,
+        originalAmountCents: 80_000, scholarshipDiscountCents: 0, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 80_000, paidAmountCents: 0, dueDate: '2026-08-05',
+        installmentStatus: 'pending',
+      },
+      // Laura — setembro, parcialmente paga
+      {
+        ...base(), id: newId(), studentId: laura.id, schoolId: schoolA.id, classId: class1ano.id,
+        competence: '2026-09', description: 'Mensalidade', chargeType: 'mensalidade', installmentNumber: 8, totalInstallments: 11,
+        originalAmountCents: 80_000, scholarshipDiscountCents: 0, otherDiscountCents: 0, additionalAmountCents: 0,
+        finalAmountCents: 80_000, paidAmountCents: 40_000, dueDate: '2026-09-05', paymentDate: '2026-08-01',
+        installmentStatus: 'partially_paid', paymentMethod: 'pix',
+      },
+    ];
+    await db.installments.bulkAdd(installments);
+
+    const payments: Payment[] = [
+      { ...base(), id: newId(), installmentId: installments[0].id, studentId: miguel.id, amountCents: 120_000, paymentDate: '2026-07-08', paymentMethod: 'pix' },
+      { ...base(), id: newId(), installmentId: installments[3].id, studentId: laura.id, amountCents: 80_000, paymentDate: '2026-07-09', paymentMethod: 'boleto' },
+      { ...base(), id: newId(), installmentId: installments[5].id, studentId: laura.id, amountCents: 40_000, paymentDate: '2026-08-01', paymentMethod: 'pix', notes: 'Pagamento parcial — restante combinado para o mês seguinte' },
+    ];
+    await db.payments.bulkAdd(payments);
   });
 }
 

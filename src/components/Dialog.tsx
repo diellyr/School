@@ -15,7 +15,7 @@ export function Dialog({
   title: string;
   description?: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -27,7 +27,7 @@ export function Dialog({
 
   if (!open) return null;
 
-  const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl' };
+  const widths = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -37,7 +37,7 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby="dialog-title"
         className={cn(
-          'relative z-10 w-full rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900',
+          'relative z-10 max-h-[85vh] w-full overflow-y-auto rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900',
           widths[size],
         )}
       >
