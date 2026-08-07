@@ -13,11 +13,20 @@ import { SkillHelpDialog } from './components/SkillHelpDialog';
 import { WeeklyPlanSection } from './components/WeeklyPlanSection';
 import { FamilyPreferencesForm } from './components/FamilyPreferencesForm';
 import { PedagogicalCatalogTab } from './components/PedagogicalCatalogTab';
+import { AnalyzedCategoriesTab } from './components/AnalyzedCategoriesTab';
 import type { FamilyActivity } from '../../domain';
 import { useAuthStore } from '../../auth/authStore';
 import { useRepositories } from '../../repositories/RepositoryProvider';
 
-type DevelopmentTab = 'acompanhamento' | 'catalogo';
+type DevelopmentTab = 'acompanhamento' | 'catalogo' | 'analisadas';
+
+const TAB_DESCRIPTIONS: Record<DevelopmentTab, string> = {
+  acompanhamento: 'Acompanhe o desenvolvimento de um aluno específico e receba sugestões de atividades em família.',
+  catalogo:
+    'Referência técnica: como cadastrar atividades para o sistema reconhecer automaticamente cada habilidade, a origem MEC/BNCC de cada orientação e a biblioteca completa de atividades sugeridas.',
+  analisadas:
+    'Visão simples e direta de tudo o que o sistema analisa: os Campos de Experiência da BNCC e as habilidades observadas em cada um — a mesma base usada nos boletins escolares.',
+};
 
 export function DevelopmentPage() {
   const [activeTab, setActiveTab] = useState<DevelopmentTab>('acompanhamento');
@@ -81,9 +90,25 @@ export function DevelopmentPage() {
         >
           Catálogo pedagógico
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className={
+            activeTab === 'analisadas'
+              ? 'rounded-none border-b-2 border-sky-600 text-sky-700 dark:text-sky-400'
+              : 'rounded-none border-b-2 border-transparent text-slate-500'
+          }
+          onClick={() => setActiveTab('analisadas')}
+        >
+          Categorias e atividades analisadas
+        </Button>
       </div>
 
+      <p className="text-xs text-slate-500 dark:text-slate-400">{TAB_DESCRIPTIONS[activeTab]}</p>
+
       {activeTab === 'catalogo' && <PedagogicalCatalogTab />}
+
+      {activeTab === 'analisadas' && <AnalyzedCategoriesTab />}
 
       {activeTab === 'acompanhamento' && (
         <>

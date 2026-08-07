@@ -135,7 +135,10 @@ function SkillCatalogRow({ skill }: { skill: Skill }) {
           </p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             O título da atividade/avaliação lançada (ou o texto do boletim importado) precisa se parecer com um
-            destes textos-indicador para o sistema associar automaticamente à habilidade:
+            destes textos-indicador para o sistema associar automaticamente à habilidade. Aparecem aqui em minúsculas
+            e sem acentos de propósito — é o formato técnico usado internamente para comparar textos, não a redação
+            correta a ser exibida às famílias (veja a aba "Categorias e atividades analisadas" para a versão em
+            linguagem simples).
           </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5 text-xs text-slate-600 dark:text-slate-300">
             {skill.matchTexts.map((t) => (
