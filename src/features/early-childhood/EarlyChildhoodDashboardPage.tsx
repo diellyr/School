@@ -147,6 +147,40 @@ export function EarlyChildhoodDashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
+  // Um registro por avaliação (não uma média) — cada categoria mostra uma barra fina por
+  // atividade avaliada, na ordem em que aconteceram, cada uma com a cor do seu próprio nível.
+  const recordsByCategory = useMemo(() => {
+    if (!data) return [];
+    const map = new Map<string, RboLevel[]>();
+    for (const row of data.rows) {
+      if (!row.assessment.rboLevel) continue;
+      const name = categoryName(row);
+      const levels = map.get(name) ?? [];
+      levels.push(row.assessment.rboLevel);
+      map.set(name, levels);
+    }
+    return [...map.entries()].map(([name, levels]) => ({ name, levels })).sort((a, b) => a.name.localeCompare(b.name));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  const maxRecordsPerCategory = useMemo(
+    () => recordsByCategory.reduce((max, c) => Math.max(max, c.levels.length), 0),
+    [recordsByCategory],
+  );
+
+  const recordsChartData = useMemo(
+    () =>
+      recordsByCategory.map((c) => {
+        const row: Record<string, string | number> = { name: c.name };
+        c.levels.forEach((level, i) => {
+          row[`v${i}`] = { R: 1, B: 2, O: 3 }[level];
+          row[`level${i}`] = level;
+        });
+        return row;
+      }),
+    [recordsByCategory],
+  );
+
   const attendanceRate = useMemo(() => {
     if (!data || data.attendance.length === 0) return null;
     const present = data.attendance.filter((a) => a.attendanceStatus === 'present').length;
@@ -328,6 +362,55 @@ export function EarlyChildhoodDashboardPage() {
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader><CardTitle>Registros por categoria</CardTitle></CardHeader>
+              <CardContent>
+                {recordsChartData.length === 0 ? (
+                  <p className="text-sm text-slate-500">Sem categorias registradas ainda.</p>
+                ) : (
+                  <>
+                    <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">
+                      Cada barra é uma avaliação individual (não uma média) — na ordem em que foram lançadas.
+                    </p>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={recordsChartData} barGap={2} barCategoryGap="25%">
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                        <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
+                        <YAxis domain={[0, 3]} ticks={[0, 1, 2, 3]} tickFormatter={(v) => Y_LABELS[v] || ''} width={26} />
+                        <Tooltip
+                          formatter={(value, name) => [
+                            Y_LABELS[Math.round(Number(value))] || '',
+                            `Registro ${Number(String(name).replace('v', '')) + 1}`,
+                          ]}
+                        />
+                        {Array.from({ length: maxRecordsPerCategory }).map((_, i) => (
+                          <Bar key={i} dataKey={`v${i}`} barSize={8} radius={[2, 2, 0, 0]}>
+                            {recordsChartData.map((row, idx) => (
+                              <Cell key={idx} fill={row[`level${i}`] ? RBO_COLORS[row[`level${i}`] as RboLevel] : 'transparent'} />
+                            ))}
+                          </Bar>
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <div className="mt-2 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600 dark:text-slate-300">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.O }} />
+                        Ótimo
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.B }} />
+                        Bom
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: RBO_COLORS.R }} />
+                        Regular
+                      </span>
+                    </div>
                   </>
                 )}
               </CardContent>
