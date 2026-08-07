@@ -238,13 +238,28 @@ export function ElementaryDashboardPage() {
                     )}
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <RadarChart data={radarData.points.map((p) => ({ subject: p.subject, value: p.value ?? 0 }))}>
-                      <PolarGrid />
-                      <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
-                      <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                  <>
+                    <ResponsiveContainer width="100%" height={240}>
+                      <RadarChart data={radarData.points.map((p) => ({ subject: p.subject, value: p.value ?? 0 }))}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
+                        <Radar dataKey="value" stroke="#0284c7" fill="#0284c7" fillOpacity={0.35} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+
+                    <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Mesma comparação, em barras
+                    </p>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={radarData.points.map((p) => ({ subject: p.subject, value: p.value ?? 0 }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                        <XAxis dataKey="subject" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
+                        <YAxis domain={[0, 100]} width={35} tickFormatter={(v) => `${v}%`} />
+                        <Tooltip formatter={(v) => [`${v}%`, 'Desempenho relativo']} />
+                        <Bar dataKey="value" fill="#0284c7" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </>
                 )}
               </CardContent>
             </Card>

@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Legend,
   Line,
   LineChart,
@@ -305,6 +306,23 @@ export function EarlyChildhoodDashboardPage() {
                         0 — centro
                       </span>
                     </div>
+
+                    <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Mesma comparação, em barras
+                    </p>
+                    <ResponsiveContainer width="100%" height={220}>
+                      <BarChart data={radarData.points.map((p) => ({ field: p.field, value: p.value ?? 0 }))}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                        <XAxis dataKey="field" tick={{ fontSize: 11 }} interval={0} angle={-15} textAnchor="end" height={50} />
+                        <YAxis domain={[0, 3]} ticks={[0, 1, 2, 3]} tickFormatter={(v) => Y_LABELS[v] || '0'} width={26} />
+                        <Tooltip formatter={(v) => [Y_LABELS[Math.round(Number(v))] || '0', 'Tendência predominante']} />
+                        <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                          {radarData.points.map((p) => (
+                            <Cell key={p.field} fill={p.value === null ? '#94a3b8' : p.value >= 2.5 ? RBO_COLORS.O : p.value >= 1.5 ? RBO_COLORS.B : RBO_COLORS.R} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </>
                 )}
               </CardContent>
