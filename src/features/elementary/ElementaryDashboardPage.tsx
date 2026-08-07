@@ -68,7 +68,11 @@ export function ElementaryDashboardPage() {
       values.push(score);
       map.set(g.subject, values);
     }
-    return [...map.entries()].map(([subject, values]) => ({ subject, avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length) }));
+    // Ordem alfabética — mesma usada em `radarData`, para os dois gráficos ("Média por
+    // disciplina" e "Comparação entre disciplinas") sempre mostrarem as disciplinas na mesma posição.
+    return [...map.entries()]
+      .map(([subject, values]) => ({ subject, avg: Math.round(values.reduce((s, v) => s + v, 0) / values.length) }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -103,11 +107,13 @@ export function ElementaryDashboardPage() {
       values.push(score);
       map.set(g.subject, values);
     }
-    const points = [...map.entries()].map(([subject, values]) => ({
-      subject,
-      value: values.length >= MIN_RADAR_SAMPLES ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : null,
-      count: values.length,
-    }));
+    const points = [...map.entries()]
+      .map(([subject, values]) => ({
+        subject,
+        value: values.length >= MIN_RADAR_SAMPLES ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : null,
+        count: values.length,
+      }))
+      .sort((a, b) => a.subject.localeCompare(b.subject));
     return { points, hasEnoughData: points.some((p) => p.value !== null) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

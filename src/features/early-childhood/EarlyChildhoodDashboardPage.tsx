@@ -117,7 +117,10 @@ export function EarlyChildhoodDashboardPage() {
       if (row.assessment.rboLevel) entry[row.assessment.rboLevel]++;
       map.set(name, entry);
     }
-    return [...map.values()];
+    // Ordem alfabética — garante que esta lista e a de `radarData` (radar + gráfico de barras
+    // "mesma comparação") sempre mostrem as categorias na mesma posição, mesmo quando a primeira
+    // atividade registrada de uma categoria ainda não tem R/B/O lançado.
+    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
@@ -133,11 +136,13 @@ export function EarlyChildhoodDashboardPage() {
       values.push({ R: 1, B: 2, O: 3 }[row.assessment.rboLevel]);
       map.set(name, values);
     }
-    const points = [...map.entries()].map(([field, values]) => ({
-      field,
-      value: values.length >= MIN_RADAR_SAMPLES ? values.reduce((s, v) => s + v, 0) / values.length : null,
-      count: values.length,
-    }));
+    const points = [...map.entries()]
+      .map(([field, values]) => ({
+        field,
+        value: values.length >= MIN_RADAR_SAMPLES ? values.reduce((s, v) => s + v, 0) / values.length : null,
+        count: values.length,
+      }))
+      .sort((a, b) => a.field.localeCompare(b.field));
     return { points, hasEnoughData: points.some((p) => p.value !== null) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
